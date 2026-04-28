@@ -8,7 +8,7 @@ interface Props {
   fechaCorte: string
 }
 
-export default function KpiCards({ partidas, fechaCorte }: Props) {
+export default function KpiCards({ partidas }: Props) {
   const ppto       = partidas.reduce((s, p) => s + p.ppto_original, 0)
   const real       = partidas.reduce((s, p) => s + p.gasto_real, 0)
   const vigente    = partidas.reduce((s, p) => s + p.ppto_vigente, 0)

@@ -40,15 +40,6 @@ export interface DetallePartida {
 }
 
 // ── Clasificación por familia según prefijo del código ──────────────────────
-function getFamilia(codigo: string): string {
-  const p = codigo[0]
-  if (p === 'E') return 'EQUIPOS Y MAQUINARIAS'
-  if (p === 'G') return 'GASTOS GENERALES'
-  if (p === 'M') return 'MATERIALES'
-  if (p === 'O') return 'MANO DE OBRA'
-  if (p === 'S') return 'SUBCONTRATOS'
-  return 'OTROS'
-}
 
 // Familia por codigo2 numérico (para cuentas sin código alfanumérico)
 function getFamiliaByCodigo2(codigo2: string): string {

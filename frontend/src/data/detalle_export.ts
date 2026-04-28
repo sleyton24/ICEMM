@@ -1,4 +1,5 @@
 // Generado por exportar_detalle.py — pegar en mockData.ts reemplazando detallePartidas
+import type { DetallePartida } from './mockData'
 export const detallePartidas: Record<string, DetallePartida[]> = {
   '101': [
     { codigo: 'M10100001', resumen: 'ESTABILIZADO DE PLANTA', ud: 'm3', cantidad: 1387.302, precio_unitario: 0.372, total: 516.48 },

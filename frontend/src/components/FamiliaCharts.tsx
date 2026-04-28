@@ -2,7 +2,6 @@ import { useMemo } from 'react'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Cell, PieChart, Pie, Legend,
-  RadialBarChart, RadialBar,
 } from 'recharts'
 import type { Partida, SinPartida } from '../data/dataAdapter'
 
@@ -151,7 +150,7 @@ export default function FamiliaCharts({ partidas, sinPartida, familias: FAMILIAS
                   <Cell key={i} fill={entry.color} />
                 ))}
               </Pie>
-              <Tooltip formatter={(v: number) => [`UF ${uf2(v)}`, 'Ppto Vigente']} />
+              <Tooltip formatter={(v) => [`UF ${uf2(Number(v))}`, 'Ppto Vigente']} />
               <Legend
                 verticalAlign="bottom"
                 height={50}
