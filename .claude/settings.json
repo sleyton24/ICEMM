@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:icemm.cl)",
+      "Bash(npx vite:*)",
+      "Bash(curl -sL \"https://icemm.cl/wp-content/uploads/2024/05/Emm-logo-color-baja.png\" -o \"c:/Users/sleyton/BNV/Administración y Finanzas - Documentos/Inteligencia de negocios/ICEMM/frontend/public/icemm-logo.png\")"
+    ]
+  }
+}

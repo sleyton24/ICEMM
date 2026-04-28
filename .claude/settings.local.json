@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd:*)",
+      "Bash(python:*)",
+      "Bash(ping:*)",
+      "Bash(ipconfig:*)",
+      "Bash(nslookup bnvsqlsof:*)",
+      "Bash(sed:*)",
+      "Bash(taskkill:*)",
+      "Read(//c/Users/sleyton/BNV/Administración y Finanzas - Documentos/Inteligencia de negocios/Claude Code RM/backend/**)",
+      "Bash(uvicorn main:app --reload --port 8000)",
+      "Read(//c/Users/sleyton/BNV/Administración y Finanzas - Documentos/Inteligencia de negocios/Claude Code RM/frontend/**)",
+      "Bash(npm run:*)",
+      "Bash(where python:*)",
+      "Bash(python3 -m uvicorn --version)",
+      "Bash(netstat -ano)"
+    ]
+  }
+}

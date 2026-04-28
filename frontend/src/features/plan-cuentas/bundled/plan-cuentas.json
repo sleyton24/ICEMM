@@ -1,0 +1,1200 @@
+{
+  "version": "2026-04-20",
+  "cargadoEn": "2026-04-20T20:29:06.215Z",
+  "origen": "bundled",
+  "familias": [
+    {
+      "codigo": 100,
+      "nombre": "MATERIALES",
+      "nombreOriginal": "Materiales (M)",
+      "letra": "M",
+      "color": "#f59e0b"
+    },
+    {
+      "codigo": 200,
+      "nombre": "MANO DE OBRA",
+      "nombreOriginal": "Mano de Obra (O)",
+      "letra": "O",
+      "color": "#1e293b"
+    },
+    {
+      "codigo": 300,
+      "nombre": "SUBCONTRATOS",
+      "nombreOriginal": "Subcontratos (S)",
+      "letra": "S",
+      "color": "#06b6d4"
+    },
+    {
+      "codigo": 400,
+      "nombre": "GASTOS GENERALES",
+      "nombreOriginal": "Gastos Generales (G)",
+      "letra": "G",
+      "color": "#ec4899"
+    },
+    {
+      "codigo": 500,
+      "nombre": "EQUIPOS Y MAQUINARIAS",
+      "nombreOriginal": "Equipos y maquinarias (E)",
+      "letra": "E",
+      "color": "#8b5cf6"
+    },
+    {
+      "codigo": 600,
+      "nombre": "OTROS",
+      "nombreOriginal": "Otros (P)",
+      "letra": "P",
+      "color": "#9ca3af"
+    },
+    {
+      "codigo": 700,
+      "nombre": "EDIFICACIONES COMERCIALES",
+      "nombreOriginal": "Edificaciones Comerciales (C)",
+      "letra": "C",
+      "color": "#f97316"
+    },
+    {
+      "codigo": 800,
+      "nombre": "POST VENTA",
+      "nombreOriginal": "Post Venta (V)",
+      "letra": "V",
+      "color": "#10b981"
+    },
+    {
+      "codigo": 900,
+      "nombre": "GASTOS OFICINA CENTRAL",
+      "nombreOriginal": "Gastos Oficina Central (I)",
+      "letra": "I",
+      "color": "#6366f1"
+    }
+  ],
+  "cuentas": [
+    {
+      "codigo": 101,
+      "descripcion": "Aridos, Bases, Rellenos",
+      "familiaCodigo": 100,
+      "letra": "M"
+    },
+    {
+      "codigo": 102,
+      "descripcion": "Cemento, Morteros, Estucos",
+      "familiaCodigo": 100,
+      "letra": "M"
+    },
+    {
+      "codigo": 103,
+      "descripcion": "Yeso, Pastas, Cal",
+      "familiaCodigo": 100,
+      "letra": "M"
+    },
+    {
+      "codigo": 104,
+      "descripcion": "Acero A63",
+      "familiaCodigo": 100,
+      "letra": "M"
+    },
+    {
+      "codigo": 105,
+      "descripcion": "Hormigones",
+      "familiaCodigo": 100,
+      "letra": "M"
+    },
+    {
+      "codigo": 106,
+      "descripcion": "Clavos, Tornillos, Fijaciones, Alambres, Pernos",
+      "familiaCodigo": 100,
+      "letra": "M"
+    },
+    {
+      "codigo": 107,
+      "descripcion": "Ladrillos, Enchapes",
+      "familiaCodigo": 100,
+      "letra": "M"
+    },
+    {
+      "codigo": 108,
+      "descripcion": "Quincallería, Números, Señaletica",
+      "familiaCodigo": 100,
+      "letra": "M"
+    },
+    {
+      "codigo": 109,
+      "descripcion": "Malla Rachel, Arpillera",
+      "familiaCodigo": 100,
+      "letra": "M"
+    },
+    {
+      "codigo": 110,
+      "descripcion": "Aditivos, Desmoldantes",
+      "familiaCodigo": 100,
+      "letra": "M"
+    },
+    {
+      "codigo": 111,
+      "descripcion": "Puente adherente, Anclajes quimicos, Sikadur",
+      "familiaCodigo": 100,
+      "letra": "M"
+    },
+    {
+      "codigo": 112,
+      "descripcion": "Madera, Pino, Alamo, Rollizos",
+      "familiaCodigo": 100,
+      "letra": "M"
+    },
+    {
+      "codigo": 113,
+      "descripcion": "OSB, Trupan, Cholguan, Melamina",
+      "familiaCodigo": 100,
+      "letra": "M"
+    },
+    {
+      "codigo": 114,
+      "descripcion": "Discos, Brocas, Gratas, Soldaduras",
+      "familiaCodigo": 100,
+      "letra": "M"
+    },
+    {
+      "codigo": 115,
+      "descripcion": "Perfiles Fe, Pletinas, Mallas, Hojalateria y Perfiles de Acero",
+      "familiaCodigo": 100,
+      "letra": "M"
+    },
+    {
+      "codigo": 116,
+      "descripcion": "Terciados para Moldajes",
+      "familiaCodigo": 100,
+      "letra": "M"
+    },
+    {
+      "codigo": 117,
+      "descripcion": "Plásticos, Separadores, Polietileno",
+      "familiaCodigo": 100,
+      "letra": "M"
+    },
+    {
+      "codigo": 118,
+      "descripcion": "Drenes, membranas, geotextil, fieltro",
+      "familiaCodigo": 100,
+      "letra": "M"
+    },
+    {
+      "codigo": 119,
+      "descripcion": "Impermeabilizantes, Igol, Cave",
+      "familiaCodigo": 100,
+      "letra": "M"
+    },
+    {
+      "codigo": 120,
+      "descripcion": "Volcanita, Volcapol",
+      "familiaCodigo": 100,
+      "letra": "M"
+    },
+    {
+      "codigo": 121,
+      "descripcion": "Internit, Permanit, Covintec",
+      "familiaCodigo": 100,
+      "letra": "M"
+    },
+    {
+      "codigo": 122,
+      "descripcion": "Artefactos Electricos y Sanitarios de Agua Caliente y Calefacción",
+      "familiaCodigo": 100,
+      "letra": "M"
+    },
+    {
+      "codigo": 123,
+      "descripcion": "Perfileria para tabiques",
+      "familiaCodigo": 100,
+      "letra": "M"
+    },
+    {
+      "codigo": 124,
+      "descripcion": "Aislantes, Lana, Aislapol, Tyvek",
+      "familiaCodigo": 100,
+      "letra": "M"
+    },
+    {
+      "codigo": 125,
+      "descripcion": "Adhesivos, Fragues, Masillas",
+      "familiaCodigo": 100,
+      "letra": "M"
+    },
+    {
+      "codigo": 126,
+      "descripcion": "Cerámicas, Porcelanatos, Piedra Pizarra",
+      "familiaCodigo": 100,
+      "letra": "M"
+    },
+    {
+      "codigo": 127,
+      "descripcion": "Bloques, Baldosas, Elem.Prefabricados",
+      "familiaCodigo": 100,
+      "letra": "M"
+    },
+    {
+      "codigo": 128,
+      "descripcion": "Vidrios y Aluminios",
+      "familiaCodigo": 100,
+      "letra": "M"
+    },
+    {
+      "codigo": 129,
+      "descripcion": "Puertas, Marcos",
+      "familiaCodigo": 100,
+      "letra": "M"
+    },
+    {
+      "codigo": 130,
+      "descripcion": "Molduras, Guardapolvos, Cubrejuntas, Cornizas, Tapacanto",
+      "familiaCodigo": 100,
+      "letra": "M"
+    },
+    {
+      "codigo": 131,
+      "descripcion": "Grifería, Fitting",
+      "familiaCodigo": 100,
+      "letra": "M"
+    },
+    {
+      "codigo": 132,
+      "descripcion": "Accesorios de baño",
+      "familiaCodigo": 100,
+      "letra": "M"
+    },
+    {
+      "codigo": 133,
+      "descripcion": "Artefactos de baño",
+      "familiaCodigo": 100,
+      "letra": "M"
+    },
+    {
+      "codigo": 134,
+      "descripcion": "Artefactos de cocina",
+      "familiaCodigo": 100,
+      "letra": "M"
+    },
+    {
+      "codigo": 135,
+      "descripcion": "Luminarias, ampolletas",
+      "familiaCodigo": 100,
+      "letra": "M"
+    },
+    {
+      "codigo": 136,
+      "descripcion": "Papel Mural, Raffia",
+      "familiaCodigo": 100,
+      "letra": "M"
+    },
+    {
+      "codigo": 137,
+      "descripcion": "Sellos, Juntas, Siliconas",
+      "familiaCodigo": 100,
+      "letra": "M"
+    },
+    {
+      "codigo": 138,
+      "descripcion": "Equipamiento Edificio",
+      "familiaCodigo": 100,
+      "letra": "M"
+    },
+    {
+      "codigo": 139,
+      "descripcion": "Mobiliario Edificio",
+      "familiaCodigo": 100,
+      "letra": "M"
+    },
+    {
+      "codigo": 140,
+      "descripcion": "Piso Vinilico, Piso Flotante, Piso SPC",
+      "familiaCodigo": 100,
+      "letra": "M"
+    },
+    {
+      "codigo": 141,
+      "descripcion": "Alfombra, Otros Pavimentos",
+      "familiaCodigo": 100,
+      "letra": "M"
+    },
+    {
+      "codigo": 142,
+      "descripcion": "Pinturas, Barnices, Sellantes",
+      "familiaCodigo": 100,
+      "letra": "M"
+    },
+    {
+      "codigo": 143,
+      "descripcion": "Materiales de Proteccion, Cartones, etc.",
+      "familiaCodigo": 100,
+      "letra": "M"
+    },
+    {
+      "codigo": 201,
+      "descripcion": "Direccion de obra",
+      "familiaCodigo": 200,
+      "letra": "O"
+    },
+    {
+      "codigo": 202,
+      "descripcion": "Supervision de terreno",
+      "familiaCodigo": 200,
+      "letra": "O"
+    },
+    {
+      "codigo": 203,
+      "descripcion": "Trazado",
+      "familiaCodigo": 200,
+      "letra": "O"
+    },
+    {
+      "codigo": 204,
+      "descripcion": "Administrativos",
+      "familiaCodigo": 200,
+      "letra": "O"
+    },
+    {
+      "codigo": 205,
+      "descripcion": "Otros Indirectos",
+      "familiaCodigo": 200,
+      "letra": "O"
+    },
+    {
+      "codigo": 206,
+      "descripcion": "Jornales",
+      "familiaCodigo": 200,
+      "letra": "O"
+    },
+    {
+      "codigo": 207,
+      "descripcion": "Albañileria",
+      "familiaCodigo": 200,
+      "letra": "O"
+    },
+    {
+      "codigo": 208,
+      "descripcion": "Carpinteria OOGG",
+      "familiaCodigo": 200,
+      "letra": "O"
+    },
+    {
+      "codigo": 209,
+      "descripcion": "Moldajes",
+      "familiaCodigo": 200,
+      "letra": "O"
+    },
+    {
+      "codigo": 210,
+      "descripcion": "Hormigones",
+      "familiaCodigo": 200,
+      "letra": "O"
+    },
+    {
+      "codigo": 211,
+      "descripcion": "Enfierradura",
+      "familiaCodigo": 200,
+      "letra": "O"
+    },
+    {
+      "codigo": 212,
+      "descripcion": "Carpinteria Terminaciones",
+      "familiaCodigo": 200,
+      "letra": "O"
+    },
+    {
+      "codigo": 213,
+      "descripcion": "Yeseros, Rematadores",
+      "familiaCodigo": 200,
+      "letra": "O"
+    },
+    {
+      "codigo": 214,
+      "descripcion": "Electrica",
+      "familiaCodigo": 200,
+      "letra": "O"
+    },
+    {
+      "codigo": 215,
+      "descripcion": "Sanitaria",
+      "familiaCodigo": 200,
+      "letra": "O"
+    },
+    {
+      "codigo": 216,
+      "descripcion": "Aseo",
+      "familiaCodigo": 200,
+      "letra": "O"
+    },
+    {
+      "codigo": 217,
+      "descripcion": "Guardias y Rondines",
+      "familiaCodigo": 200,
+      "letra": "O"
+    },
+    {
+      "codigo": 218,
+      "descripcion": "Post Entrega Municipal",
+      "familiaCodigo": 200,
+      "letra": "O"
+    },
+    {
+      "codigo": 219,
+      "descripcion": "Premios de Obra",
+      "familiaCodigo": 200,
+      "letra": "O"
+    },
+    {
+      "codigo": 301,
+      "descripcion": "Demolicion",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 302,
+      "descripcion": "Movimientos Tierra, Excavacion",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 303,
+      "descripcion": "Socalzados, Entibaciones manuales",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 304,
+      "descripcion": "Anclajes, Sostenimientos",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 305,
+      "descripcion": "Excavacion Manual, Preparacion Cancha",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 306,
+      "descripcion": "Enfierradura",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 307,
+      "descripcion": "Postensados, Montajes Prefabricados",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 308,
+      "descripcion": "Colocación Hormigones, Afinado Radier y Losa",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 309,
+      "descripcion": "Carpinteria Moldajes, Montaje y Desmontaje Andamios",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 310,
+      "descripcion": "Sanitario, Alcantarillado",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 311,
+      "descripcion": "Central Agua Caliente, Paneles Solares",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 312,
+      "descripcion": "Impulsión, Bombas",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 313,
+      "descripcion": "Electricidad, Canalización Corrientes debiles",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 314,
+      "descripcion": "Corrientes Debiles y Telecomunicaciones",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 315,
+      "descripcion": "Sistemas de Seguridad y Combate Contra Incendio",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 316,
+      "descripcion": "Calefaccion, Climatización",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 317,
+      "descripcion": "Extraccion, Presurización",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 318,
+      "descripcion": "Basuras",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 319,
+      "descripcion": "Estructuras, Carpinteria Metalica",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 320,
+      "descripcion": "Impermeabilizaciones",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 321,
+      "descripcion": "Tabiquerias",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 322,
+      "descripcion": "Cielos Modulares",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 323,
+      "descripcion": "Aislación Térmica y Acústica",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 324,
+      "descripcion": "SC Yesos",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 325,
+      "descripcion": "SC Estucos, Afinados y Sobrelosas",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 326,
+      "descripcion": "Ventanas, Aluminios y Espejos",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 327,
+      "descripcion": "Ventanas de PVC",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 328,
+      "descripcion": "Carpinteria Terminacion",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 329,
+      "descripcion": "Cerámicas, Pavimentos",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 330,
+      "descripcion": "SC Piso Vinilico, Piso Flotante, Piso SPC",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 331,
+      "descripcion": "SC Alfombra, Otros Pavimentos",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 332,
+      "descripcion": "Revestimientos Terminacion",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 333,
+      "descripcion": "Papel mural",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 334,
+      "descripcion": "Muebles y Closet",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 335,
+      "descripcion": "Cubiertas Marmol, Granito",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 336,
+      "descripcion": "SC Pinturas, Barnices",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 337,
+      "descripcion": "Barandas Vidriadas",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 338,
+      "descripcion": "SC Cubiertas, Hojalateria",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 339,
+      "descripcion": "SC Maquillaje, Estuco Fachada",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 340,
+      "descripcion": "Revestimientos Fachada",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 341,
+      "descripcion": "Enchapes, Piedra, P. Pizarra",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 342,
+      "descripcion": "Pavimentación, Asfalto",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 343,
+      "descripcion": "Piscinas, Piletas",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 344,
+      "descripcion": "Ascensores, Rampas",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 345,
+      "descripcion": "Señalización, Demarcación, Sello Pavimentos",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 346,
+      "descripcion": "SC Obras Civiles",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 347,
+      "descripcion": "SC Urbanización, OOEE, TEP",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 348,
+      "descripcion": "SC Serviu, IMIV, Mitigaciones",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 349,
+      "descripcion": "Jardines, Riego",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 350,
+      "descripcion": "Otros Especializados",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 351,
+      "descripcion": "Compañía Electrica",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 352,
+      "descripcion": "SC Aseo",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 353,
+      "descripcion": "Sistemas Anticaidas, Limpiafachadas",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 354,
+      "descripcion": "SC Cierros Perimetrales",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 355,
+      "descripcion": "SC MO Varios, SC Habilitación",
+      "familiaCodigo": 300,
+      "letra": "S"
+    },
+    {
+      "codigo": 401,
+      "descripcion": "Ensayo de Materiales",
+      "familiaCodigo": 400,
+      "letra": "G"
+    },
+    {
+      "codigo": 402,
+      "descripcion": "Consumos, Agua, Luz, Gas",
+      "familiaCodigo": 400,
+      "letra": "G"
+    },
+    {
+      "codigo": 403,
+      "descripcion": "Permisos, Derechos, Certificaciones",
+      "familiaCodigo": 400,
+      "letra": "G"
+    },
+    {
+      "codigo": 404,
+      "descripcion": "Seguros, Boletas",
+      "familiaCodigo": 400,
+      "letra": "G"
+    },
+    {
+      "codigo": 405,
+      "descripcion": "Honorarios Profesionales",
+      "familiaCodigo": 400,
+      "letra": "G"
+    },
+    {
+      "codigo": 406,
+      "descripcion": "Mat.Eléctricos y Sanitarios Inst.Faen.",
+      "familiaCodigo": 400,
+      "letra": "G"
+    },
+    {
+      "codigo": 407,
+      "descripcion": "Tableros Faena, Extenciones",
+      "familiaCodigo": 400,
+      "letra": "G"
+    },
+    {
+      "codigo": 408,
+      "descripcion": "Gastos de Notaria, Multas",
+      "familiaCodigo": 400,
+      "letra": "G"
+    },
+    {
+      "codigo": 409,
+      "descripcion": "Pevención y Seguridad",
+      "familiaCodigo": 400,
+      "letra": "G"
+    },
+    {
+      "codigo": 410,
+      "descripcion": "Equipos y Sistemas Oficinas de Obra",
+      "familiaCodigo": 400,
+      "letra": "G"
+    },
+    {
+      "codigo": 411,
+      "descripcion": "Contenedores, Oficinas, Baños IIFF",
+      "familiaCodigo": 400,
+      "letra": "G"
+    },
+    {
+      "codigo": 412,
+      "descripcion": "Caja Chica",
+      "familiaCodigo": 400,
+      "letra": "G"
+    },
+    {
+      "codigo": 413,
+      "descripcion": "Combustibles, Lubricantes,",
+      "familiaCodigo": 400,
+      "letra": "G"
+    },
+    {
+      "codigo": 414,
+      "descripcion": "Empalmes Provisorios y Supresiones",
+      "familiaCodigo": 400,
+      "letra": "G"
+    },
+    {
+      "codigo": 415,
+      "descripcion": "Art. Librería y Escritorio",
+      "familiaCodigo": 400,
+      "letra": "G"
+    },
+    {
+      "codigo": 416,
+      "descripcion": "Planos, Fotocopias, Formularios",
+      "familiaCodigo": 400,
+      "letra": "G"
+    },
+    {
+      "codigo": 417,
+      "descripcion": "Colaciones, Movilización",
+      "familiaCodigo": 400,
+      "letra": "G"
+    },
+    {
+      "codigo": 418,
+      "descripcion": "Camiones y Vehiculos EMM",
+      "familiaCodigo": 400,
+      "letra": "G"
+    },
+    {
+      "codigo": 419,
+      "descripcion": "Fletes externos",
+      "familiaCodigo": 400,
+      "letra": "G"
+    },
+    {
+      "codigo": 420,
+      "descripcion": "Retiro de escombros y excedentes",
+      "familiaCodigo": 400,
+      "letra": "G"
+    },
+    {
+      "codigo": 421,
+      "descripcion": "GG Oficina central",
+      "familiaCodigo": 400,
+      "letra": "G"
+    },
+    {
+      "codigo": 422,
+      "descripcion": "Costo financiero",
+      "familiaCodigo": 400,
+      "letra": "G"
+    },
+    {
+      "codigo": 423,
+      "descripcion": "Asistencia Social, Beneficios, Cursos",
+      "familiaCodigo": 400,
+      "letra": "G"
+    },
+    {
+      "codigo": 424,
+      "descripcion": "Elementos de Aseo IIFF",
+      "familiaCodigo": 400,
+      "letra": "G"
+    },
+    {
+      "codigo": 425,
+      "descripcion": "Insumos de Trazado",
+      "familiaCodigo": 400,
+      "letra": "G"
+    },
+    {
+      "codigo": 426,
+      "descripcion": "Materiales Construcción Instalación de Faenas",
+      "familiaCodigo": 400,
+      "letra": "G"
+    },
+    {
+      "codigo": 427,
+      "descripcion": "Sistema de Vigilancia, Servicio Guardias",
+      "familiaCodigo": 400,
+      "letra": "G"
+    },
+    {
+      "codigo": 501,
+      "descripcion": "Trompos, Betoneras, Servicio de Bombeo",
+      "familiaCodigo": 500,
+      "letra": "E"
+    },
+    {
+      "codigo": 502,
+      "descripcion": "Vibrador, Cerchas",
+      "familiaCodigo": 500,
+      "letra": "E"
+    },
+    {
+      "codigo": 503,
+      "descripcion": "Minicargador, Retroexcavadora, Miniexcavadora",
+      "familiaCodigo": 500,
+      "letra": "E"
+    },
+    {
+      "codigo": 504,
+      "descripcion": "Grua Torre",
+      "familiaCodigo": 500,
+      "letra": "E"
+    },
+    {
+      "codigo": 505,
+      "descripcion": "Gruas moviles, Camion Pluma",
+      "familiaCodigo": 500,
+      "letra": "E"
+    },
+    {
+      "codigo": 506,
+      "descripcion": "Andamios, Plataformas",
+      "familiaCodigo": 500,
+      "letra": "E"
+    },
+    {
+      "codigo": 507,
+      "descripcion": "Taladros, Esmeriles, Soldadora",
+      "familiaCodigo": 500,
+      "letra": "E"
+    },
+    {
+      "codigo": 508,
+      "descripcion": "Herramientas eléctricas especializadas",
+      "familiaCodigo": 500,
+      "letra": "E"
+    },
+    {
+      "codigo": 509,
+      "descripcion": "Moldajes, Alzaprimas",
+      "familiaCodigo": 500,
+      "letra": "E"
+    },
+    {
+      "codigo": 510,
+      "descripcion": "Radios",
+      "familiaCodigo": 500,
+      "letra": "E"
+    },
+    {
+      "codigo": 511,
+      "descripcion": "Nivel, Taquímetro, Estación Total",
+      "familiaCodigo": 500,
+      "letra": "E"
+    },
+    {
+      "codigo": 512,
+      "descripcion": "Montacargas, Elevadores",
+      "familiaCodigo": 500,
+      "letra": "E"
+    },
+    {
+      "codigo": 513,
+      "descripcion": "Grupos Generadores",
+      "familiaCodigo": 500,
+      "letra": "E"
+    },
+    {
+      "codigo": 514,
+      "descripcion": "Rodillos, Placas, Vibropison",
+      "familiaCodigo": 500,
+      "letra": "E"
+    },
+    {
+      "codigo": 515,
+      "descripcion": "Herramientas Menores Manuales (No Electricas)",
+      "familiaCodigo": 500,
+      "letra": "E"
+    },
+    {
+      "codigo": 516,
+      "descripcion": "Insumos para herramientas electricas",
+      "familiaCodigo": 500,
+      "letra": "E"
+    },
+    {
+      "codigo": 517,
+      "descripcion": "Alzador de persona, Genie",
+      "familiaCodigo": 500,
+      "letra": "E"
+    },
+    {
+      "codigo": 601,
+      "descripcion": "Pilotos y Sala de Ventas",
+      "familiaCodigo": 600,
+      "letra": "P"
+    },
+    {
+      "codigo": 602,
+      "descripcion": "Publicidad",
+      "familiaCodigo": 600,
+      "letra": "P"
+    },
+    {
+      "codigo": 603,
+      "descripcion": "Imprevistos y no considerados",
+      "familiaCodigo": 600,
+      "letra": "P"
+    },
+    {
+      "codigo": 604,
+      "descripcion": "Costo Post Venta",
+      "familiaCodigo": 600,
+      "letra": "P"
+    },
+    {
+      "codigo": 605,
+      "descripcion": "Utilidad, Honorario Construcción",
+      "familiaCodigo": 600,
+      "letra": "P"
+    },
+    {
+      "codigo": 606,
+      "descripcion": "Extras y/o Modificaciones",
+      "familiaCodigo": 600,
+      "letra": "P"
+    },
+    {
+      "codigo": 607,
+      "descripcion": "Costo de estudio y/o Proyectos",
+      "familiaCodigo": 600,
+      "letra": "P"
+    },
+    {
+      "codigo": 701,
+      "descripcion": "Materiales EC",
+      "familiaCodigo": 700,
+      "letra": "C"
+    },
+    {
+      "codigo": 702,
+      "descripcion": "Mano de Obra EC",
+      "familiaCodigo": 700,
+      "letra": "C"
+    },
+    {
+      "codigo": 703,
+      "descripcion": "Subcontratos EC",
+      "familiaCodigo": 700,
+      "letra": "C"
+    },
+    {
+      "codigo": 704,
+      "descripcion": "Gastos Generales EC",
+      "familiaCodigo": 700,
+      "letra": "C"
+    },
+    {
+      "codigo": 705,
+      "descripcion": "Equipos y Maquinarias EC",
+      "familiaCodigo": 700,
+      "letra": "C"
+    },
+    {
+      "codigo": 706,
+      "descripcion": "Otros EC",
+      "familiaCodigo": 700,
+      "letra": "C"
+    },
+    {
+      "codigo": 901,
+      "descripcion": "Recursos Humanos Of Central",
+      "familiaCodigo": 900,
+      "letra": "I"
+    },
+    {
+      "codigo": 902,
+      "descripcion": "Uso de softwares y redes",
+      "familiaCodigo": 900,
+      "letra": "I"
+    },
+    {
+      "codigo": 903,
+      "descripcion": "Cuentas de servicio",
+      "familiaCodigo": 900,
+      "letra": "I"
+    },
+    {
+      "codigo": 904,
+      "descripcion": "Gastos Generales Oficina",
+      "familiaCodigo": 900,
+      "letra": "I"
+    },
+    {
+      "codigo": 905,
+      "descripcion": "Arriendo Oficinas",
+      "familiaCodigo": 900,
+      "letra": "I"
+    },
+    {
+      "codigo": 906,
+      "descripcion": "Costos Financieros",
+      "familiaCodigo": 900,
+      "letra": "I"
+    },
+    {
+      "codigo": 907,
+      "descripcion": "Honorarios",
+      "familiaCodigo": 900,
+      "letra": "I"
+    },
+    {
+      "codigo": 908,
+      "descripcion": "Creditos / Leasing / Leaseback",
+      "familiaCodigo": 900,
+      "letra": "I"
+    },
+    {
+      "codigo": 909,
+      "descripcion": "Arriendo bodega central",
+      "familiaCodigo": 900,
+      "letra": "I"
+    },
+    {
+      "codigo": 910,
+      "descripcion": "Asesorias - Consultorías - Estudios",
+      "familiaCodigo": 900,
+      "letra": "I"
+    },
+    {
+      "codigo": 911,
+      "descripcion": "Marketing y Ventas",
+      "familiaCodigo": 900,
+      "letra": "I"
+    },
+    {
+      "codigo": 912,
+      "descripcion": "Costos Legales",
+      "familiaCodigo": 900,
+      "letra": "I"
+    },
+    {
+      "codigo": 913,
+      "descripcion": "Directorio",
+      "familiaCodigo": 900,
+      "letra": "I"
+    },
+    {
+      "codigo": 914,
+      "descripcion": "Proyectos de Especialidades",
+      "familiaCodigo": 900,
+      "letra": "I"
+    }
+  ]
+}

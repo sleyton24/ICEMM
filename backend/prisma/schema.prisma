@@ -1,0 +1,92 @@
+// Plan de cuentas, productos, proyectos, archivos y ERP de ICEMM.
+// JSON columns para los blobs grandes (partidas itemizadas, transacciones ERP).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ── Auth ─────────────────────────────────────────────────────────────────────
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  nombre       String
+  rol          String   @default("viewer")  // "admin" | "editor" | "viewer"
+  activo       Boolean  @default(true)
+  fechaCreacion DateTime @default(now())
+}
+
+// ── Plan de cuentas (global, no per-project) ─────────────────────────────────
+
+model PlanCuentas {
+  id        String   @id @default(uuid())
+  version   String
+  origen    String   // "bundled" | "uploaded"
+  familias  Json     // FamiliaMacro[]
+  cuentas   Json     // CuentaCosto[]
+  cargadoEn DateTime @default(now())
+  // Solo el plan activo se marca con `activo = true`; los anteriores quedan como histórico.
+  activo    Boolean  @default(false)
+}
+
+model MaestroProductos {
+  id        String   @id @default(uuid())
+  version   String
+  origen    String
+  productos Json     // ProductoMaestro[]
+  cargadoEn DateTime @default(now())
+  activo    Boolean  @default(false)
+}
+
+// ── Proyectos ────────────────────────────────────────────────────────────────
+
+model Project {
+  id                  String   @id @default(uuid())
+  nombre              String
+  unidadNegocioCodigo Int?
+  cutoffMesReal       String?  // "YYYY-MM"
+  fechaCreacion       DateTime @default(now())
+  fechaActualizacion  DateTime @updatedAt
+  archivos            ArchivoCargado[]
+  erp                 CargaERP?
+}
+
+model ArchivoCargado {
+  id                String   @id @default(uuid())
+  projectId         String
+  // "presupuesto_original" | "presupuesto_redistribuido" | "ppto_horas_extra" | "proyectado"
+  slot              String
+  nombreArchivo     String
+  fechaCarga        DateTime @default(now())
+  partidas          Json     // PartidaRaw[]
+  subtotalesFamilia Json
+  totalGeneral      Float
+  project           Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, slot])
+  @@index([projectId])
+}
+
+model CargaERP {
+  id                       String   @id @default(uuid())
+  projectId                String   @unique
+  nombreArchivo            String
+  unidadNegocioCodigo      Int
+  unidadNegocioDescripcion String
+  totalUF                  Float
+  numTransacciones         Int
+  rangoFechaDesde          DateTime
+  rangoFechaHasta          DateTime
+  agregadoPorCcosto        Json
+  agregadoPorCcostoPorMes  Json
+  mesesDisponibles         String[]
+  transaccionesPorCcosto   Json     // ← más pesado; mover a tabla aparte si crece
+  fechaCarga               DateTime @default(now())
+  project                  Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
