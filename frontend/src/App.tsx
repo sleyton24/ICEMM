@@ -5,12 +5,13 @@ import TablaControl from './components/TablaControl'
 import Top5Chart from './components/Top5Chart'
 import FamiliaCharts from './components/FamiliaCharts'
 import SinPartidaPanel from './components/SinPartidaPanel'
+import DirectorioReport from './components/DirectorioReport'
 import ProjectSwitcher from './features/projects/ProjectSwitcher'
 import AdminPlanCuentasPage from './features/plan-cuentas/AdminPlanCuentasPage'
 import CutoffMesFilter from './features/projects/CutoffMesFilter'
 import AuthGate from './features/auth/AuthGate'
 
-type Tab = 'tabla' | 'familias' | 'top5'
+type Tab = 'tabla' | 'familias' | 'top5' | 'directorio'
 
 export default function App() {
   const [tab, setTab] = useState<Tab>('tabla')
@@ -63,9 +64,10 @@ export default function App() {
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
           <nav className="flex border-b border-gray-100">
             {([
-              { id: 'tabla',    label: 'Tabla de Control' },
-              { id: 'familias', label: 'Gráficos por Familia' },
-              { id: 'top5',     label: 'Top 5 Sobrecosto' },
+              { id: 'tabla',     label: 'Tabla de Control' },
+              { id: 'familias',  label: 'Gráficos por Familia' },
+              { id: 'top5',      label: 'Top 5 Sobrecosto' },
+              { id: 'directorio', label: 'Directorio' },
             ] as { id: Tab; label: string }[]).map(t => (
               <button
                 key={t.id}
@@ -83,7 +85,8 @@ export default function App() {
           <div className="p-5">
             {tab === 'tabla'    && <TablaControl partidas={data.partidas} movimientos={data.movimientos} detallePartidas={data.detallePartidas} familias={data.familias} />}
             {tab === 'familias' && <FamiliaCharts partidas={data.partidas} sinPartida={data.sinPartida} familias={data.familias} />}
-            {tab === 'top5'     && <Top5Chart partidas={data.partidas} />}
+            {tab === 'top5'      && <Top5Chart partidas={data.partidas} />}
+            {tab === 'directorio' && <DirectorioReport />}
           </div>
         </div>
 
