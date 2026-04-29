@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo } from 'react'
 import { useProjectsStore } from '../features/projects/ProjectsStore'
 import { usePlanCuentasStore } from '../features/plan-cuentas/PlanCuentasStore'
 import { mergeProyecto, type PartidaMerged } from '../features/data-upload/parser/mergeProyecto'
@@ -14,22 +14,6 @@ const FAMILIAS_REPORTE = [
   'EQUIPOS Y MAQUINARIAS',
   'OTROS',
 ] as const
-
-interface VentasProyecto {
-  ventaInicial: number
-  ventaObrasExtra: number
-}
-
-const VENTAS_KEY = 'icemm.ventas.v1'
-function loadVentas(): Record<string, VentasProyecto> {
-  try {
-    const raw = localStorage.getItem(VENTAS_KEY)
-    return raw ? JSON.parse(raw) : {}
-  } catch { return {} }
-}
-function saveVentas(v: Record<string, VentasProyecto>) {
-  localStorage.setItem(VENTAS_KEY, JSON.stringify(v))
-}
 
 function familiaTotales(partidas: PartidaMerged[]) {
   return {
@@ -52,11 +36,7 @@ export default function DirectorioReport() {
   const proyectos = useProjectsStore(s => s.projects)
   const activeProjectId = useProjectsStore(s => s.activeProjectId)
   const plan = usePlanCuentasStore(s => s.plan)
-  const [ventas, setVentas] = useState<Record<string, VentasProyecto>>(loadVentas())
 
-  useEffect(() => { saveVentas(ventas) }, [ventas])
-
-  // Merge cada proyecto con su cutoff
   const datosProyectos = useMemo(() => {
     return proyectos.map(p => ({
       proyecto: p,
@@ -64,8 +44,8 @@ export default function DirectorioReport() {
     }))
   }, [proyectos, plan])
 
-  // ── Tabla 1: Plan de Cuentas del proyecto activo ────────────────────────────
   const proyectoActivo = datosProyectos.find(d => d.proyecto.id === activeProjectId)
+
   const filasFamilia = proyectoActivo
     ? FAMILIAS_REPORTE.map(fam => {
         const ps = proyectoActivo.partidas.filter(p => p.familia === fam)
@@ -81,17 +61,10 @@ export default function DirectorioReport() {
       )
     : null
 
-  const updateVenta = (projectId: string, field: keyof VentasProyecto, value: number) => {
-    setVentas(prev => ({
-      ...prev,
-      [projectId]: { ...(prev[projectId] ?? { ventaInicial: 0, ventaObrasExtra: 0 }), [field]: value },
-    }))
-  }
-
   return (
     <div className="space-y-8">
       {/* ════════════════════════════════════════════════════════════════
-          TABLA 1: VISION DE PLAN DE CUENTAS DE OBRA
+          TABLA 1: VISIÓN PLAN DE CUENTAS DE OBRA
           ════════════════════════════════════════════════════════════════ */}
       <div className="rounded-lg border border-gray-200 overflow-hidden">
         <div className="px-5 py-3 bg-navy">
@@ -169,7 +142,7 @@ export default function DirectorioReport() {
       </div>
 
       {/* ════════════════════════════════════════════════════════════════
-          TABLA 2: VISION DE VENTAS Y RESULTADO DE OBRA
+          TABLA 2: VISIÓN DE VENTAS Y RESULTADO DE OBRA
           ════════════════════════════════════════════════════════════════ */}
       <div className="rounded-lg border border-gray-200 overflow-hidden">
         <div className="px-5 py-3 bg-navy">
@@ -200,46 +173,30 @@ export default function DirectorioReport() {
                   <td colSpan={datosProyectos.length + 1} className="px-3 py-1.5 text-[11px] font-bold text-emerald-700 uppercase tracking-wider">Ingresos (Ventas)</td>
                 </tr>
                 <tr>
-                  <td className="px-3 py-2 pl-6 text-gray-600 text-xs">Venta Inicial <span className="text-gray-300">(1)</span></td>
+                  <td className="px-3 py-2 pl-6 text-gray-600 text-xs">Venta Inicial <span className="text-gray-300">(1 = Total PPTO Inicial)</span></td>
                   {datosProyectos.map(d => {
-                    const v = ventas[d.proyecto.id]?.ventaInicial ?? 0
-                    return (
-                      <td key={d.proyecto.id} className="px-3 py-2 text-right">
-                        <input
-                          type="number"
-                          value={v || ''}
-                          onChange={e => updateVenta(d.proyecto.id, 'ventaInicial', parseFloat(e.target.value) || 0)}
-                          placeholder="0,00"
-                          className="w-28 text-right tabular-nums text-xs border border-gray-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-teal-muted/40"
-                        />
-                      </td>
-                    )
+                    const v = d.partidas
+                      .filter(p => (FAMILIAS_REPORTE as readonly string[]).includes(p.familia))
+                      .reduce((s, p) => s + p.ppto_original, 0)
+                    return <td key={d.proyecto.id} className="px-3 py-2 tabular-nums text-right text-gray-700">{uf2(v)}</td>
                   })}
                 </tr>
                 <tr>
-                  <td className="px-3 py-2 pl-6 text-gray-600 text-xs">Venta Obras Extra <span className="text-gray-300">(3)</span></td>
+                  <td className="px-3 py-2 pl-6 text-gray-600 text-xs">Venta Obras Extra <span className="text-gray-300">(3 = Total PPTO OO.EE.)</span></td>
                   {datosProyectos.map(d => {
-                    const v = ventas[d.proyecto.id]?.ventaObrasExtra ?? 0
-                    return (
-                      <td key={d.proyecto.id} className="px-3 py-2 text-right">
-                        <input
-                          type="number"
-                          value={v || ''}
-                          onChange={e => updateVenta(d.proyecto.id, 'ventaObrasExtra', parseFloat(e.target.value) || 0)}
-                          placeholder="0,00"
-                          className="w-28 text-right tabular-nums text-xs border border-gray-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-teal-muted/40"
-                        />
-                      </td>
-                    )
+                    const v = d.partidas
+                      .filter(p => (FAMILIAS_REPORTE as readonly string[]).includes(p.familia))
+                      .reduce((s, p) => s + p.ppto_horas_extra, 0)
+                    return <td key={d.proyecto.id} className="px-3 py-2 tabular-nums text-right text-violet-600">{uf2(v)}</td>
                   })}
                 </tr>
                 <tr className="bg-emerald-50/30">
-                  <td className="px-3 py-2 pl-6 font-semibold text-gray-700 text-xs">Venta Total <span className="text-gray-300">(4)</span></td>
+                  <td className="px-3 py-2 pl-6 font-semibold text-gray-700 text-xs">Venta Total <span className="text-gray-300">(4 = Total PPTO Vigente)</span></td>
                   {datosProyectos.map(d => {
-                    const ventaInicial = ventas[d.proyecto.id]?.ventaInicial ?? 0
-                    const ventaExtra = ventas[d.proyecto.id]?.ventaObrasExtra ?? 0
-                    const total = ventaInicial + ventaExtra
-                    return <td key={d.proyecto.id} className="px-3 py-2 tabular-nums text-right font-semibold text-navy">{uf2(total)}</td>
+                    const v = d.partidas
+                      .filter(p => (FAMILIAS_REPORTE as readonly string[]).includes(p.familia))
+                      .reduce((s, p) => s + p.ppto_vigente, 0)
+                    return <td key={d.proyecto.id} className="px-3 py-2 tabular-nums text-right font-semibold text-navy">{uf2(v)}</td>
                   })}
                 </tr>
 
@@ -248,10 +205,12 @@ export default function DirectorioReport() {
                   <td colSpan={datosProyectos.length + 1} className="px-3 py-1.5 text-[11px] font-bold text-amber-700 uppercase tracking-wider">Egresos (Costos)</td>
                 </tr>
                 <tr>
-                  <td className="px-3 py-2 pl-6 font-medium text-gray-700 text-xs">Costos Totales <span className="text-gray-300">(5)</span></td>
+                  <td className="px-3 py-2 pl-6 font-medium text-gray-700 text-xs">Costos Totales <span className="text-gray-300">(5 = Total PPTO Proyectado)</span></td>
                   {datosProyectos.map(d => {
-                    const totalProy = d.partidas.reduce((s, p) => s + p.proyeccion, 0)
-                    return <td key={d.proyecto.id} className="px-3 py-2 tabular-nums text-right text-gray-700">{uf2(totalProy)}</td>
+                    const v = d.partidas
+                      .filter(p => (FAMILIAS_REPORTE as readonly string[]).includes(p.familia))
+                      .reduce((s, p) => s + p.proyeccion, 0)
+                    return <td key={d.proyecto.id} className="px-3 py-2 tabular-nums text-right text-gray-700">{uf2(v)}</td>
                   })}
                 </tr>
 
@@ -267,10 +226,11 @@ export default function DirectorioReport() {
                   })}
                 </tr>
                 <tr>
-                  <td className="px-3 py-2 pl-6 text-gray-600 text-xs">Ahorro o Pérdida <span className="text-gray-300">(7)</span></td>
+                  <td className="px-3 py-2 pl-6 text-gray-600 text-xs">Ahorro o Pérdida <span className="text-gray-300">(7 = Total EE.RR.)</span></td>
                   {datosProyectos.map(d => {
-                    const vigente = d.partidas.reduce((s, p) => s + p.ppto_vigente, 0)
-                    const proy = d.partidas.reduce((s, p) => s + p.proyeccion, 0)
+                    const partidas = d.partidas.filter(p => (FAMILIAS_REPORTE as readonly string[]).includes(p.familia))
+                    const vigente = partidas.reduce((s, p) => s + p.ppto_vigente, 0)
+                    const proy = partidas.reduce((s, p) => s + p.proyeccion, 0)
                     const ahorro = vigente - proy
                     return (
                       <td key={d.proyecto.id} className="px-3 py-2 tabular-nums text-right">
@@ -285,8 +245,9 @@ export default function DirectorioReport() {
                   <td className="px-3 py-2 pl-6 font-semibold text-gray-700 text-xs">Utilidad Total Proyectada <span className="text-gray-300">(CC 605 + 7)</span></td>
                   {datosProyectos.map(d => {
                     const cc605 = sumByCC(d.partidas, 605, 'ppto_original')
-                    const vigente = d.partidas.reduce((s, p) => s + p.ppto_vigente, 0)
-                    const proy = d.partidas.reduce((s, p) => s + p.proyeccion, 0)
+                    const partidas = d.partidas.filter(p => (FAMILIAS_REPORTE as readonly string[]).includes(p.familia))
+                    const vigente = partidas.reduce((s, p) => s + p.ppto_vigente, 0)
+                    const proy = partidas.reduce((s, p) => s + p.proyeccion, 0)
                     const utilTotal = cc605 + (vigente - proy)
                     return <td key={d.proyecto.id} className="px-3 py-2 tabular-nums text-right font-semibold text-navy">{uf2(utilTotal)}</td>
                   })}
@@ -300,8 +261,9 @@ export default function DirectorioReport() {
                   <td className="px-3 py-2 pl-6 text-gray-600 text-xs">Utilidad Total Proyectada <span className="text-gray-300">(CC 605 + 7)</span></td>
                   {datosProyectos.map(d => {
                     const cc605 = sumByCC(d.partidas, 605, 'ppto_original')
-                    const vigente = d.partidas.reduce((s, p) => s + p.ppto_vigente, 0)
-                    const proy = d.partidas.reduce((s, p) => s + p.proyeccion, 0)
+                    const partidas = d.partidas.filter(p => (FAMILIAS_REPORTE as readonly string[]).includes(p.familia))
+                    const vigente = partidas.reduce((s, p) => s + p.ppto_vigente, 0)
+                    const proy = partidas.reduce((s, p) => s + p.proyeccion, 0)
                     const utilTotal = cc605 + (vigente - proy)
                     return <td key={d.proyecto.id} className="px-3 py-2 tabular-nums text-right text-gray-600">{uf2(utilTotal)}</td>
                   })}
@@ -324,8 +286,9 @@ export default function DirectorioReport() {
                   <td className="px-3 py-2 pl-6 font-bold text-purple-900 text-xs uppercase">Total Margen Operacional</td>
                   {datosProyectos.map(d => {
                     const cc605 = sumByCC(d.partidas, 605, 'ppto_original')
-                    const vigente = d.partidas.reduce((s, p) => s + p.ppto_vigente, 0)
-                    const proy = d.partidas.reduce((s, p) => s + p.proyeccion, 0)
+                    const partidas = d.partidas.filter(p => (FAMILIAS_REPORTE as readonly string[]).includes(p.familia))
+                    const vigente = partidas.reduce((s, p) => s + p.ppto_vigente, 0)
+                    const proy = partidas.reduce((s, p) => s + p.proyeccion, 0)
                     const utilTotal = cc605 + (vigente - proy)
                     const cc421 = sumByCC(d.partidas, 421, 'proyeccion')
                     const cc604 = sumByCC(d.partidas, 604, 'proyeccion')

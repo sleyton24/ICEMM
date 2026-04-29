@@ -7,5 +7,12 @@ export default defineConfig({
   server: {
     port: 5177,
     strictPort: true,
+    proxy: {
+      // Redirige /api/* a backend del VPS (mismo origen para el browser → sin CORS)
+      '/api': {
+        target: 'http://187.127.29.98',
+        changeOrigin: true,
+      },
+    },
   },
 })
