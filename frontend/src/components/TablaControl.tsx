@@ -339,8 +339,8 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
           </div>
 
           {/* Total general de la obra */}
-          <div className="rounded-lg border border-navy overflow-hidden">
-            <table className="w-full text-sm table-fixed">
+          <div className="rounded-lg border border-navy overflow-hidden overflow-x-auto">
+            <table className="w-full min-w-[1200px] text-sm table-fixed">
               <colgroup>
                 <col className="w-[55px]" />
                 <col />
@@ -402,7 +402,7 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
 
             return (
               <div key={familia} className="rounded-lg border border-gray-200 overflow-hidden overflow-x-auto">
-                <table className="w-full text-sm table-fixed">
+                <table className="w-full min-w-[1200px] text-sm table-fixed">
                   <colgroup>
                     <col className="w-[55px]" />
                     <col />
