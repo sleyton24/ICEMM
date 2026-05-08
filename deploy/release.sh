@@ -14,6 +14,8 @@ APP_DIR=/var/www/icemm
 
 log "Pull desde GitHub..."
 cd $APP_DIR
+# Descartar cambios locales (archivos generados como dist/) antes del pull
+git checkout -- .
 git pull --rebase
 
 log "Backend: install + sync schema + build..."
