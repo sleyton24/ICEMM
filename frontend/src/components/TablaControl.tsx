@@ -42,9 +42,12 @@ interface Props {
   movimientos: Record<string, Movimiento[]>
   detallePartidas: Record<string, DetallePartida[]>
   familias: string[]
+  proyeccionAnteriorPorCodigo?: Record<string, number>
+  esVistaAprobada?: boolean
+  numeroInforme?: number | null
 }
 
-export default function TablaControl({ partidas, movimientos, detallePartidas, familias: FAMILIAS }: Props) {
+export default function TablaControl({ partidas, movimientos, detallePartidas, familias: FAMILIAS, proyeccionAnteriorPorCodigo = {}, esVistaAprobada = false, numeroInforme = null }: Props) {
   const planCuentas = usePlanCuentasStore(s => s.plan)
   const activeProject = useProjectsStore(s => s.projects.find(p => p.id === s.activeProjectId) ?? null)
   const [cuentaDetalle, setCuentaDetalle] = useState<{ cc: number; nombre: string } | null>(null)
@@ -183,6 +186,21 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
       sortUndefined: 'last',
     },
     {
+      id: 'var_eerr_anterior', header: 'Var EERR Anterior',
+      accessorFn: (row) => {
+        const proyAnt = proyeccionAnteriorPorCodigo[row.codigo]
+        return proyAnt !== undefined ? row.proyeccion - proyAnt : null
+      },
+      cell: ({ getValue }) => {
+        const v = getValue() as number | null
+        if (v === null) return <span className="text-gray-300">—</span>
+        // Negativo (proyectado bajó) = bueno (verde); positivo (proyectado subió) = malo (rojo)
+        const cls = v < 0 ? 'text-emerald-600' : v > 0 ? 'text-accent' : 'text-gray-400'
+        return <span className={`tabular-nums font-medium ${cls}`}>{signed(-v)}</span>
+      },
+      sortUndefined: 'last',
+    },
+    {
       id: 'estado_arrow', header: '', enableSorting: false,
       cell: ({ row }) => <VarArrow pct={row.original.variacion_pct} />,
     },
@@ -207,10 +225,18 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
   })
 
   const estados = ['TODOS', 'CRITICO', 'ALERTA', 'EN CONTROL', 'FAVORABLE', 'SIN EJECUCION', 'SOLO REAL']
-  const headers = ['Cuenta', 'Recurso', 'PPTO Inic', 'Redistrib.', 'OO.EE.', 'Vigente', 'Proyectado', 'Gastado', 'Saldo', 'Var EERR', 'Var %', '', '']
+  const headers = ['Cuenta', 'Recurso', 'PPTO Inic', 'Redistrib.', 'OO.EE.', 'Vigente', 'Proyectado', 'Gastado', 'Saldo', 'Var EERR', 'Var %', 'Var EERR Anterior', '', '']
 
   return (
     <div className="space-y-4">
+      {/* Banner read-only cuando estamos viendo un informe aprobado */}
+      {esVistaAprobada && (
+        <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-lg px-4 py-2 text-xs text-emerald-700">
+          <span className="font-bold">Informe N°{numeroInforme} (aprobado)</span>
+          <span className="text-emerald-600">— modo solo lectura. No se puede editar este informe.</span>
+        </div>
+      )}
+
       {/* Filters */}
       <div className="flex flex-wrap gap-3 items-center justify-between">
         <div className="flex flex-wrap gap-2 items-center">

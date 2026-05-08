@@ -55,6 +55,27 @@ model Project {
   fechaActualizacion  DateTime @updatedAt
   archivos            ArchivoCargado[]
   erp                 CargaERP?
+  informes            Informe[]
+}
+
+/// Snapshot inmutable de un proyecto en un momento dado.
+/// El "informe activo" (en borrador) son los archivos del Project directamente.
+/// Una vez aprobado, se serializa todo en `snapshotProyecto` y queda read-only.
+model Informe {
+  id              String    @id @default(uuid())
+  projectId       String
+  numero          Int       // 1, 2, 3 ... auto-incremental por proyecto
+  estado          String    @default("aprobado")  // siempre 'aprobado' (los borradores viven en Project)
+  fechaCreacion   DateTime  @default(now())
+  fechaAprobacion DateTime  @default(now())
+  aprobadoPor     String    // email del user
+  comentario      String?
+  /// Snapshot completo: { slots, partidas?, ventas, fechaCorte, ... }
+  snapshotProyecto Json
+  project         Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, numero])
+  @@index([projectId])
 }
 
 model ArchivoCargado {

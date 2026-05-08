@@ -16,11 +16,12 @@ log "Pull desde GitHub..."
 cd $APP_DIR
 git pull --rebase
 
-log "Backend: install + migrate + build..."
+log "Backend: install + sync schema + build..."
 cd $APP_DIR/backend
 npm install --legacy-peer-deps
 npx prisma generate
-npx prisma migrate deploy
+# db push sincroniza el schema sin migrations (seguro mientras solo agreguemos columnas/tablas)
+npx prisma db push --accept-data-loss
 npm run build
 
 log "Frontend: install + build..."

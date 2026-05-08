@@ -1,8 +1,12 @@
 import { Router } from 'express'
 import { z } from 'zod'
 import { prisma } from '../db.js'
+import informesRouter from './informes.js'
 
 const router = Router()
+
+// Sub-router de informes
+router.use('/:id/informes', informesRouter)
 
 const ITEMIZADO_SLOTS = ['presupuesto_original', 'presupuesto_redistribuido', 'ppto_horas_extra', 'proyectado'] as const
 type ItemizadoSlot = typeof ITEMIZADO_SLOTS[number]

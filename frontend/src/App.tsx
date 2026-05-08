@@ -10,6 +10,7 @@ import ProjectSwitcher from './features/projects/ProjectSwitcher'
 import AdminPlanCuentasPage from './features/plan-cuentas/AdminPlanCuentasPage'
 import CutoffMesFilter from './features/projects/CutoffMesFilter'
 import AuthGate from './features/auth/AuthGate'
+import InformeSelector from './features/informes/InformeSelector'
 
 type Tab = 'tabla' | 'familias' | 'top5' | 'directorio'
 
@@ -38,7 +39,8 @@ export default function App() {
               <p className="text-sm font-semibold text-navy">{data.projectName}</p>
             </div>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <InformeSelector />
             <CutoffMesFilter />
             <ProjectSwitcher />
             <div className="text-right">
@@ -83,7 +85,7 @@ export default function App() {
           </nav>
 
           <div className="p-5">
-            {tab === 'tabla'    && <TablaControl partidas={data.partidas} movimientos={data.movimientos} detallePartidas={data.detallePartidas} familias={data.familias} />}
+            {tab === 'tabla'    && <TablaControl partidas={data.partidas} movimientos={data.movimientos} detallePartidas={data.detallePartidas} familias={data.familias} proyeccionAnteriorPorCodigo={data.proyeccionAnteriorPorCodigo} esVistaAprobada={data.esVistaAprobada} numeroInforme={data.numeroInforme} />}
             {tab === 'familias' && <FamiliaCharts partidas={data.partidas} sinPartida={data.sinPartida} familias={data.familias} />}
             {tab === 'top5'      && <Top5Chart partidas={data.partidas} />}
             {tab === 'directorio' && <DirectorioReport />}
