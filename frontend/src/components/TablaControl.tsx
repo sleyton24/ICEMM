@@ -128,9 +128,9 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
         const v = getValue() as number
         const diff = v - row.original.ppto_original
         return (
-          <span className={`tabular-nums ${diff !== 0 ? 'font-medium text-teal' : ''}`}>
+          <span className={`tabular-nums ${diff > 0 ? 'font-medium text-emerald-600' : diff < 0 ? 'font-medium text-accent' : ''}`}>
             {uf2(v)}
-            {diff !== 0 && <span className="ml-1 text-[10px] text-teal-muted">({diff > 0 ? '+' : ''}{uf2(diff)})</span>}
+            {diff !== 0 && <span className={`ml-1 text-[10px] ${diff > 0 ? 'text-emerald-500' : 'text-accent'}`}>({diff > 0 ? '+' : ''}{uf2(diff)})</span>}
           </span>
         )
       },
@@ -167,7 +167,7 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
       cell: ({ getValue }) => <span className="tabular-nums text-gray-500">{uf2(getValue() as number)}</span>,
     },
     {
-      accessorKey: 'variacion_uf', header: 'Var UF',
+      accessorKey: 'variacion_uf', header: 'Var EERR',
       cell: ({ getValue }) => {
         const v = getValue() as number
         return <span className={`tabular-nums font-medium ${varColor(v)}`}>{signed(v)}</span>
@@ -207,7 +207,7 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
   })
 
   const estados = ['TODOS', 'CRITICO', 'ALERTA', 'EN CONTROL', 'FAVORABLE', 'SIN EJECUCION', 'SOLO REAL']
-  const headers = ['Cuenta', 'Recurso', 'PPTO Inic', 'Redistrib.', 'OO.EE.', 'Vigente', 'Proyectado', 'Gastado', 'Saldo', 'Var UF', 'Var %', '', '']
+  const headers = ['Cuenta', 'Recurso', 'PPTO Inic', 'Redistrib.', 'OO.EE.', 'Vigente', 'Proyectado', 'Gastado', 'Saldo', 'Var EERR', 'Var %', '', '']
 
   return (
     <div className="space-y-4">
@@ -338,7 +338,7 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
                     <span className="ml-2 text-[11px] text-white/40">{datos.length} partidas</span>
                   </th>
                   <th className="px-3 py-3 tabular-nums font-bold text-white text-right">{uf2(totObra.ppto_original)}</th>
-                  <th className="px-3 py-3 tabular-nums font-bold text-teal-light text-right">{uf2(totObra.redistribuido)}</th>
+                  <th className={`px-3 py-3 tabular-nums font-bold text-right ${totObra.redistribuido - totObra.ppto_original > 0 ? 'text-emerald-300' : totObra.redistribuido - totObra.ppto_original < 0 ? 'text-red-300' : 'text-white/80'}`}>{uf2(totObra.redistribuido)}</th>
                   <th className="px-3 py-3 tabular-nums font-bold text-violet-300 text-right">{uf2(totObra.ppto_horas_extra)}</th>
                   <th className="px-3 py-3 tabular-nums font-bold text-white text-right">{uf2(totObra.ppto_vigente)}</th>
                   <th className="px-3 py-3 tabular-nums font-bold text-white text-right">{uf2(totObra.proyeccion)}</th>
@@ -392,7 +392,7 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
                         <span className="ml-2 text-[11px] text-white/40">{ps.length}</span>
                       </th>
                       <th className="px-3 py-2.5 tabular-nums font-medium text-white/80 text-right">{uf2(tot.ppto_original)}</th>
-                      <th className="px-3 py-2.5 tabular-nums font-medium text-teal-light text-right">{uf2(tot.redistribuido)}</th>
+                      <th className={`px-3 py-2.5 tabular-nums font-medium text-right ${tot.redistribuido - tot.ppto_original > 0 ? 'text-emerald-300' : tot.redistribuido - tot.ppto_original < 0 ? 'text-red-300' : 'text-white/80'}`}>{uf2(tot.redistribuido)}</th>
                       <th className="px-3 py-2.5 tabular-nums font-medium text-violet-300 text-right">{uf2(tot.ppto_horas_extra)}</th>
                       <th className="px-3 py-2.5 tabular-nums font-bold text-white text-right">{uf2(tot.ppto_vigente)}</th>
                       <th className="px-3 py-2.5 tabular-nums font-medium text-white/80 text-right">{uf2(tot.proyeccion)}</th>
@@ -455,14 +455,14 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
                                 })()}
                                 <span className="ml-1.5 text-[10px] text-gray-400 font-normal">{cps.length}</span>
                                 {ccDiffRedist !== 0 && (
-                                  <span className={`ml-1.5 text-[10px] font-medium ${ccDiffRedist > 0 ? 'text-teal' : 'text-accent'}`}>
+                                  <span className={`ml-1.5 text-[10px] font-medium ${ccDiffRedist > 0 ? 'text-emerald-600' : 'text-accent'}`}>
                                     ({ccDiffRedist > 0 ? '+' : ''}{uf2(ccDiffRedist)})
                                   </span>
                                 )}
                               </td>
                               <td className="px-3 py-2 tabular-nums font-semibold text-navy text-right">{uf2(ccTot.ppto_original)}</td>
                               <td className="px-3 py-2 tabular-nums font-semibold text-right">
-                                <span className={ccDiffRedist !== 0 ? 'text-teal' : 'text-navy'}>{uf2(ccTot.redistribuido)}</span>
+                                <span className={ccDiffRedist > 0 ? 'text-emerald-600' : ccDiffRedist < 0 ? 'text-accent' : 'text-navy'}>{uf2(ccTot.redistribuido)}</span>
                               </td>
                               <td className="px-3 py-2 tabular-nums font-semibold text-violet-600 text-right">{uf2(ccTot.ppto_horas_extra)}</td>
                               <td className="px-3 py-2 tabular-nums font-bold text-navy text-right">{uf2(ccTot.ppto_vigente)}</td>
@@ -506,12 +506,25 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
                                   onDoubleClick={() => setDrilldown(p)}
                                   className={`hover:bg-teal-light/20 transition-colors cursor-pointer ${i % 2 === 1 ? 'bg-gray-50/40' : ''}`}>
                                   <td className="px-3 py-1.5 text-gray-300 font-mono text-[10px] pl-8">{p.codigo2}</td>
-                                  <td className="px-3 py-1.5 text-gray-600 text-xs truncate">{p.familia} — {p.partida}</td>
+                                  <td className="px-3 py-1.5 text-gray-600 text-xs truncate">
+                                    {p.familia} — {p.partida}
+                                    {(() => {
+                                      const diff = p.redistribuido - p.ppto_original
+                                      if (diff === 0) return null
+                                      return (
+                                        <span className={`ml-1.5 text-[10px] font-semibold ${diff > 0 ? 'text-emerald-600' : 'text-accent'}`}>
+                                          ({diff > 0 ? '+' : ''}{uf2(diff)})
+                                        </span>
+                                      )
+                                    })()}
+                                  </td>
                                   <td className="px-3 py-1.5 tabular-nums text-gray-500 text-xs text-right">{uf2(p.ppto_original)}</td>
                                   <td className="px-3 py-1.5 tabular-nums text-xs text-right">
-                                    <span className={p.redistribuido !== p.ppto_original ? 'text-teal font-medium' : 'text-gray-500'}>
-                                      {uf2(p.redistribuido)}
-                                    </span>
+                                    {(() => {
+                                      const diff = p.redistribuido - p.ppto_original
+                                      const cls = diff > 0 ? 'text-emerald-600 font-medium' : diff < 0 ? 'text-accent font-medium' : 'text-gray-500'
+                                      return <span className={cls}>{uf2(p.redistribuido)}</span>
+                                    })()}
                                   </td>
                                   <td className="px-3 py-1.5 tabular-nums text-xs text-right">
                                     <span className={p.ppto_horas_extra > 0 ? 'text-violet-600 font-medium' : 'text-gray-400'}>{uf2(p.ppto_horas_extra)}</span>
