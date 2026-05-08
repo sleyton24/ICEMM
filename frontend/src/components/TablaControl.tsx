@@ -344,15 +344,16 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
               <colgroup>
                 <col className="w-[55px]" />
                 <col />
-                <col className="w-[88px]" />
-                <col className="w-[88px]" />
-                <col className="w-[75px]" />
-                <col className="w-[88px]" />
-                <col className="w-[88px]" />
-                <col className="w-[88px]" />
-                <col className="w-[88px]" />
+                <col className="w-[85px]" />
                 <col className="w-[85px]" />
                 <col className="w-[70px]" />
+                <col className="w-[85px]" />
+                <col className="w-[85px]" />
+                <col className="w-[85px]" />
+                <col className="w-[85px]" />
+                <col className="w-[80px]" />
+                <col className="w-[60px]" />
+                <col className="w-[90px]" />
                 <col className="w-[34px]" />
                 <col className="w-[45px]" />
               </colgroup>
@@ -376,6 +377,17 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
                   <th className="px-3 py-3 tabular-nums font-bold text-right">
                     <span className={obraVarPct > 0 ? 'text-emerald-400' : obraVarPct < 0 ? 'text-red-400' : 'text-white/40'}>{obraVarPct >= 0 ? '+' : ''}{obraVarPct.toFixed(1)}%</span>
                   </th>
+                  <th className="px-3 py-3 tabular-nums font-bold text-right">
+                    {(() => {
+                      const totalAnt = datos.reduce((s, p) => {
+                        const a = proyeccionAnteriorPorCodigo[p.codigo]
+                        return a !== undefined ? s + (p.proyeccion - a) : s
+                      }, 0)
+                      const tieneAnt = datos.some(p => proyeccionAnteriorPorCodigo[p.codigo] !== undefined)
+                      if (!tieneAnt) return <span className="text-white/30">—</span>
+                      return <span className={totalAnt < 0 ? 'text-emerald-400' : totalAnt > 0 ? 'text-red-400' : 'text-white/40'}>{totalAnt >= 0 ? '+' : ''}{uf2(-totalAnt)}</span>
+                    })()}
+                  </th>
                   <th className="px-3 py-3 text-center"><VarArrow pct={obraVarPct} /></th>
                   <th className="px-3 py-3" />
                 </tr>
@@ -394,15 +406,16 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
                   <colgroup>
                     <col className="w-[55px]" />
                     <col />
-                    <col className="w-[88px]" />
-                    <col className="w-[88px]" />
-                    <col className="w-[75px]" />
-                    <col className="w-[88px]" />
-                    <col className="w-[88px]" />
-                    <col className="w-[88px]" />
-                    <col className="w-[88px]" />
+                    <col className="w-[85px]" />
                     <col className="w-[85px]" />
                     <col className="w-[70px]" />
+                    <col className="w-[85px]" />
+                    <col className="w-[85px]" />
+                    <col className="w-[85px]" />
+                    <col className="w-[85px]" />
+                    <col className="w-[80px]" />
+                    <col className="w-[60px]" />
+                    <col className="w-[90px]" />
                     <col className="w-[34px]" />
                     <col className="w-[45px]" />
                   </colgroup>
@@ -429,6 +442,17 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
                       </th>
                       <th className="px-3 py-2.5 tabular-nums font-bold text-right">
                         <span className={varPct > 0 ? 'text-emerald-400' : varPct < 0 ? 'text-red-400' : 'text-white/40'}>{varPct >= 0 ? '+' : ''}{varPct.toFixed(1)}%</span>
+                      </th>
+                      <th className="px-3 py-2.5 tabular-nums font-bold text-right">
+                        {(() => {
+                          const totalAnt = ps.reduce((s, p) => {
+                            const a = proyeccionAnteriorPorCodigo[p.codigo]
+                            return a !== undefined ? s + (p.proyeccion - a) : s
+                          }, 0)
+                          const tieneAnt = ps.some(p => proyeccionAnteriorPorCodigo[p.codigo] !== undefined)
+                          if (!tieneAnt) return <span className="text-white/30">—</span>
+                          return <span className={totalAnt < 0 ? 'text-emerald-400' : totalAnt > 0 ? 'text-red-400' : 'text-white/40'}>{totalAnt >= 0 ? '+' : ''}{uf2(-totalAnt)}</span>
+                        })()}
                       </th>
                       <th className="px-3 py-2.5 text-center"><VarArrow pct={varPct} /></th>
                       <th className="px-3 py-2.5" />
@@ -501,6 +525,18 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
                               <td className="px-3 py-2 tabular-nums font-semibold text-right">
                                 <span className={varColor(ccVarPct ?? 0)}>{pct1(ccVarPct)}</span>
                               </td>
+                              <td className="px-3 py-2 tabular-nums font-semibold text-right">
+                                {(() => {
+                                  const totalAnt = cps.reduce((s, p) => {
+                                    const a = proyeccionAnteriorPorCodigo[p.codigo]
+                                    return a !== undefined ? s + (p.proyeccion - a) : s
+                                  }, 0)
+                                  const tieneAnt = cps.some(p => proyeccionAnteriorPorCodigo[p.codigo] !== undefined)
+                                  if (!tieneAnt) return <span className="text-gray-300">—</span>
+                                  const cls = totalAnt < 0 ? 'text-emerald-600' : totalAnt > 0 ? 'text-accent' : 'text-gray-400'
+                                  return <span className={cls}>{totalAnt >= 0 ? '+' : ''}{uf2(-totalAnt)}</span>
+                                })()}
+                              </td>
                               <td className="px-3 py-2"><VarArrow pct={ccVarPct} /></td>
                               <td className="px-3 py-2 text-right">
                                 {(() => {
@@ -566,6 +602,15 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
                                   </td>
                                   <td className="px-3 py-1.5 tabular-nums text-xs text-right">
                                     <span className={`font-medium ${varColor(p.variacion_pct ?? 0)}`}>{pct1(p.variacion_pct)}</span>
+                                  </td>
+                                  <td className="px-3 py-1.5 tabular-nums text-xs text-right">
+                                    {(() => {
+                                      const a = proyeccionAnteriorPorCodigo[p.codigo]
+                                      if (a === undefined) return <span className="text-gray-300">—</span>
+                                      const v = p.proyeccion - a
+                                      const cls = v < 0 ? 'text-emerald-600 font-medium' : v > 0 ? 'text-accent font-medium' : 'text-gray-400'
+                                      return <span className={cls}>{v >= 0 ? '+' : ''}{uf2(-v)}</span>
+                                    })()}
                                   </td>
                                   <td className="px-3 py-1.5"><VarArrow pct={p.variacion_pct} /></td>
                                   <td className="px-3 py-1.5">
