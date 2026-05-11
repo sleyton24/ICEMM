@@ -11,6 +11,7 @@ import AdminPlanCuentasPage from './features/plan-cuentas/AdminPlanCuentasPage'
 import CutoffMesFilter from './features/projects/CutoffMesFilter'
 import AuthGate from './features/auth/AuthGate'
 import InformeSelector from './features/informes/InformeSelector'
+import { useCurrentUser } from './features/auth/useCurrentUser'
 
 type Tab = 'tabla' | 'familias' | 'top5' | 'directorio'
 
@@ -18,6 +19,7 @@ export default function App() {
   const [tab, setTab] = useState<Tab>('tabla')
   const [showAdmin, setShowAdmin] = useState(false)
   const data = useDashboardData()
+  const { user, esAdmin } = useCurrentUser()
 
   if (showAdmin) {
     return <AuthGate><AdminPlanCuentasPage onBack={() => setShowAdmin(false)} /></AuthGate>
@@ -40,13 +42,25 @@ export default function App() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <InformeSelector />
+            <InformeSelector esAdmin={esAdmin} />
             <CutoffMesFilter />
             <ProjectSwitcher />
             <div className="text-right">
               <p className="text-xs text-gray-400">Fecha de corte</p>
               <p className="text-sm font-semibold text-navy tabular-nums">{data.fechaCorte}</p>
             </div>
+            {user && (
+              <div className="flex items-center gap-2 border-l border-gray-200 pl-3">
+                <div className="text-right">
+                  <p className="text-[11px] text-gray-400">{user.nombre}</p>
+                  <span className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${
+                    user.rol === 'admin' ? 'bg-navy text-white' :
+                    user.rol === 'editor' ? 'bg-teal-light text-navy' :
+                    'bg-gray-100 text-gray-500'
+                  }`}>{user.rol}</span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </header>
@@ -104,12 +118,14 @@ export default function App() {
           <p className="text-[11px] text-gray-300 tracking-wide">
             ICEMM · {data.projectName} · Informe de Resultado de Obra · Corte {data.fechaCorte}
           </p>
-          <button
-            onClick={() => setShowAdmin(true)}
-            className="text-[10px] text-gray-300 hover:text-teal-muted transition-colors mt-1"
-          >
-            Plan de Cuentas
-          </button>
+          {esAdmin && (
+            <button
+              onClick={() => setShowAdmin(true)}
+              className="text-[10px] text-gray-300 hover:text-teal-muted transition-colors mt-1"
+            >
+              Plan de Cuentas
+            </button>
+          )}
         </footer>
       </div>
     </div>

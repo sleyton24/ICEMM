@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import { z } from 'zod'
 import { prisma } from '../db.js'
+import { requireRole } from '../middleware/auth.js'
 import informesRouter from './informes.js'
 
 const router = Router()
@@ -21,7 +22,7 @@ router.get('/', async (_req, res) => {
   res.json(projects.map(toProyectoDTO))
 })
 
-router.post('/', async (req, res) => {
+router.post('/', requireRole('admin', 'editor'), async (req, res) => {
   const parsed = z.object({ nombre: z.string().min(1) }).safeParse(req.body)
   if (!parsed.success) return res.status(400).json({ error: 'nombre requerido' })
   const project = await prisma.project.create({
@@ -40,7 +41,7 @@ router.get('/:id', async (req, res) => {
   res.json(toProyectoDTO(project))
 })
 
-router.patch('/:id', async (req, res) => {
+router.patch('/:id', requireRole('admin', 'editor'), async (req, res) => {
   const parsed = z.object({
     nombre: z.string().optional(),
     cutoffMesReal: z.string().nullable().optional(),
@@ -56,7 +57,7 @@ router.patch('/:id', async (req, res) => {
   res.json(toProyectoDTO(project))
 })
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requireRole('admin'), async (req, res) => {
   await prisma.project.delete({ where: { id: req.params.id } })
   res.status(204).end()
 })
@@ -70,7 +71,7 @@ const uploadSlotSchema = z.object({
   totalGeneral: z.number(),
 })
 
-router.post('/:id/slots/:slot', async (req, res) => {
+router.post('/:id/slots/:slot', requireRole('admin', 'editor'), async (req, res) => {
   const slot = req.params.slot as ItemizadoSlot
   if (!ITEMIZADO_SLOTS.includes(slot)) return res.status(400).json({ error: 'slot inválido' })
 
@@ -99,7 +100,7 @@ router.post('/:id/slots/:slot', async (req, res) => {
   res.json(toProyectoDTO(updated!))
 })
 
-router.delete('/:id/slots/:slot', async (req, res) => {
+router.delete('/:id/slots/:slot', requireRole('admin', 'editor'), async (req, res) => {
   const projectId = req.params.id
   const slot = req.params.slot
   if (slot === 'gasto_real_erp') {
@@ -128,7 +129,7 @@ const uploadERPSchema = z.object({
   transaccionesPorCcosto: z.record(z.any()),
 })
 
-router.post('/:id/erp', async (req, res) => {
+router.post('/:id/erp', requireRole('admin', 'editor'), async (req, res) => {
   const projectId = req.params.id
   const parsed = uploadERPSchema.safeParse(req.body)
   if (!parsed.success) return res.status(400).json({ error: 'Payload inválido', issues: parsed.error.issues })

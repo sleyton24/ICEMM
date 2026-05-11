@@ -1,9 +1,12 @@
 import { useState } from 'react'
 import { ChevronDown, Plus, Trash2, FolderOpen, Upload } from 'lucide-react'
 import { useProjectsStore } from './ProjectsStore'
+import { useCurrentUser } from '../auth/useCurrentUser'
 import UploadPanel from '../data-upload/UploadPanel'
 
 export default function ProjectSwitcher() {
+  const { user, esAdmin, puedeEditar } = useCurrentUser()
+  void user
   const { projects, activeProjectId, createProject, deleteProject, setActiveProject, activeProject: getActive } = useProjectsStore()
   const active = getActive()
   const [open, setOpen] = useState(false)
@@ -62,7 +65,7 @@ export default function ProjectSwitcher() {
                     </p>
                   </div>
                   <div className="flex items-center gap-1 ml-2 flex-shrink-0">
-                    {p.id === activeProjectId && (
+                    {p.id === activeProjectId && puedeEditar && (
                       <button
                         onClick={(e) => { e.stopPropagation(); setShowUpload(true); setOpen(false) }}
                         className="p-1 text-teal-muted hover:text-navy transition-colors"
@@ -71,19 +74,22 @@ export default function ProjectSwitcher() {
                         <Upload className="h-3.5 w-3.5" />
                       </button>
                     )}
-                    <button
-                      onClick={(e) => { e.stopPropagation(); if (confirm(`¿Eliminar "${p.nombre}"?`)) deleteProject(p.id) }}
-                      className="p-1 text-gray-300 hover:text-accent transition-colors"
-                      title="Eliminar proyecto"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
+                    {esAdmin && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); if (confirm(`¿Eliminar "${p.nombre}"?`)) deleteProject(p.id) }}
+                        className="p-1 text-gray-300 hover:text-accent transition-colors"
+                        title="Eliminar proyecto"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}
             </div>
 
-            {/* Create new */}
+            {/* Create new — solo admin/editor */}
+            {puedeEditar && (
             <div className="border-t border-gray-100 p-3">
               {showNew ? (
                 <div className="flex gap-2">
@@ -108,6 +114,7 @@ export default function ProjectSwitcher() {
                 </button>
               )}
             </div>
+            )}
           </div>
         </>
       )}

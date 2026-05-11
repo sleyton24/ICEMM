@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Lock, AlertTriangle } from 'lucide-react'
 import { api, setToken } from '../../api/client'
+import { useCurrentUserStore } from './useCurrentUser'
 
 type AuthState =
   | { status: 'loading' }
@@ -25,13 +26,21 @@ interface AuthUser {
 export default function AuthGate({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AuthState>({ status: 'loading' })
 
+  const setCurrentUser = useCurrentUserStore(s => s.setUser)
+  const clearCurrentUser = useCurrentUserStore(s => s.clear)
+
   const checkAuth = async () => {
     try {
       const me = await api.get<{ beta: boolean; user: AuthUser | null }>('/auth/me')
-      if (me.beta) setState({ status: 'beta' })
-      else if (me.user) setState({ status: 'authed', user: me.user })
-      else {
+      if (me.beta && me.user) {
+        setCurrentUser(me.user, true)
+        setState({ status: 'beta' })
+      } else if (me.user) {
+        setCurrentUser(me.user, false)
+        setState({ status: 'authed', user: me.user })
+      } else {
         setToken(null)
+        clearCurrentUser()
         setState({ status: 'login' })
       }
     } catch (e: any) {

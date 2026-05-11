@@ -40,7 +40,13 @@ router.post('/login', loginLimiter, async (req, res) => {
 })
 
 router.get('/me', (req, res) => {
-  if (req.isBeta) return res.json({ beta: true })
+  if (req.isBeta) {
+    // En BETA, no hay login pero asumimos rol 'admin' para que el frontend habilite todo.
+    return res.json({
+      beta: true,
+      user: { id: 'beta', email: 'beta@icemm', nombre: 'Beta', rol: 'admin' },
+    })
+  }
   res.json({ beta: false, user: req.user ?? null })
 })
 
