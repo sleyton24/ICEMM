@@ -10,6 +10,7 @@ import ProjectSwitcher from './features/projects/ProjectSwitcher'
 import AdminPlanCuentasPage from './features/plan-cuentas/AdminPlanCuentasPage'
 import CutoffMesFilter from './features/projects/CutoffMesFilter'
 import AuthGate from './features/auth/AuthGate'
+import AdminUsersPage from './features/auth/AdminUsersPage'
 import InformeSelector from './features/informes/InformeSelector'
 import { useCurrentUser } from './features/auth/useCurrentUser'
 
@@ -18,11 +19,15 @@ type Tab = 'tabla' | 'familias' | 'top5' | 'directorio'
 export default function App() {
   const [tab, setTab] = useState<Tab>('tabla')
   const [showAdmin, setShowAdmin] = useState(false)
+  const [showUsersAdmin, setShowUsersAdmin] = useState(false)
   const data = useDashboardData()
   const { user, esAdmin } = useCurrentUser()
 
   if (showAdmin) {
     return <AuthGate><AdminPlanCuentasPage onBack={() => setShowAdmin(false)} /></AuthGate>
+  }
+  if (showUsersAdmin) {
+    return <AuthGate><AdminUsersPage onBack={() => setShowUsersAdmin(false)} /></AuthGate>
   }
 
   return (
@@ -59,6 +64,17 @@ export default function App() {
                     'bg-gray-100 text-gray-500'
                   }`}>{user.rol}</span>
                 </div>
+                <button
+                  onClick={() => {
+                    localStorage.removeItem('icemm.mock.user')
+                    localStorage.removeItem('icemm.auth.token')
+                    window.location.reload()
+                  }}
+                  className="text-[10px] text-gray-400 hover:text-accent transition-colors"
+                  title="Cerrar sesión"
+                >
+                  Salir
+                </button>
               </div>
             )}
           </div>
@@ -119,12 +135,21 @@ export default function App() {
             ICEMM · {data.projectName} · Informe de Resultado de Obra · Corte {data.fechaCorte}
           </p>
           {esAdmin && (
-            <button
-              onClick={() => setShowAdmin(true)}
-              className="text-[10px] text-gray-300 hover:text-teal-muted transition-colors mt-1"
-            >
-              Plan de Cuentas
-            </button>
+            <div className="flex justify-center gap-3 mt-1">
+              <button
+                onClick={() => setShowAdmin(true)}
+                className="text-[10px] text-gray-300 hover:text-teal-muted transition-colors"
+              >
+                Plan de Cuentas
+              </button>
+              <span className="text-[10px] text-gray-200">·</span>
+              <button
+                onClick={() => setShowUsersAdmin(true)}
+                className="text-[10px] text-gray-300 hover:text-teal-muted transition-colors"
+              >
+                Usuarios
+              </button>
+            </div>
           )}
         </footer>
       </div>

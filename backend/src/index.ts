@@ -9,6 +9,7 @@ import { authMiddleware, softAuthMiddleware } from './middleware/auth.js'
 import authRouter from './routes/auth.js'
 import projectsRouter from './routes/projects.js'
 import planCuentasRouter from './routes/planCuentas.js'
+import usersRouter from './routes/users.js'
 
 const app = express()
 const PORT = Number(process.env.PORT ?? 3001)
@@ -51,6 +52,7 @@ app.use('/api/auth', softAuthMiddleware, authRouter)
 // Rutas protegidas
 app.use('/api/projects', authMiddleware, projectsRouter)
 app.use('/api/plan-cuentas', authMiddleware, planCuentasRouter)
+app.use('/api/users', authMiddleware, usersRouter)
 
 // 404 + error handler
 app.use((_req, res) => res.status(404).json({ error: 'Not found' }))

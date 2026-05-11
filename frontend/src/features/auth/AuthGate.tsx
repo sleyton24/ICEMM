@@ -17,11 +17,27 @@ interface AuthUser {
   rol: 'admin' | 'editor' | 'viewer'
 }
 
+/** Cuentas de prueba locales (solo aplica con VITE_FORCE_LOGIN_UI=true) */
+const MOCK_USERS: Record<string, AuthUser & { password: string }> = {
+  admin: {
+    id: 'mock-admin', email: 'admin', password: 'admin',
+    nombre: 'Admin', rol: 'admin',
+  },
+  editor: {
+    id: 'mock-editor', email: 'editor', password: 'editor',
+    nombre: 'Editor', rol: 'editor',
+  },
+  viewer: {
+    id: 'mock-viewer', email: 'viewer', password: 'viewer',
+    nombre: 'Viewer', rol: 'viewer',
+  },
+}
+
+const FORCE_LOGIN_UI = (import.meta.env.VITE_FORCE_LOGIN_UI as string | undefined) === 'true'
+
 /**
- * Envoltorio que verifica el modo del backend al iniciar:
- *   - Si BETA → renderiza children directo
- *   - Si requiere login y hay token válido → renderiza children
- *   - Si requiere login y no hay token → muestra LoginForm
+ * Envoltorio que verifica el modo del backend al iniciar.
+ * Si VITE_FORCE_LOGIN_UI=true → siempre muestra LoginForm para previsualizar el flujo.
  */
 export default function AuthGate({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AuthState>({ status: 'loading' })
@@ -30,10 +46,25 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
   const clearCurrentUser = useCurrentUserStore(s => s.clear)
 
   const checkAuth = async () => {
+    // Modo preview del login UI: ignora BETA, muestra login con cuentas mock
+    if (FORCE_LOGIN_UI) {
+      const stored = localStorage.getItem('icemm.mock.user')
+      if (stored) {
+        const u = JSON.parse(stored) as AuthUser
+        setCurrentUser(u, false)
+        setState({ status: 'authed', user: u })
+      } else {
+        clearCurrentUser()
+        setState({ status: 'login' })
+      }
+      return
+    }
+
     try {
       const me = await api.get<{ beta: boolean; user: AuthUser | null }>('/auth/me')
-      if (me.beta && me.user) {
-        setCurrentUser(me.user, true)
+      if (me.beta) {
+        const betaUser = me.user ?? { id: 'beta', email: 'beta@icemm', nombre: 'Beta', rol: 'admin' as const }
+        setCurrentUser(betaUser, true)
         setState({ status: 'beta' })
       } else if (me.user) {
         setCurrentUser(me.user, false)
@@ -94,9 +125,20 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
     setError(null)
     setLoading(true)
     try {
-      const { token } = await api.post<{ token: string }>('/auth/login', { email, password })
-      setToken(token)
-      onSuccess()
+      if (FORCE_LOGIN_UI) {
+        // Login mock — no toca backend
+        const mock = MOCK_USERS[email]
+        if (!mock || mock.password !== password) {
+          throw new Error('Credenciales inválidas (modo demo)')
+        }
+        const { password: _drop, ...userOnly } = mock
+        localStorage.setItem('icemm.mock.user', JSON.stringify(userOnly))
+        onSuccess()
+      } else {
+        const { token } = await api.post<{ token: string }>('/auth/login', { email, password })
+        setToken(token)
+        onSuccess()
+      }
     } catch (e: any) {
       setError(e.message ?? 'Credenciales inválidas')
     } finally {
@@ -125,9 +167,9 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
 
         <div className="space-y-3">
           <div>
-            <label className="text-[11px] font-medium text-gray-500 uppercase tracking-wider block mb-1">Email</label>
+            <label className="text-[11px] font-medium text-gray-500 uppercase tracking-wider block mb-1">{FORCE_LOGIN_UI ? 'Usuario' : 'Email'}</label>
             <input
-              type="email"
+              type={FORCE_LOGIN_UI ? 'text' : 'email'}
               required
               autoFocus
               value={email}
@@ -154,6 +196,15 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
         >
           {loading ? 'Ingresando...' : 'Ingresar'}
         </button>
+
+        {FORCE_LOGIN_UI && (
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 space-y-1 text-[11px] text-amber-700">
+            <p className="font-semibold uppercase tracking-wider text-[10px]">Modo Demo — cuentas de prueba</p>
+            <p>· <code className="bg-white px-1 rounded">admin</code> / admin</p>
+            <p>· <code className="bg-white px-1 rounded">editor</code> / editor</p>
+            <p>· <code className="bg-white px-1 rounded">viewer</code> / viewer</p>
+          </div>
+        )}
       </form>
     </div>
   )
