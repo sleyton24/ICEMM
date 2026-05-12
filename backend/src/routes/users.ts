@@ -75,6 +75,31 @@ router.patch('/:id', async (req, res) => {
   }
 })
 
+/** Listar proyectos asignados a un usuario */
+router.get('/:id/projects', async (req, res) => {
+  const links = await prisma.userProject.findMany({
+    where: { userId: req.params.id },
+    select: { projectId: true },
+  })
+  res.json(links.map(l => l.projectId))
+})
+
+/** Reemplazar la lista de proyectos asignados a un usuario */
+router.put('/:id/projects', async (req, res) => {
+  const parsed = z.object({ projectIds: z.array(z.string()) }).safeParse(req.body)
+  if (!parsed.success) return res.status(400).json({ error: 'Datos inválidos' })
+
+  // Reemplazo total: borrar y recrear
+  await prisma.userProject.deleteMany({ where: { userId: req.params.id } })
+  if (parsed.data.projectIds.length > 0) {
+    await prisma.userProject.createMany({
+      data: parsed.data.projectIds.map(projectId => ({ userId: req.params.id, projectId })),
+      skipDuplicates: true,
+    })
+  }
+  res.status(204).end()
+})
+
 router.delete('/:id', async (req, res) => {
   // Evitar borrar el último admin activo
   const user = await prisma.user.findUnique({ where: { id: req.params.id } })

@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react'
-import { Users, UserPlus, Trash2, X, AlertTriangle, Check, Pencil } from 'lucide-react'
+import { Users, UserPlus, Trash2, X, AlertTriangle, Check, Pencil, FolderOpen } from 'lucide-react'
 import { api } from '../../api/client'
+
+interface ProjectMini {
+  id: string
+  nombre: string
+}
 
 interface UserRow {
   id: string
@@ -191,17 +196,49 @@ function UserFormModal({ mode, user, onClose, onSaved }: FormProps) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // Proyectos accesibles (no aplica a admin — admin ve todos por definición)
+  const [allProjects, setAllProjects] = useState<ProjectMini[]>([])
+  const [assignedIds, setAssignedIds] = useState<Set<string>>(new Set())
+
+  useEffect(() => {
+    // Cargar lista de todos los proyectos
+    api.get<ProjectMini[]>('/projects').then(ps => setAllProjects(ps.map(p => ({ id: p.id, nombre: p.nombre }))))
+    // Si editamos un user existente, traer sus asignaciones
+    if (mode === 'edit' && user) {
+      api.get<string[]>(`/users/${user.id}/projects`).then(ids => setAssignedIds(new Set(ids)))
+    }
+  }, [mode, user])
+
+  const toggleProject = (id: string) => {
+    setAssignedIds(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
     setSaving(true)
     try {
+      let userId: string
       if (mode === 'create') {
-        await api.post('/users', { email, nombre, password, rol, activo })
+        const created = await api.post<{ id: string }>('/users', { email, nombre, password, rol, activo })
+        userId = created.id
       } else {
         const payload: Record<string, unknown> = { nombre, rol, activo }
         if (password) payload.password = password
         await api.patch(`/users/${user!.id}`, payload)
+        userId = user!.id
+      }
+      // Guardar asignaciones de proyectos (irrelevante si rol=admin pero se guarda igual sin efecto)
+      if (rol !== 'admin') {
+        await api.put(`/users/${userId}/projects`, { projectIds: Array.from(assignedIds) })
+      } else {
+        // Limpiar asignaciones explícitas: admin ve todos
+        await api.put(`/users/${userId}/projects`, { projectIds: [] })
       }
       onSaved()
     } catch (e: any) {
@@ -291,6 +328,41 @@ function UserFormModal({ mode, user, onClose, onSaved }: FormProps) {
             />
             Usuario activo
           </label>
+
+          {/* Proyectos accesibles — solo visible si rol != admin */}
+          {rol !== 'admin' && (
+            <div className="pt-3 border-t border-gray-100">
+              <label className="text-[11px] font-medium text-gray-500 uppercase tracking-wider flex items-center gap-1.5 mb-2">
+                <FolderOpen className="h-3.5 w-3.5" />
+                Proyectos accesibles
+              </label>
+              {allProjects.length === 0 ? (
+                <p className="text-[11px] text-gray-400 italic">No hay proyectos para asignar.</p>
+              ) : (
+                <div className="max-h-40 overflow-y-auto border border-gray-200 rounded-lg p-2 space-y-1 bg-gray-50/50">
+                  {allProjects.map(p => (
+                    <label key={p.id} className="flex items-center gap-2 px-2 py-1 text-sm text-gray-700 hover:bg-white cursor-pointer rounded">
+                      <input
+                        type="checkbox"
+                        checked={assignedIds.has(p.id)}
+                        onChange={() => toggleProject(p.id)}
+                        className="rounded border-gray-300"
+                      />
+                      <span className="truncate">{p.nombre}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
+              <p className="text-[10px] text-gray-400 mt-1">
+                Si no asignás ninguno, el usuario no podrá ver ningún proyecto.
+              </p>
+            </div>
+          )}
+          {rol === 'admin' && (
+            <p className="text-[11px] text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
+              <strong>Admin</strong> ve todos los proyectos automáticamente.
+            </p>
+          )}
         </div>
 
         <div className="flex justify-end gap-2 pt-2 border-t border-gray-100">

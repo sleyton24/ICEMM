@@ -14,8 +14,14 @@ type ItemizadoSlot = typeof ITEMIZADO_SLOTS[number]
 
 // ── List / create / read / update / delete ───────────────────────────────────
 
-router.get('/', async (_req, res) => {
+router.get('/', async (req, res) => {
+  // Admin (o beta) ve todos. Editor/viewer solo los asignados.
+  let where: any = {}
+  if (!req.isBeta && req.user && req.user.rol !== 'admin') {
+    where = { usuarios: { some: { userId: req.user.id } } }
+  }
   const projects = await prisma.project.findMany({
+    where,
     orderBy: { fechaActualizacion: 'desc' },
     include: { archivos: true, erp: true },
   })
@@ -29,6 +35,12 @@ router.post('/', requireRole('admin', 'editor'), async (req, res) => {
     data: { nombre: parsed.data.nombre },
     include: { archivos: true, erp: true },
   })
+  // Si el creador es editor (no admin), auto-asignárselo para que pueda verlo
+  if (!req.isBeta && req.user && req.user.rol === 'editor') {
+    await prisma.userProject.create({
+      data: { userId: req.user.id, projectId: project.id },
+    })
+  }
   res.status(201).json(toProyectoDTO(project))
 })
 
