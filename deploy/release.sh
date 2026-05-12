@@ -31,6 +31,13 @@ cd $APP_DIR/frontend
 npm install --legacy-peer-deps
 npm run build
 
+log "Sync nginx config (si cambió)..."
+if ! diff -q $APP_DIR/deploy/nginx-icemm.conf /etc/nginx/sites-available/icemm > /dev/null 2>&1; then
+  cp $APP_DIR/deploy/nginx-icemm.conf /etc/nginx/sites-available/icemm
+  nginx -t && systemctl reload nginx
+  log "  Nginx recargado"
+fi
+
 log "Reiniciando PM2..."
 pm2 restart icemm-api
 

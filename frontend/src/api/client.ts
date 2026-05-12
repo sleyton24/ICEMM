@@ -32,12 +32,18 @@ export class ApiError extends Error {
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
+    'Cache-Control': 'no-cache',
+    'Pragma': 'no-cache',
     ...((init.headers as Record<string, string>) ?? {}),
   }
   const token = getToken()
   if (token) headers.Authorization = `Bearer ${token}`
 
-  const res = await fetch(`${API_URL}${path}`, { ...init, headers })
+  const res = await fetch(`${API_URL}${path}`, {
+    cache: 'no-store',
+    ...init,
+    headers,
+  })
 
   if (res.status === 204) return undefined as T
 
