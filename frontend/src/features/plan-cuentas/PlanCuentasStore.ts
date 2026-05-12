@@ -74,5 +74,4 @@ export const usePlanCuentasStore = create<PlanCuentasState>((set, get) => ({
   },
 }))
 
-// Hidratar al cargar
-usePlanCuentasStore.getState().fetch()
+// NOTA: la hidratación inicial se dispara desde AuthGate cuando hay auth válida.

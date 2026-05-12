@@ -132,5 +132,5 @@ export const useProjectsStore = create<ProjectsState>((set, get) => ({
   },
 }))
 
-// Hidratar al cargar
-useProjectsStore.getState().fetchProjects()
+// NOTA: la hidratación inicial se dispara desde AuthGate cuando hay auth válida.
+// No llamar fetchProjects aquí — el módulo se ejecuta antes del login y el 401 deja la store vacía.

@@ -7,7 +7,7 @@ import App from './App.tsx'
 // Cada release con cambios estructurales debe BUMPear este número.
 // Si el browser tiene una versión distinta guardada, limpia todo el storage
 // para evitar que datos viejos rompan la app (tokens, mock users, IDs, etc.)
-const SCHEMA_VERSION = '2026-05-08-1'
+const SCHEMA_VERSION = '2026-05-08-2'
 const STORED = localStorage.getItem('icemm.schemaVersion')
 if (STORED !== SCHEMA_VERSION) {
   // Conservar el token de auth si existe (para no obligar a re-loguear sin necesidad)

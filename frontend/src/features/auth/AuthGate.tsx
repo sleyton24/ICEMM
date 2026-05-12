@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { Lock, AlertTriangle } from 'lucide-react'
 import { api, setToken } from '../../api/client'
 import { useCurrentUserStore } from './useCurrentUser'
+import { useProjectsStore } from '../projects/ProjectsStore'
+import { usePlanCuentasStore } from '../plan-cuentas/PlanCuentasStore'
 
 type AuthState =
   | { status: 'loading' }
@@ -53,6 +55,7 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
         const u = JSON.parse(stored) as AuthUser
         setCurrentUser(u, false)
         setState({ status: 'authed', user: u })
+        hydrateData()
       } else {
         clearCurrentUser()
         setState({ status: 'login' })
@@ -66,9 +69,11 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
         const betaUser = me.user ?? { id: 'beta', email: 'beta@icemm', nombre: 'Beta', rol: 'admin' as const }
         setCurrentUser(betaUser, true)
         setState({ status: 'beta' })
+        hydrateData()
       } else if (me.user) {
         setCurrentUser(me.user, false)
         setState({ status: 'authed', user: me.user })
+        hydrateData()
       } else {
         setToken(null)
         clearCurrentUser()
@@ -77,6 +82,12 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
     } catch (e: any) {
       setState({ status: 'error', message: e.message ?? 'Error conectando al servidor' })
     }
+  }
+
+  /** Carga proyectos + plan de cuentas después de confirmar que hay sesión válida */
+  const hydrateData = () => {
+    useProjectsStore.getState().fetchProjects()
+    usePlanCuentasStore.getState().fetch()
   }
 
   useEffect(() => { checkAuth() }, [])
