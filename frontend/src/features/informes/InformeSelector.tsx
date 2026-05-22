@@ -10,7 +10,7 @@ import { useInformesStore } from './InformesStore'
  * - Cuando hay informes aprobados: dropdown con cada uno (read-only)
  * - Botón "Aprobar como Informe N°X" para guardar snapshot del estado actual
  */
-export default function InformeSelector({ esAdmin = true }: { esAdmin?: boolean }) {
+export default function InformeSelector({ esAdmin = true, esDirector = false }: { esAdmin?: boolean; esDirector?: boolean }) {
   const activeProjectId = useProjectsStore(s => s.activeProjectId)
   const { porProyecto, viewPorProyecto, fetchInformes, fetchSnapshot, aprobar, eliminar, setView } = useInformesStore()
   const [open, setOpen] = useState(false)
@@ -21,6 +21,18 @@ export default function InformeSelector({ esAdmin = true }: { esAdmin?: boolean 
     if (!activeProjectId) return
     fetchInformes(activeProjectId).catch(() => { /* ignore */ })
   }, [activeProjectId, fetchInformes])
+
+  // Director: forzar la vista al último informe aprobado automáticamente
+  useEffect(() => {
+    if (!esDirector || !activeProjectId) return
+    const informes = porProyecto[activeProjectId] ?? []
+    const current = viewPorProyecto[activeProjectId]
+    if (informes.length > 0 && (!current || current.tipo === 'borrador')) {
+      fetchSnapshot(activeProjectId, informes[0].id).then(snap => {
+        setView(activeProjectId, { tipo: 'aprobado', informe: snap })
+      }).catch(() => { /* ignore */ })
+    }
+  }, [esDirector, activeProjectId, porProyecto, viewPorProyecto, fetchSnapshot, setView])
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -97,19 +109,21 @@ export default function InformeSelector({ esAdmin = true }: { esAdmin?: boolean 
 
       {open && (
         <div className="absolute top-full mt-1 right-0 w-72 bg-white rounded-xl shadow-lg border border-gray-100 z-50 overflow-hidden">
-          {/* Borrador */}
-          <button
-            onClick={handleSelectBorrador}
-            className={`w-full flex items-start gap-2 px-4 py-3 text-left border-b border-gray-100 hover:bg-surface
-              ${view.tipo === 'borrador' ? 'bg-teal-light/30' : ''}`}
-          >
-            <FileText className="h-4 w-4 text-teal-muted flex-shrink-0 mt-0.5" />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-navy">Borrador (editable)</p>
-              <p className="text-[11px] text-gray-400">Estado actual del proyecto</p>
-            </div>
-            {view.tipo === 'borrador' && <Check className="h-4 w-4 text-teal-muted flex-shrink-0" />}
-          </button>
+          {/* Borrador — oculto para director */}
+          {!esDirector && (
+            <button
+              onClick={handleSelectBorrador}
+              className={`w-full flex items-start gap-2 px-4 py-3 text-left border-b border-gray-100 hover:bg-surface
+                ${view.tipo === 'borrador' ? 'bg-teal-light/30' : ''}`}
+            >
+              <FileText className="h-4 w-4 text-teal-muted flex-shrink-0 mt-0.5" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-navy">Borrador (editable)</p>
+                <p className="text-[11px] text-gray-400">Estado actual del proyecto</p>
+              </div>
+              {view.tipo === 'borrador' && <Check className="h-4 w-4 text-teal-muted flex-shrink-0" />}
+            </button>
+          )}
 
           {/* Informes aprobados */}
           {informes.length === 0 ? (

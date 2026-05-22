@@ -1,6 +1,8 @@
 import { useMemo } from 'react'
+import { FileText, Lock } from 'lucide-react'
 import { useProjectsStore } from '../features/projects/ProjectsStore'
 import { usePlanCuentasStore } from '../features/plan-cuentas/PlanCuentasStore'
+import { useInformesStore } from '../features/informes/InformesStore'
 import { mergeProyecto, type PartidaMerged } from '../features/data-upload/parser/mergeProyecto'
 
 const uf2 = (n: number) => n.toLocaleString('es-CL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -36,6 +38,7 @@ export default function DirectorioReport() {
   const proyectos = useProjectsStore(s => s.projects)
   const activeProjectId = useProjectsStore(s => s.activeProjectId)
   const plan = usePlanCuentasStore(s => s.plan)
+  const view = useInformesStore(s => activeProjectId ? s.viewPorProyecto[activeProjectId] : null)
 
   const datosProyectos = useMemo(() => {
     return proyectos.map(p => ({
@@ -63,6 +66,23 @@ export default function DirectorioReport() {
 
   return (
     <div className="space-y-8">
+      {/* Banner del informe activo */}
+      <div className={`flex items-center gap-2 rounded-lg px-4 py-2 text-xs border ${
+        view?.tipo === 'aprobado'
+          ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+          : 'bg-amber-50 border-amber-200 text-amber-700'
+      }`}>
+        {view?.tipo === 'aprobado' ? <Lock className="h-3.5 w-3.5" /> : <FileText className="h-3.5 w-3.5" />}
+        <span className="font-bold">
+          {view?.tipo === 'aprobado' ? `Informe N°${view.informe.numero} (aprobado)` : 'Borrador (estado actual)'}
+        </span>
+        <span className="text-xs opacity-75">
+          {view?.tipo === 'aprobado'
+            ? '— modo solo lectura'
+            : '— refleja los archivos cargados ahora'}
+        </span>
+      </div>
+
       {/* ════════════════════════════════════════════════════════════════
           TABLA 1: VISIÓN PLAN DE CUENTAS DE OBRA
           ════════════════════════════════════════════════════════════════ */}

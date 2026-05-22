@@ -11,7 +11,7 @@ interface UserRow {
   id: string
   email: string
   nombre: string
-  rol: 'admin' | 'editor' | 'viewer'
+  rol: 'admin' | 'editor' | 'viewer' | 'director'
   activo: boolean
   fechaCreacion: string
 }
@@ -118,6 +118,7 @@ export default function AdminUsersPage({ onBack }: Props) {
                     <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
                       u.rol === 'admin' ? 'bg-navy text-white' :
                       u.rol === 'editor' ? 'bg-teal-light text-navy' :
+                      u.rol === 'director' ? 'bg-emerald-100 text-emerald-700' :
                       'bg-gray-100 text-gray-500'
                     }`}>{u.rol}</span>
                   </td>
@@ -191,7 +192,7 @@ function UserFormModal({ mode, user, onClose, onSaved }: FormProps) {
   const [email, setEmail] = useState(user?.email ?? '')
   const [nombre, setNombre] = useState(user?.nombre ?? '')
   const [password, setPassword] = useState('')
-  const [rol, setRol] = useState<'admin' | 'editor' | 'viewer'>(user?.rol ?? 'viewer')
+  const [rol, setRol] = useState<'admin' | 'editor' | 'viewer' | 'director'>(user?.rol ?? 'viewer')
   const [activo, setActivo] = useState(user?.activo ?? true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -317,6 +318,7 @@ function UserFormModal({ mode, user, onClose, onSaved }: FormProps) {
               <option value="admin">Admin — control total</option>
               <option value="editor">Editor — carga archivos y edita</option>
               <option value="viewer">Viewer — solo lectura</option>
+              <option value="director">Director — solo informes aprobados</option>
             </select>
           </div>
           <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">

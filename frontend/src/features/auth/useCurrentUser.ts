@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { api } from '../../api/client'
 
-export type Rol = 'admin' | 'editor' | 'viewer'
+export type Rol = 'admin' | 'editor' | 'viewer' | 'director'
 
 export interface CurrentUser {
   id: string
@@ -23,6 +23,7 @@ interface UserState {
   esAdmin: () => boolean
   puedeEditar: () => boolean
   esLector: () => boolean
+  esDirector: () => boolean
 }
 
 export const useCurrentUserStore = create<UserState>((set, get) => ({
@@ -48,6 +49,7 @@ export const useCurrentUserStore = create<UserState>((set, get) => ({
     return r === 'admin' || r === 'editor'
   },
   esLector: () => get().user?.rol === 'viewer',
+  esDirector: () => get().user?.rol === 'director',
 }))
 
 // Hook conveniente con métodos memoizados
@@ -60,5 +62,6 @@ export function useCurrentUser() {
     esAdmin: state.user?.rol === 'admin',
     puedeEditar: state.user?.rol === 'admin' || state.user?.rol === 'editor',
     esLector: state.user?.rol === 'viewer',
+    esDirector: state.user?.rol === 'director',
   }
 }

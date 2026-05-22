@@ -14,7 +14,7 @@ export interface AuthUser {
   id: string
   email: string
   nombre: string
-  rol: 'admin' | 'editor' | 'viewer'
+  rol: 'admin' | 'editor' | 'viewer' | 'director'
 }
 
 declare module 'express-serve-static-core' {

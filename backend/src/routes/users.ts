@@ -13,7 +13,7 @@ const createSchema = z.object({
   email: z.string().min(1),
   nombre: z.string().min(1),
   password: z.string().min(4),
-  rol: z.enum(['admin', 'editor', 'viewer']),
+  rol: z.enum(['admin', 'editor', 'viewer', 'director']),
   activo: z.boolean().optional(),
 })
 

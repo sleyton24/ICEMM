@@ -23,8 +23,10 @@ export interface DashboardData {
   fechaCorte: string
   isDemo: boolean
   projectName: string
-  /** Proyección del informe anterior, por código de partida → para VAR EERR Anterior */
+  /** Proyección del informe anterior, por código de partida (DEPRECATED — usar variacionAnteriorPorCodigo) */
   proyeccionAnteriorPorCodigo: Record<string, number>
+  /** Variacion_uf del informe anterior, por código de partida → para VAR EERR Anterior */
+  variacionAnteriorPorCodigo: Record<string, number>
   /** Indica si estamos viendo un snapshot aprobado (read-only) */
   esVistaAprobada: boolean
   numeroInforme: number | null
@@ -90,6 +92,7 @@ export function useDashboardData(): DashboardData {
     isDemo: false,
     projectName: activeProject?.nombre ?? 'Sin proyecto',
     proyeccionAnteriorPorCodigo: {},
+    variacionAnteriorPorCodigo: {},
     esVistaAprobada: false,
     numeroInforme: null,
   }
@@ -126,6 +129,7 @@ export function useDashboardData(): DashboardData {
   // Si estamos en borrador, "anterior" es el último aprobado (informes[0] desc).
   // Si estamos viendo Informe N°X, "anterior" es Informe N°X-1.
   const proyeccionAnteriorPorCodigo: Record<string, number> = {}
+  const variacionAnteriorPorCodigo: Record<string, number> = {}
   const informes = activeProjectId ? (informesPorProyecto[activeProjectId] ?? []) : []
   let informeAnteriorId: string | undefined
   if (view?.tipo === 'aprobado') {
@@ -140,6 +144,7 @@ export function useDashboardData(): DashboardData {
     const { partidas: partidasAnt } = mergeProyecto(proyectoAnterior, plan, proyectoAnterior.cutoffMesReal ?? null)
     for (const p of partidasAnt) {
       proyeccionAnteriorPorCodigo[p.codigo] = p.proyeccion
+      variacionAnteriorPorCodigo[p.codigo] = p.variacion_uf
     }
   }
 
@@ -154,6 +159,7 @@ export function useDashboardData(): DashboardData {
     isDemo: false,
     projectName: activeProject.nombre,
     proyeccionAnteriorPorCodigo,
+    variacionAnteriorPorCodigo,
     esVistaAprobada,
     numeroInforme,
   }

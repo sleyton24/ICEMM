@@ -34,7 +34,7 @@ router.post('/login', loginLimiter, async (req, res) => {
     id: user.id,
     email: user.email,
     nombre: user.nombre,
-    rol: user.rol as 'admin' | 'editor' | 'viewer',
+    rol: user.rol as 'admin' | 'editor' | 'viewer' | 'director',
   })
   res.json({ token, user: { id: user.id, email: user.email, nombre: user.nombre, rol: user.rol } })
 })

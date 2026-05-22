@@ -43,11 +43,13 @@ interface Props {
   detallePartidas: Record<string, DetallePartida[]>
   familias: string[]
   proyeccionAnteriorPorCodigo?: Record<string, number>
+  variacionAnteriorPorCodigo?: Record<string, number>
   esVistaAprobada?: boolean
   numeroInforme?: number | null
 }
 
-export default function TablaControl({ partidas, movimientos, detallePartidas, familias: FAMILIAS, proyeccionAnteriorPorCodigo = {}, esVistaAprobada = false, numeroInforme = null }: Props) {
+export default function TablaControl({ partidas, movimientos, detallePartidas, familias: FAMILIAS, proyeccionAnteriorPorCodigo: _proyeccionAnt = {}, variacionAnteriorPorCodigo = {}, esVistaAprobada = false, numeroInforme = null }: Props) {
+  void _proyeccionAnt
   const planCuentas = usePlanCuentasStore(s => s.plan)
   const activeProject = useProjectsStore(s => s.projects.find(p => p.id === s.activeProjectId) ?? null)
   const [cuentaDetalle, setCuentaDetalle] = useState<{ cc: number; nombre: string } | null>(null)
@@ -88,15 +90,44 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
     setCuentasAbiertas(new Set())
   }
 
+  // Calcular estado agregado por cuenta (codigo2) — se usa para el filtro de Alerta/Crítico/etc.
+  const estadoPorCuenta = useMemo(() => {
+    const map: Record<string, string> = {}
+    const grupos = new Map<string, Partida[]>()
+    for (const p of partidas) {
+      const g = grupos.get(p.codigo2) || []
+      g.push(p)
+      grupos.set(p.codigo2, g)
+    }
+    for (const [cc, ps] of grupos) {
+      const vigente = ps.reduce((s, x) => s + x.ppto_vigente, 0)
+      const proy = ps.reduce((s, x) => s + x.proyeccion, 0)
+      const real = ps.reduce((s, x) => s + x.gasto_real, 0)
+      const ppto = ps.reduce((s, x) => s + x.ppto_original + x.redistribuido, 0)
+      if (ppto === 0 && vigente === 0 && (real > 0 || proy > 0)) { map[cc] = 'SOLO REAL'; continue }
+      if (vigente > 0 && real === 0 && proy === 0) { map[cc] = 'SIN EJECUCION'; continue }
+      const variacion = vigente - proy
+      const pct = vigente !== 0 ? (variacion / vigente) * 100 : null
+      if (pct === null) { map[cc] = 'SIN EJECUCION'; continue }
+      if (pct < -10) map[cc] = 'CRITICO'
+      else if (pct < -5) map[cc] = 'ALERTA'
+      else if (pct <= 5) map[cc] = 'EN CONTROL'
+      else map[cc] = 'FAVORABLE'
+    }
+    return map
+  }, [partidas])
+
   const datos = useMemo(() => {
     let d = partidas
-    if (estadoFiltro !== 'TODOS') d = d.filter(p => p.estado === estadoFiltro)
+    if (estadoFiltro !== 'TODOS') {
+      d = d.filter(p => estadoPorCuenta[p.codigo2] === estadoFiltro)
+    }
     if (globalFilter) {
       const q = globalFilter.toLowerCase()
       d = d.filter(p => p.partida.toLowerCase().includes(q) || p.familia.toLowerCase().includes(q) || p.codigo2.includes(q))
     }
     return d
-  }, [partidas, estadoFiltro, globalFilter])
+  }, [partidas, estadoFiltro, globalFilter, estadoPorCuenta])
 
   const grupos = useMemo(() => {
     const map = new Map<string, Partida[]>()
@@ -188,15 +219,15 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
     {
       id: 'var_eerr_anterior', header: 'Var EERR Anterior',
       accessorFn: (row) => {
-        const proyAnt = proyeccionAnteriorPorCodigo[row.codigo]
-        return proyAnt !== undefined ? row.proyeccion - proyAnt : null
+        const varAnt = variacionAnteriorPorCodigo[row.codigo]
+        return varAnt !== undefined ? row.variacion_uf - varAnt : null
       },
       cell: ({ getValue }) => {
         const v = getValue() as number | null
         if (v === null) return <span className="text-gray-300">—</span>
-        // Negativo (proyectado bajó) = bueno (verde); positivo (proyectado subió) = malo (rojo)
-        const cls = v < 0 ? 'text-emerald-600' : v > 0 ? 'text-accent' : 'text-gray-400'
-        return <span className={`tabular-nums font-medium ${cls}`}>{signed(-v)}</span>
+        // Positivo = mejoró (verde); Negativo = empeoró (rojo)
+        const cls = v > 0 ? 'text-emerald-600' : v < 0 ? 'text-accent' : 'text-gray-400'
+        return <span className={`tabular-nums font-medium ${cls}`}>{signed(v)}</span>
       },
       sortUndefined: 'last',
     },
@@ -380,12 +411,12 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
                   <th className="px-3 py-3 tabular-nums font-bold text-right">
                     {(() => {
                       const totalAnt = datos.reduce((s, p) => {
-                        const a = proyeccionAnteriorPorCodigo[p.codigo]
-                        return a !== undefined ? s + (p.proyeccion - a) : s
+                        const a = variacionAnteriorPorCodigo[p.codigo]
+                        return a !== undefined ? s + (p.variacion_uf - a) : s
                       }, 0)
-                      const tieneAnt = datos.some(p => proyeccionAnteriorPorCodigo[p.codigo] !== undefined)
+                      const tieneAnt = datos.some(p => variacionAnteriorPorCodigo[p.codigo] !== undefined)
                       if (!tieneAnt) return <span className="text-white/30">—</span>
-                      return <span className={totalAnt < 0 ? 'text-emerald-400' : totalAnt > 0 ? 'text-red-400' : 'text-white/40'}>{totalAnt >= 0 ? '+' : ''}{uf2(-totalAnt)}</span>
+                      return <span className={totalAnt > 0 ? 'text-emerald-400' : totalAnt < 0 ? 'text-red-400' : 'text-white/40'}>{totalAnt >= 0 ? '+' : ''}{uf2(totalAnt)}</span>
                     })()}
                   </th>
                   <th className="px-3 py-3 text-center"><VarArrow pct={obraVarPct} /></th>
@@ -446,12 +477,12 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
                       <th className="px-3 py-2.5 tabular-nums font-bold text-right">
                         {(() => {
                           const totalAnt = ps.reduce((s, p) => {
-                            const a = proyeccionAnteriorPorCodigo[p.codigo]
-                            return a !== undefined ? s + (p.proyeccion - a) : s
+                            const a = variacionAnteriorPorCodigo[p.codigo]
+                            return a !== undefined ? s + (p.variacion_uf - a) : s
                           }, 0)
-                          const tieneAnt = ps.some(p => proyeccionAnteriorPorCodigo[p.codigo] !== undefined)
+                          const tieneAnt = ps.some(p => variacionAnteriorPorCodigo[p.codigo] !== undefined)
                           if (!tieneAnt) return <span className="text-white/30">—</span>
-                          return <span className={totalAnt < 0 ? 'text-emerald-400' : totalAnt > 0 ? 'text-red-400' : 'text-white/40'}>{totalAnt >= 0 ? '+' : ''}{uf2(-totalAnt)}</span>
+                          return <span className={totalAnt > 0 ? 'text-emerald-400' : totalAnt < 0 ? 'text-red-400' : 'text-white/40'}>{totalAnt >= 0 ? '+' : ''}{uf2(totalAnt)}</span>
                         })()}
                       </th>
                       <th className="px-3 py-2.5 text-center"><VarArrow pct={varPct} /></th>
@@ -528,13 +559,13 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
                               <td className="px-3 py-2 tabular-nums font-semibold text-right">
                                 {(() => {
                                   const totalAnt = cps.reduce((s, p) => {
-                                    const a = proyeccionAnteriorPorCodigo[p.codigo]
-                                    return a !== undefined ? s + (p.proyeccion - a) : s
+                                    const a = variacionAnteriorPorCodigo[p.codigo]
+                                    return a !== undefined ? s + (p.variacion_uf - a) : s
                                   }, 0)
-                                  const tieneAnt = cps.some(p => proyeccionAnteriorPorCodigo[p.codigo] !== undefined)
+                                  const tieneAnt = cps.some(p => variacionAnteriorPorCodigo[p.codigo] !== undefined)
                                   if (!tieneAnt) return <span className="text-gray-300">—</span>
-                                  const cls = totalAnt < 0 ? 'text-emerald-600' : totalAnt > 0 ? 'text-accent' : 'text-gray-400'
-                                  return <span className={cls}>{totalAnt >= 0 ? '+' : ''}{uf2(-totalAnt)}</span>
+                                  const cls = totalAnt > 0 ? 'text-emerald-600' : totalAnt < 0 ? 'text-accent' : 'text-gray-400'
+                                  return <span className={cls}>{totalAnt >= 0 ? '+' : ''}{uf2(totalAnt)}</span>
                                 })()}
                               </td>
                               <td className="px-3 py-2"><VarArrow pct={ccVarPct} /></td>
@@ -605,11 +636,11 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
                                   </td>
                                   <td className="px-3 py-1.5 tabular-nums text-xs text-right">
                                     {(() => {
-                                      const a = proyeccionAnteriorPorCodigo[p.codigo]
+                                      const a = variacionAnteriorPorCodigo[p.codigo]
                                       if (a === undefined) return <span className="text-gray-300">—</span>
-                                      const v = p.proyeccion - a
-                                      const cls = v < 0 ? 'text-emerald-600 font-medium' : v > 0 ? 'text-accent font-medium' : 'text-gray-400'
-                                      return <span className={cls}>{v >= 0 ? '+' : ''}{uf2(-v)}</span>
+                                      const v = p.variacion_uf - a
+                                      const cls = v > 0 ? 'text-emerald-600 font-medium' : v < 0 ? 'text-accent font-medium' : 'text-gray-400'
+                                      return <span className={cls}>{v >= 0 ? '+' : ''}{uf2(v)}</span>
                                     })()}
                                   </td>
                                   <td className="px-3 py-1.5"><VarArrow pct={p.variacion_pct} /></td>
