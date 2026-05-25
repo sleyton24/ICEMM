@@ -70,6 +70,21 @@ model Project {
   erp                 CargaERP?
   informes            Informe[]
   usuarios            UserProject[]
+  comentarios         Comentario[]
+}
+
+/// Comentarios libres asociados a una partida (codigo) de un proyecto.
+model Comentario {
+  id            String   @id @default(uuid())
+  projectId     String
+  codigoPartida String   // codigo de la partida (M10100001, S30566773, etc.) o codigo2 (cuenta)
+  contenido     String
+  autorEmail    String
+  autorNombre   String
+  fechaCreacion DateTime @default(now())
+  project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, codigoPartida])
 }
 
 /// Snapshot inmutable de un proyecto en un momento dado.

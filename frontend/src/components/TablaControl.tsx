@@ -9,6 +9,7 @@ import type { Partida, Movimiento, DetallePartida } from '../data/dataAdapter'
 import { usePlanCuentasStore } from '../features/plan-cuentas/PlanCuentasStore'
 import { useProjectsStore } from '../features/projects/ProjectsStore'
 import CuentaDetalleModal from './CuentaDetalleModal'
+import ComentariosSection from './ComentariosSection'
 
 const uf2 = (n: number) => n.toLocaleString('es-CL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 const signed = (n: number) => `${n >= 0 ? '+' : ''}${uf2(n)}`
@@ -787,6 +788,9 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
                     </div>
                   </div>
                 )}
+
+                {/* Comentarios */}
+                <ComentariosSection codigo={drilldown.codigo} />
               </div>
             </div>
           </div>
