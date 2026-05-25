@@ -39,13 +39,21 @@ export default function DirectorioReport() {
   const activeProjectId = useProjectsStore(s => s.activeProjectId)
   const plan = usePlanCuentasStore(s => s.plan)
   const view = useInformesStore(s => activeProjectId ? s.viewPorProyecto[activeProjectId] : null)
+  const viewsAll = useInformesStore(s => s.viewPorProyecto)
 
   const datosProyectos = useMemo(() => {
-    return proyectos.map(p => ({
-      proyecto: p,
-      partidas: mergeProyecto(p, plan, p.cutoffMesReal ?? null).partidas,
-    }))
-  }, [proyectos, plan])
+    return proyectos.map(p => {
+      // Si para este proyecto la vista activa es un informe aprobado, usar su snapshot
+      const v = viewsAll[p.id]
+      const proyectoEnUso = v?.tipo === 'aprobado'
+        ? { ...p, nombre: v.informe.snapshot.nombre, unidadNegocioCodigo: v.informe.snapshot.unidadNegocioCodigo, cutoffMesReal: v.informe.snapshot.cutoffMesReal, slots: v.informe.snapshot.slots }
+        : p
+      return {
+        proyecto: p,
+        partidas: mergeProyecto(proyectoEnUso, plan, proyectoEnUso.cutoffMesReal ?? null).partidas,
+      }
+    })
+  }, [proyectos, plan, viewsAll])
 
   const proyectoActivo = datosProyectos.find(d => d.proyecto.id === activeProjectId)
 
