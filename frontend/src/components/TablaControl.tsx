@@ -55,6 +55,7 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
   const planCuentas = usePlanCuentasStore(s => s.plan)
   const activeProject = useProjectsStore(s => s.projects.find(p => p.id === s.activeProjectId) ?? null)
   const [cuentaDetalle, setCuentaDetalle] = useState<{ cc: number; nombre: string } | null>(null)
+  const [cuentaComentarios, setCuentaComentarios] = useState<{ cc: string; nombre: string } | null>(null)
   const [sorting, setSorting]         = useState<SortingState>([{ id: 'variacion_pct', desc: true }])
   const [globalFilter, setGlobalFilter] = useState('')
   const [estadoFiltro, setEstadoFiltro] = useState<string>('TODOS')
@@ -521,10 +522,14 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
                           const rows: React.ReactNode[] = []
 
                           // Account header row
+                          const ccNumLocal = parseInt(cc, 10)
+                          const ccNombreLocal = planCuentas.cuentas.find(c => c.codigo === ccNumLocal)?.descripcion ?? `Cuenta ${cc}`
                           rows.push(
                             <tr key={`hdr-${cc}`}
                               onClick={() => toggleCuenta(ccKey)}
-                              className="bg-gray-100/60 hover:bg-gray-100 cursor-pointer border-t border-gray-200">
+                              onDoubleClick={(e) => { e.stopPropagation(); setCuentaComentarios({ cc, nombre: ccNombreLocal }) }}
+                              className="bg-gray-100/60 hover:bg-gray-100 cursor-pointer border-t border-gray-200"
+                              title="Click: expandir / Doble click: comentarios">
                               <td className="px-3 py-2 font-mono text-xs font-bold text-navy">
                                 <span className="flex items-center gap-1">
                                   <ChevronRight className={`h-3 w-3 text-gray-400 transition-transform ${ccOpen ? 'rotate-90' : ''}`} />
@@ -680,6 +685,27 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
         />
       )}
 
+      {/* Cuenta comentarios modal */}
+      {cuentaComentarios && (
+        <div className="fixed inset-0 bg-navy/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setCuentaComentarios(null)}>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] flex flex-col border border-gray-100" onClick={e => e.stopPropagation()}>
+            <div className="flex items-start justify-between px-6 py-4 border-b border-gray-100">
+              <div>
+                <p className="text-[11px] text-teal-muted font-medium uppercase tracking-wider">Cuenta {cuentaComentarios.cc}</p>
+                <h3 className="text-lg font-bold text-navy font-slab">{cuentaComentarios.nombre}</h3>
+              </div>
+              <button onClick={() => setCuentaComentarios(null)} className="text-gray-300 hover:text-gray-500 text-2xl leading-none">&times;</button>
+            </div>
+            <div className="overflow-y-auto flex-1 px-6 py-4">
+              <ComentariosSection codigo={cuentaComentarios.cc} />
+            </div>
+            <div className="flex justify-end px-6 py-3 border-t border-gray-100">
+              <button onClick={() => setCuentaComentarios(null)} className="px-4 py-2 bg-navy text-white text-sm font-medium rounded-lg hover:bg-navy-light">Cerrar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Drilldown Modal */}
       {drilldown && (() => {
         const detalle = detallePartidas[drilldown.codigo2] || []
@@ -789,8 +815,6 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
                   </div>
                 )}
 
-                {/* Comentarios */}
-                <ComentariosSection codigo={drilldown.codigo} />
               </div>
             </div>
           </div>
