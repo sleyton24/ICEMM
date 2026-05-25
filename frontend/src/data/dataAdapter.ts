@@ -138,13 +138,19 @@ export function useDashboardData(): DashboardData {
   } else {
     informeAnteriorId = informes[0]?.id  // último aprobado
   }
-  if (informeAnteriorId && snapshots[informeAnteriorId]) {
-    const snapAnterior = snapshots[informeAnteriorId].snapshot
-    const proyectoAnterior = snapshotToProyecto(activeProject, snapAnterior)
-    const { partidas: partidasAnt } = mergeProyecto(proyectoAnterior, plan, proyectoAnterior.cutoffMesReal ?? null)
-    for (const p of partidasAnt) {
-      proyeccionAnteriorPorCodigo[p.codigo] = p.proyeccion
-      variacionAnteriorPorCodigo[p.codigo] = p.variacion_uf
+  if (informeAnteriorId) {
+    if (snapshots[informeAnteriorId]) {
+      const snapAnterior = snapshots[informeAnteriorId].snapshot
+      const proyectoAnterior = snapshotToProyecto(activeProject, snapAnterior)
+      const { partidas: partidasAnt } = mergeProyecto(proyectoAnterior, plan, proyectoAnterior.cutoffMesReal ?? null)
+      for (const p of partidasAnt) {
+        proyeccionAnteriorPorCodigo[p.codigo] = p.proyeccion
+        variacionAnteriorPorCodigo[p.codigo] = p.variacion_uf
+      }
+    } else {
+      // Snapshot no cargado todavía — dispararlo en background (fire & forget).
+      // Cuando llegue, el store se actualiza y el hook re-renderea con los datos completos.
+      useInformesStore.getState().fetchSnapshot(activeProjectId!, informeAnteriorId).catch(() => { /* ignore */ })
     }
   }
 
