@@ -116,7 +116,7 @@ export default function App() {
           </nav>
 
           <div className="p-5">
-            {tab === 'tabla'    && <TablaControl partidas={data.partidas} movimientos={data.movimientos} detallePartidas={data.detallePartidas} familias={data.familias} proyeccionAnteriorPorCodigo={data.proyeccionAnteriorPorCodigo} variacionAnteriorPorCodigo={data.variacionAnteriorPorCodigo} esVistaAprobada={data.esVistaAprobada} numeroInforme={data.numeroInforme} />}
+            {tab === 'tabla'    && <TablaControl partidas={data.partidas} movimientos={data.movimientos} detallePartidas={data.detallePartidas} familias={data.familias} proyeccionAnteriorPorCodigo={data.proyeccionAnteriorPorCodigo} variacionAnteriorPorCodigo={data.variacionAnteriorPorCodigo} partidasAnteriorMeta={data.partidasAnteriorMeta} esVistaAprobada={data.esVistaAprobada} numeroInforme={data.numeroInforme} />}
             {tab === 'familias' && <FamiliaCharts partidas={data.partidas} sinPartida={data.sinPartida} familias={data.familias} />}
             {tab === 'top5'      && <Top5Chart partidas={data.partidas} />}
             {tab === 'directorio' && <DirectorioReport />}

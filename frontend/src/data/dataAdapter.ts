@@ -27,6 +27,8 @@ export interface DashboardData {
   proyeccionAnteriorPorCodigo: Record<string, number>
   /** Variacion_uf del informe anterior, por código de partida → para VAR EERR Anterior */
   variacionAnteriorPorCodigo: Record<string, number>
+  /** Info extra para agregaciones correctas (cuenta + familia anterior por codigo) */
+  partidasAnteriorMeta: Record<string, { codigo2: string; familia: string; variacion_uf: number }>
   /** Indica si estamos viendo un snapshot aprobado (read-only) */
   esVistaAprobada: boolean
   numeroInforme: number | null
@@ -93,6 +95,7 @@ export function useDashboardData(): DashboardData {
     projectName: activeProject?.nombre ?? 'Sin proyecto',
     proyeccionAnteriorPorCodigo: {},
     variacionAnteriorPorCodigo: {},
+    partidasAnteriorMeta: {},
     esVistaAprobada: false,
     numeroInforme: null,
   }
@@ -130,6 +133,7 @@ export function useDashboardData(): DashboardData {
   // Si estamos viendo Informe N°X, "anterior" es Informe N°X-1.
   const proyeccionAnteriorPorCodigo: Record<string, number> = {}
   const variacionAnteriorPorCodigo: Record<string, number> = {}
+  const partidasAnteriorMeta: Record<string, { codigo2: string; familia: string; variacion_uf: number }> = {}
   const informes = activeProjectId ? (informesPorProyecto[activeProjectId] ?? []) : []
   let informeAnteriorId: string | undefined
   if (view?.tipo === 'aprobado') {
@@ -146,6 +150,7 @@ export function useDashboardData(): DashboardData {
       for (const p of partidasAnt) {
         proyeccionAnteriorPorCodigo[p.codigo] = p.proyeccion
         variacionAnteriorPorCodigo[p.codigo] = p.variacion_uf
+        partidasAnteriorMeta[p.codigo] = { codigo2: p.codigo2, familia: p.familia, variacion_uf: p.variacion_uf }
       }
     } else {
       // Snapshot no cargado todavía — dispararlo en background (fire & forget).
@@ -166,6 +171,7 @@ export function useDashboardData(): DashboardData {
     projectName: activeProject.nombre,
     proyeccionAnteriorPorCodigo,
     variacionAnteriorPorCodigo,
+    partidasAnteriorMeta,
     esVistaAprobada,
     numeroInforme,
   }

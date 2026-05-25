@@ -44,11 +44,12 @@ interface Props {
   familias: string[]
   proyeccionAnteriorPorCodigo?: Record<string, number>
   variacionAnteriorPorCodigo?: Record<string, number>
+  partidasAnteriorMeta?: Record<string, { codigo2: string; familia: string; variacion_uf: number }>
   esVistaAprobada?: boolean
   numeroInforme?: number | null
 }
 
-export default function TablaControl({ partidas, movimientos, detallePartidas, familias: FAMILIAS, proyeccionAnteriorPorCodigo: _proyeccionAnt = {}, variacionAnteriorPorCodigo = {}, esVistaAprobada = false, numeroInforme = null }: Props) {
+export default function TablaControl({ partidas, movimientos, detallePartidas, familias: FAMILIAS, proyeccionAnteriorPorCodigo: _proyeccionAnt = {}, variacionAnteriorPorCodigo = {}, partidasAnteriorMeta = {}, esVistaAprobada = false, numeroInforme = null }: Props) {
   void _proyeccionAnt
   const planCuentas = usePlanCuentasStore(s => s.plan)
   const activeProject = useProjectsStore(s => s.projects.find(p => p.id === s.activeProjectId) ?? null)
@@ -410,13 +411,12 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
                   </th>
                   <th className="px-3 py-3 tabular-nums font-bold text-right">
                     {(() => {
-                      const totalAnt = datos.reduce((s, p) => {
-                        const a = variacionAnteriorPorCodigo[p.codigo]
-                        return a !== undefined ? s + (p.variacion_uf - a) : s
-                      }, 0)
-                      const tieneAnt = datos.some(p => variacionAnteriorPorCodigo[p.codigo] !== undefined)
+                      const tieneAnt = Object.keys(variacionAnteriorPorCodigo).length > 0
                       if (!tieneAnt) return <span className="text-white/30">—</span>
-                      return <span className={totalAnt > 0 ? 'text-emerald-400' : totalAnt < 0 ? 'text-red-400' : 'text-white/40'}>{totalAnt >= 0 ? '+' : ''}{uf2(totalAnt)}</span>
+                      const totalActual = datos.reduce((s, p) => s + p.variacion_uf, 0)
+                      const totalAnterior = Object.values(variacionAnteriorPorCodigo).reduce((s, v) => s + v, 0)
+                      const delta = totalActual - totalAnterior
+                      return <span className={delta > 0 ? 'text-emerald-400' : delta < 0 ? 'text-red-400' : 'text-white/40'}>{delta >= 0 ? '+' : ''}{uf2(delta)}</span>
                     })()}
                   </th>
                   <th className="px-3 py-3 text-center"><VarArrow pct={obraVarPct} /></th>
@@ -476,13 +476,16 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
                       </th>
                       <th className="px-3 py-2.5 tabular-nums font-bold text-right">
                         {(() => {
-                          const totalAnt = ps.reduce((s, p) => {
-                            const a = variacionAnteriorPorCodigo[p.codigo]
-                            return a !== undefined ? s + (p.variacion_uf - a) : s
-                          }, 0)
-                          const tieneAnt = ps.some(p => variacionAnteriorPorCodigo[p.codigo] !== undefined)
+                          // Suma del total actual de la familia
+                          const totalActual = ps.reduce((s, p) => s + p.variacion_uf, 0)
+                          // Suma del total anterior FILTRADO por familia (todas las partidas que pertenecían a esta familia en el informe anterior)
+                          const totalAnterior = Object.values(partidasAnteriorMeta)
+                            .filter(m => m.familia === familia)
+                            .reduce((s, m) => s + m.variacion_uf, 0)
+                          const tieneAnt = Object.values(partidasAnteriorMeta).some(m => m.familia === familia)
                           if (!tieneAnt) return <span className="text-white/30">—</span>
-                          return <span className={totalAnt > 0 ? 'text-emerald-400' : totalAnt < 0 ? 'text-red-400' : 'text-white/40'}>{totalAnt >= 0 ? '+' : ''}{uf2(totalAnt)}</span>
+                          const delta = totalActual - totalAnterior
+                          return <span className={delta > 0 ? 'text-emerald-400' : delta < 0 ? 'text-red-400' : 'text-white/40'}>{delta >= 0 ? '+' : ''}{uf2(delta)}</span>
                         })()}
                       </th>
                       <th className="px-3 py-2.5 text-center"><VarArrow pct={varPct} /></th>
@@ -558,14 +561,15 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
                               </td>
                               <td className="px-3 py-2 tabular-nums font-semibold text-right">
                                 {(() => {
-                                  const totalAnt = cps.reduce((s, p) => {
-                                    const a = variacionAnteriorPorCodigo[p.codigo]
-                                    return a !== undefined ? s + (p.variacion_uf - a) : s
-                                  }, 0)
-                                  const tieneAnt = cps.some(p => variacionAnteriorPorCodigo[p.codigo] !== undefined)
+                                  const totalActual = cps.reduce((s, p) => s + p.variacion_uf, 0)
+                                  const totalAnterior = Object.values(partidasAnteriorMeta)
+                                    .filter(m => m.codigo2 === cc)
+                                    .reduce((s, m) => s + m.variacion_uf, 0)
+                                  const tieneAnt = Object.values(partidasAnteriorMeta).some(m => m.codigo2 === cc)
                                   if (!tieneAnt) return <span className="text-gray-300">—</span>
-                                  const cls = totalAnt > 0 ? 'text-emerald-600' : totalAnt < 0 ? 'text-accent' : 'text-gray-400'
-                                  return <span className={cls}>{totalAnt >= 0 ? '+' : ''}{uf2(totalAnt)}</span>
+                                  const delta = totalActual - totalAnterior
+                                  const cls = delta > 0 ? 'text-emerald-600' : delta < 0 ? 'text-accent' : 'text-gray-400'
+                                  return <span className={cls}>{delta >= 0 ? '+' : ''}{uf2(delta)}</span>
                                 })()}
                               </td>
                               <td className="px-3 py-2"><VarArrow pct={ccVarPct} /></td>
