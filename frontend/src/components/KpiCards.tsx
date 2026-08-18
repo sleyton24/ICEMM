@@ -1,4 +1,5 @@
 import type { Partida } from '../data/dataAdapter'
+import { estadoPorGrupo } from '../data/estado'
 
 const uf = (n: number) =>
   `UF ${n.toLocaleString('es-CL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
@@ -18,10 +19,14 @@ export default function KpiCards({ partidas }: Props) {
   const varTotalPct = vigente ? (varTotal / vigente) * 100 : 0
   const ejecPct     = vigente ? (real / vigente) * 100 : 0
 
-  const conteos = partidas.reduce<Record<string, number>>((acc, p) => {
-    acc[p.estado] = (acc[p.estado] || 0) + 1
+  // El semaforo se evalua a nivel de familia: una familia puede tener partidas
+  // criticas y aun asi cerrar en control, que es lo que le importa a la obra.
+  const estadosFamilia = estadoPorGrupo(partidas, p => p.familia)
+  const conteos = Object.values(estadosFamilia).reduce<Record<string, number>>((acc, e) => {
+    acc[e] = (acc[e] || 0) + 1
     return acc
   }, {})
+  const totalFamilias = Object.keys(estadosFamilia).length
 
   return (
     <div className="space-y-4">
@@ -39,14 +44,22 @@ export default function KpiCards({ partidas }: Props) {
         />
       </div>
 
-      {/* Estado badges */}
-      <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
-        <EstadoBadge label="Crítico"       count={conteos['CRITICO']      || 0} dot="#E00544"  />
-        <EstadoBadge label="Alerta"        count={conteos['ALERTA']       || 0} dot="#f59e0b"  />
-        <EstadoBadge label="En Control"    count={conteos['EN CONTROL']   || 0} dot="#16a34a"  />
-        <EstadoBadge label="Favorable"     count={conteos['FAVORABLE']    || 0} dot="#0ea5e9"  />
-        <EstadoBadge label="Sin Ejecución" count={conteos['SIN EJECUCION']|| 0} dot="#9ca3af"  />
-        <EstadoBadge label="Solo Real"     count={conteos['SOLO REAL']    || 0} dot="#8b5cf6"  />
+      {/* Estado badges — agregados por familia */}
+      <div className="space-y-1.5">
+        <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wide">
+          Estado por familia
+          <span className="ml-1.5 text-gray-300 normal-case tracking-normal">
+            {totalFamilias} familia{totalFamilias !== 1 ? 's' : ''}
+          </span>
+        </p>
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+          <EstadoBadge label="Crítico"       count={conteos['CRITICO']      || 0} dot="#E00544"  />
+          <EstadoBadge label="Alerta"        count={conteos['ALERTA']       || 0} dot="#f59e0b"  />
+          <EstadoBadge label="En Control"    count={conteos['EN CONTROL']   || 0} dot="#16a34a"  />
+          <EstadoBadge label="Favorable"     count={conteos['FAVORABLE']    || 0} dot="#0ea5e9"  />
+          <EstadoBadge label="Sin Ejecución" count={conteos['SIN EJECUCION']|| 0} dot="#9ca3af"  />
+          <EstadoBadge label="Solo Real"     count={conteos['SOLO REAL']    || 0} dot="#8b5cf6"  />
+        </div>
       </div>
     </div>
   )

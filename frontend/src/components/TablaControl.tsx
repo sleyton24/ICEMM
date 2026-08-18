@@ -6,6 +6,7 @@ import {
 } from '@tanstack/react-table'
 import { ChevronUp, ChevronDown, ChevronsUpDown, Search, Layers, List, ChevronRight, TrendingUp, TrendingDown, Minus } from 'lucide-react'
 import type { Partida, Movimiento, DetallePartida } from '../data/dataAdapter'
+import { estadoPorGrupo } from '../data/estado'
 import { usePlanCuentasStore } from '../features/plan-cuentas/PlanCuentasStore'
 import { useProjectsStore } from '../features/projects/ProjectsStore'
 import CuentaDetalleModal from './CuentaDetalleModal'
@@ -93,32 +94,8 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
     setCuentasAbiertas(new Set())
   }
 
-  // Calcular estado agregado por cuenta (codigo2) — se usa para el filtro de Alerta/Crítico/etc.
-  const estadoPorCuenta = useMemo(() => {
-    const map: Record<string, string> = {}
-    const grupos = new Map<string, Partida[]>()
-    for (const p of partidas) {
-      const g = grupos.get(p.codigo2) || []
-      g.push(p)
-      grupos.set(p.codigo2, g)
-    }
-    for (const [cc, ps] of grupos) {
-      const vigente = ps.reduce((s, x) => s + x.ppto_vigente, 0)
-      const proy = ps.reduce((s, x) => s + x.proyeccion, 0)
-      const real = ps.reduce((s, x) => s + x.gasto_real, 0)
-      const ppto = ps.reduce((s, x) => s + x.ppto_original + x.redistribuido, 0)
-      if (ppto === 0 && vigente === 0 && (real > 0 || proy > 0)) { map[cc] = 'SOLO REAL'; continue }
-      if (vigente > 0 && real === 0 && proy === 0) { map[cc] = 'SIN EJECUCION'; continue }
-      const variacion = vigente - proy
-      const pct = vigente !== 0 ? (variacion / vigente) * 100 : null
-      if (pct === null) { map[cc] = 'SIN EJECUCION'; continue }
-      if (pct < -10) map[cc] = 'CRITICO'
-      else if (pct < -5) map[cc] = 'ALERTA'
-      else if (pct <= 5) map[cc] = 'EN CONTROL'
-      else map[cc] = 'FAVORABLE'
-    }
-    return map
-  }, [partidas])
+  // Estado agregado por cuenta (codigo2) — se usa para el filtro de Alerta/Crítico/etc.
+  const estadoPorCuenta = useMemo(() => estadoPorGrupo(partidas, p => p.codigo2), [partidas])
 
   const datos = useMemo(() => {
     let d = partidas

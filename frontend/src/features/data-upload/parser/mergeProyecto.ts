@@ -45,6 +45,20 @@ function calcEstado(p: { ppto_original: number; redistribuido: number; ppto_vige
   return 'FAVORABLE'
 }
 
+/** Familia 900 del Plan de Cuentas — Gastos de Oficina Central. */
+const FAMILIA_OFICINA_CENTRAL = 900
+
+/**
+ * Las cuentas 900 (901-914, Gastos Oficina Central) no son costo de obra:
+ * se excluyen del dashboard completo (KPIs, tabla, graficos y directorio).
+ */
+function esOficinaCentral(cc: number, plan: PlanCuentas): boolean {
+  if (isNaN(cc)) return false
+  const cuenta = plan.cuentas.find(c => c.codigo === cc)
+  if (cuenta) return cuenta.familiaCodigo === FAMILIA_OFICINA_CENTRAL
+  return Math.floor(cc / 100) * 100 === FAMILIA_OFICINA_CENTRAL
+}
+
 /**
  * Resolve familia name from Plan de Cuentas by codigo2 (cost center code).
  * Falls back to the partida's own familia field if not found in the plan.
@@ -171,6 +185,12 @@ export function mergeProyecto(proyecto: Proyecto, plan?: PlanCuentas, cutoffMes?
       : NaN
     const cambioDeCC = !isNaN(ccOrig) && !isNaN(ccRedist) && ccOrig !== ccRedist
 
+    // Cuentas 900 (Gastos Oficina Central) quedan fuera del resultado de obra.
+    // Si la partida se redistribuyo DESDE una cuenta de obra hacia una 900, igual
+    // dejamos la fila fantasma en la cuenta origen: para la obra es una baja de ppto.
+    const destinoOficinaCentral = esOficinaCentral(cc, planActivo)
+    if (destinoOficinaCentral && !(cambioDeCC && entry.orig && !esOficinaCentral(ccOrig, planActivo))) continue
+
     // If the item moved accounts:
     //   ppto_original = 0 (it wasn't in this account originally)
     //   redistribuido = the value (it's now assigned here)
@@ -206,7 +226,7 @@ export function mergeProyecto(proyecto: Proyecto, plan?: PlanCuentas, cutoffMes?
     const familia = !isNaN(cc)
       ? resolverFamilia(cc, base.familia, planActivo)
       : base.familia
-    familiasSet.add(familia)
+    if (!destinoOficinaCentral) familiasSet.add(familia)
 
     const p: PartidaMerged = {
       codigo,
@@ -226,11 +246,11 @@ export function mergeProyecto(proyecto: Proyecto, plan?: PlanCuentas, cutoffMes?
       estado: 'SIN EJECUCION',
     }
     p.estado = calcEstado(p)
-    partidas.push(p)
+    if (!destinoOficinaCentral) partidas.push(p)
 
     // If the partida moved accounts, also create a phantom row in the ORIGINAL account
     // showing the original budget but redistribuido=0 (it left this account)
-    if (cambioDeCC && entry.orig) {
+    if (cambioDeCC && entry.orig && !esOficinaCentral(ccOrig, planActivo)) {
       const ppto_orig_only = entry.orig.total ?? 0
       const familiaOrig = resolverFamilia(ccOrig, entry.orig.familia, planActivo)
       familiasSet.add(familiaOrig)
@@ -267,6 +287,7 @@ export function mergeProyecto(proyecto: Proyecto, plan?: PlanCuentas, cutoffMes?
     for (const [ccStr, data] of Object.entries(erpData.agregadoPorCcosto)) {
       const cc = Number(ccStr)
       if (ccConsumed.has(cc)) continue
+      if (esOficinaCentral(cc, planActivo)) continue
 
       // Use the cutoff-filtered amount (gastoRealPorCc), not the raw total.
       const gasto_real = gastoRealPorCc[cc] ?? 0
