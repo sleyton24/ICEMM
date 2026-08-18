@@ -18,12 +18,21 @@ cd $APP_DIR
 git checkout -- .
 git pull --rebase
 
-log "Backend: install + sync schema + build..."
+log "Backup de la base ANTES de migrar..."
+# Snapshot antes de cualquier cambio de schema (rollback manual si algo sale mal).
+if [ -x "$APP_DIR/deploy/backup.sh" ]; then
+  bash "$APP_DIR/deploy/backup.sh" pre-release || { echo "✗ Backup falló — aborto el release"; exit 1; }
+else
+  echo "⚠ deploy/backup.sh no encontrado/ejecutable — se recomienda fuertemente tener backups antes de migrar"
+fi
+
+log "Backend: install + migrate + build..."
 cd $APP_DIR/backend
 npm install --legacy-peer-deps
 npx prisma generate
-# db push sincroniza el schema sin migrations (seguro mientras solo agreguemos columnas/tablas)
-npx prisma db push --accept-data-loss
+# Migraciones versionadas y revisadas (NUNCA db push --accept-data-loss en prod):
+# migrate deploy solo aplica migraciones pendientes del historial, sin cambios destructivos automáticos.
+npx prisma migrate deploy
 npm run build
 
 log "Frontend: install + build..."

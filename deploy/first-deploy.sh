@@ -76,6 +76,9 @@ DATABASE_URL=postgresql://${DB_USER}:${DB_PASS_VAL}@localhost:5432/${DB_NAME}?sc
 PORT=3001
 CORS_ORIGIN=*
 BETA_MODE=true
+# Opt-in consciente para correr la demo BETA (sin login) sobre NODE_ENV=production.
+# Para producción real: BETA_MODE=false y borrar esta línea.
+ALLOW_BETA_IN_PROD=true
 JWT_SECRET=${JWT_SECRET}
 NODE_ENV=production
 EOF
@@ -120,6 +123,14 @@ log "Configurando firewall..."
 ufw allow OpenSSH
 ufw allow 'Nginx Full'
 ufw --force enable
+
+# ── 9b. Backups automáticos (pg_dump diario 03:15) ──────────────────────────
+log "Instalando backup diario de PostgreSQL..."
+chmod +x $APP_DIR/deploy/backup.sh $APP_DIR/deploy/release.sh 2>/dev/null || true
+CRON_LINE="15 3 * * * $APP_DIR/deploy/backup.sh daily >> $LOG_DIR/backup.log 2>&1"
+# Idempotente: solo agrega la línea si no existe ya en el crontab del usuario.
+( sudo -u $SUDO_USER crontab -l 2>/dev/null | grep -v "deploy/backup.sh" ; echo "$CRON_LINE" ) | sudo -u $SUDO_USER crontab -
+log "  Cron de backup instalado (03:15 diario → $LOG_DIR/backup.log)."
 
 # ── 10. Verificación ────────────────────────────────────────────────────────
 sleep 2
