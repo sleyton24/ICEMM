@@ -40,3 +40,6 @@ backend/.env
 
 # Prisma local
 backend/prisma/dev.db*
+
+# Paquete del predictor entregado por EMM (no versionar)
+Prediccion de curvas.zip

@@ -6,6 +6,8 @@ import type {
 } from '../../projects/types'
 import type { PlanCuentas } from '../../plan-cuentas/types'
 import { planCuentasBundled } from '../../plan-cuentas/bundled/seed'
+import { esOficinaCentral } from '../../plan-cuentas/oficinaCentral'
+import { esRollupFamilia } from '../../plan-cuentas/rollupFamilia'
 
 // Re-use the dashboard Partida type from mockData (canonical shape)
 export interface PartidaMerged {
@@ -43,20 +45,6 @@ function calcEstado(p: { ppto_original: number; redistribuido: number; ppto_vige
   if (pct < -5) return 'ALERTA'
   if (pct <= 5) return 'EN CONTROL'
   return 'FAVORABLE'
-}
-
-/** Familia 900 del Plan de Cuentas — Gastos de Oficina Central. */
-const FAMILIA_OFICINA_CENTRAL = 900
-
-/**
- * Las cuentas 900 (901-914, Gastos Oficina Central) no son costo de obra:
- * se excluyen del dashboard completo (KPIs, tabla, graficos y directorio).
- */
-function esOficinaCentral(cc: number, plan: PlanCuentas): boolean {
-  if (isNaN(cc)) return false
-  const cuenta = plan.cuentas.find(c => c.codigo === cc)
-  if (cuenta) return cuenta.familiaCodigo === FAMILIA_OFICINA_CENTRAL
-  return Math.floor(cc / 100) * 100 === FAMILIA_OFICINA_CENTRAL
 }
 
 /**
@@ -288,6 +276,9 @@ export function mergeProyecto(proyecto: Proyecto, plan?: PlanCuentas, cutoffMes?
       const cc = Number(ccStr)
       if (ccConsumed.has(cc)) continue
       if (esOficinaCentral(cc, planActivo)) continue
+      // Contrapartidas de rollup: hoy el parser ya no las carga, pero los
+      // proyectos cargados antes del filtro las tienen guardadas en sus slots.
+      if (esRollupFamilia(cc)) continue
 
       // Use the cutoff-filtered amount (gastoRealPorCc), not the raw total.
       const gasto_real = gastoRealPorCc[cc] ?? 0

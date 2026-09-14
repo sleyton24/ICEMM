@@ -83,7 +83,8 @@ export default function FamiliaCharts({ partidas, sinPartida, familias: FAMILIAS
 
   const totalPpto = familiaData.reduce((s, f) => s + f.ppto, 0)
   const totalReal = familiaData.reduce((s, f) => s + f.real, 0)
-  const realSinPartida = sinPartida.filter(s => s.gasto_uf > 0).reduce((s, p) => s + p.gasto_uf, 0)
+  // Se suman también los negativos: excluirlos descuadraba el total contra el KPI.
+  const realSinPartida = sinPartida.reduce((s, p) => s + p.gasto_uf, 0)
 
   return (
     <div className="space-y-5">

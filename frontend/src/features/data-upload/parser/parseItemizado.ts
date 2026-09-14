@@ -1,6 +1,7 @@
 import * as XLSX from 'xlsx'
 import type { PartidaRaw, ParseResult, FamiliaCanonica } from '../../projects/types'
 import { normalizeFamilia, isFamiliaHeader } from './normalizeFamilia'
+import { esOficinaCentral, NOMBRE_FAMILIA_OFICINA_CENTRAL } from '../../plan-cuentas/oficinaCentral'
 
 /**
  * Parsea un archivo Excel de itemizado ICEMM (.xls / .xlsx).
@@ -23,6 +24,9 @@ export function parseItemizado(buffer: ArrayBuffer): ParseResult {
   const subtotalesFamilia: Record<string, number> = {}
   let totalGeneral = 0
   let redondeo = 0
+  // Cuentas 900 (Gastos Oficina Central): se descartan al leer el archivo.
+  let ofCentralPartidas = 0
+  let ofCentralUF = 0
 
   // Extraer nombre del proyecto de metadatos (fila ~4, col B)
   let nombreProyecto = ''
@@ -121,6 +125,15 @@ export function parseItemizado(buffer: ArrayBuffer): ParseResult {
     const precio = typeof row[5] === 'number' ? row[5] : parseFloat(String(row[5] ?? '0')) || 0
     const total = !isNaN(colG) ? colG : 0
 
+    // Cuentas 900 (Gastos Oficina Central) no son costo de obra: no se cargan.
+    // Se mira el C. Costo y, como respaldo, la familia en curso — hay filas de
+    // esa sección que vienen sin código de cuenta.
+    if (esOficinaCentral(codigo2) || currentFamilia === NOMBRE_FAMILIA_OFICINA_CENTRAL) {
+      ofCentralPartidas++
+      ofCentralUF += total
+      continue
+    }
+
     // Duplicate check
     if (codigosSeen.has(colA)) {
       warnings.push(`Código duplicado en fila ${i + 1}: "${colA}" — se conserva el último.`)
@@ -142,6 +155,11 @@ export function parseItemizado(buffer: ArrayBuffer): ParseResult {
     })
   }
 
+  // El subtotal de Oficina Central sale junto con sus partidas: si se dejara,
+  // la validación cruzada de abajo reportaría una discrepancia falsa (suma 0
+  // contra el subtotal del archivo).
+  delete subtotalesFamilia[NOMBRE_FAMILIA_OFICINA_CENTRAL]
+
   // Validación cruzada: suma por familia vs subtotal reportado
   const sumasFamilia: Record<string, number> = {}
   for (const p of partidas) {
@@ -158,6 +176,17 @@ export function parseItemizado(buffer: ArrayBuffer): ParseResult {
   // If totalGeneral not found from TOTAL row, calculate from subtotals
   if (totalGeneral === 0 && partidas.length > 0) {
     totalGeneral = partidas.reduce((s, p) => s + p.total, 0) + redondeo
+  } else if (ofCentralUF !== 0) {
+    // El TOTAL del archivo incluye las 900; hay que descontarlas para que el
+    // total cargado cuadre con las partidas que efectivamente quedaron.
+    totalGeneral = Math.round((totalGeneral - ofCentralUF) * 100) / 100
+  }
+
+  if (ofCentralPartidas > 0) {
+    warnings.push(
+      `${ofCentralPartidas} partida(s) de Gastos Oficina Central (cuentas 900), ` +
+      `por ${ofCentralUF.toFixed(2)} UF, se excluyeron: no son costo de obra.`
+    )
   }
 
   return { nombreProyecto, partidas, subtotalesFamilia, totalGeneral, redondeo, warnings }

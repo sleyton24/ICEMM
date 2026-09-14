@@ -1,5 +1,7 @@
 import type { WorkBook } from 'xlsx'
 import * as XLSX from 'xlsx'
+import { esOficinaCentral } from '../../plan-cuentas/oficinaCentral'
+import { esRollupFamilia, CODIGOS_ROLLUP_FAMILIA } from '../../plan-cuentas/rollupFamilia'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -160,6 +162,12 @@ export function inspeccionarERP(workbook: WorkBook): { unidades: UnidadNegocio[]
     )
   }
 
+  // OJO: este inspector NO descarta las cuentas 900 a propósito. Su trabajo es
+  // mostrar qué trae el archivo para que el usuario elija su unidad de negocio;
+  // si filtrara, una unidad compuesta solo de oficina central (p.ej.
+  // "OF. CENTRAL ICEMM") desaparecería del selector sin explicación. El filtro
+  // se aplica en parsearERP, que es lo que realmente se carga, y la diferencia
+  // de UF queda explicada en un warning al confirmar la carga.
   const unidadMap = new Map<number, { descripcion: string; total_uf: number; num_filas: number }>()
 
   for (let i = 1; i < rows.length; i++) {
@@ -229,6 +237,12 @@ export function parsearERP(workbook: WorkBook, unidadNegocioCodigo: number): Gas
   let maxDate: Date | null = null
   let unidadDescripcion = ''
   let filasUnidad = 0
+  // Cuentas 900 (Gastos Oficina Central): se descartan al leer el archivo.
+  let ofCentralTx = 0
+  let ofCentralUF = 0
+  // Contrapartidas de rollup por familia (100..500): idem, duplican el detalle.
+  let rollupTx = 0
+  let rollupUF = 0
 
   for (let i = 1; i < rows.length; i++) {
     const row = rows[i]
@@ -237,6 +251,25 @@ export function parsearERP(workbook: WorkBook, unidadNegocioCodigo: number): Gas
     const codUnidad = safeInt(row[colIdx.cod_unidad])
     if (codUnidad !== unidadNegocioCodigo) continue
 
+    const concepto = safeInt(row[colIdx.concepto1_codigo])
+
+    // Cuentas 900 (Gastos Oficina Central): gasto corporativo, no de obra.
+    // Se descarta antes de contar la fila para que num_filas y total_uf sigan
+    // cuadrando entre sí — num_filas se guarda como numTransacciones.
+    if (esOficinaCentral(concepto)) {
+      ofCentralTx++
+      ofCentralUF += safeFloat(row[colIdx.afecto_detalle_uf]) + safeFloat(row[colIdx.exento_detalle_uf])
+      continue
+    }
+
+    // Rollup por familia: contrapartida agrupada con signo contrario que duplica
+    // el detalle ya desglosado. Sumarla descuadra el gasto real de la obra.
+    if (esRollupFamilia(concepto)) {
+      rollupTx++
+      rollupUF += safeFloat(row[colIdx.afecto_detalle_uf]) + safeFloat(row[colIdx.exento_detalle_uf])
+      continue
+    }
+
     filasUnidad++
 
     // Capture descripcion from first matching row
@@ -244,7 +277,6 @@ export function parsearERP(workbook: WorkBook, unidadNegocioCodigo: number): Gas
       unidadDescripcion = safeString(row[colIdx.desc_unidad])
     }
 
-    const concepto = safeInt(row[colIdx.concepto1_codigo])
     const afecto_uf = safeFloat(row[colIdx.afecto_detalle_uf])
     const exento_uf = safeFloat(row[colIdx.exento_detalle_uf])
     const monto = afecto_uf + exento_uf
@@ -332,6 +364,23 @@ export function parsearERP(workbook: WorkBook, unidadNegocioCodigo: number): Gas
   const currentYear = new Date().getFullYear()
   if (minDate && minDate.getFullYear() < currentYear - 2) {
     warnings.push(`Hay transacciones con fecha desde ${minDate.toLocaleDateString('es-CL')} (más de 2 años de antigüedad).`)
+  }
+
+  if (rollupTx > 0) {
+    warnings.push(
+      `${rollupTx.toLocaleString('es-CL')} contrapartida(s) de rollup por familia ` +
+      `(conceptos ${CODIGOS_ROLLUP_FAMILIA.join(', ')}), por ` +
+      `${(Math.round(rollupUF * 100) / 100).toFixed(2)} UF, se excluyeron: duplican el ` +
+      `detalle por cuenta que ya viene desglosado.`
+    )
+  }
+
+  if (ofCentralTx > 0) {
+    warnings.push(
+      `${ofCentralTx.toLocaleString('es-CL')} transaccion(es) de Gastos Oficina Central ` +
+      `(cuentas 900), por ${(Math.round(ofCentralUF * 100) / 100).toFixed(2)} UF, se excluyeron: ` +
+      `no son costo de obra.`
+    )
   }
 
   // Build result

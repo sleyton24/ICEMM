@@ -193,12 +193,23 @@ describe('inspeccionarERP', () => {
 describe('parsearERP', () => {
   const result = parsearERP(mockWb, 2)
 
-  it('returns 1285 transactions', () => {
-    expect(result.unidadNegocio.num_filas).toBe(1285)
+  // El archivo trae 1285 filas por 8.034,88 UF para la unidad 2, de las cuales
+  // 5 (7,77 UF) son de cuentas 900 (Gastos Oficina Central) y no se cargan.
+  // inspeccionarERP sigue reportando el total crudo del archivo; parsearERP
+  // reporta lo que efectivamente entra al proyecto.
+  it('carga 1280 transacciones — excluye las 5 de cuentas 900', () => {
+    expect(result.unidadNegocio.num_filas).toBe(1280)
   })
 
-  it('returns total ~8034.88 UF', () => {
-    expect(result.total_uf).toBeCloseTo(8034.88, 0)
+  it('carga ~8027.11 UF — el archivo trae 8034.88 menos 7.77 de oficina central', () => {
+    expect(result.total_uf).toBeCloseTo(8027.11, 0)
+  })
+
+  it('no deja ninguna cuenta 900 en el agregado por centro de costo', () => {
+    const novecientas = Object.keys(result.porCentroCosto)
+      .map(Number)
+      .filter(cc => cc >= 900 && cc < 1000)
+    expect(novecientas).toEqual([])
   })
 
   it('identifies 61 unique conceptos', () => {
@@ -234,9 +245,11 @@ describe('parsearERP', () => {
     expect(cc303.proveedores_top[0].razon_social).toBe('CONSTRUCTORA ABC')
   })
 
-  it('has no warnings for normal data', () => {
-    // No dates older than 2 years → no warnings expected
-    expect(result.warnings).toHaveLength(0)
+  it('avisa de lo excluido por oficina central, y nada mas', () => {
+    // No hay fechas de mas de 2 años → el unico warning esperado es el de las 900.
+    expect(result.warnings).toHaveLength(1)
+    expect(result.warnings[0]).toMatch(/Gastos Oficina Central/)
+    expect(result.warnings[0]).toMatch(/5 transaccion/)
   })
 
   it('handles NCCE (negative amounts) naturally via summation', () => {
@@ -260,6 +273,61 @@ describe('parsearERP', () => {
     const resultWithNC = parsearERP(wb3, 2)
     // Concepto 201 should be reduced by 30.0 UF
     expect(resultWithNC.porCentroCosto[201].monto_uf).toBeCloseTo(1230.09 - 30.0, 1)
+  })
+})
+
+describe('parsearERP — contrapartidas de rollup por familia', () => {
+  /**
+   * El ERP emite, ademas del detalle por cuenta, contrapartidas agrupadas por
+   * familia (conceptos 100/200/300/400/500) con signo contrario. Duplican el
+   * detalle y descuadran el gasto real: en La Quebrada son -22.387 UF, y el
+   * acumulado pasa de 31.208,60 a 8.822 UF si no se filtran.
+   */
+  function conRollups(): XLSX.WorkBook {
+    const wb = buildMockWorkbook()
+    const rows: any[][] = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, defval: null })
+    // Una contrapartida por familia, todas negativas, todas en la unidad 2
+    for (const [cc, uf] of [[100, -1200], [200, -900], [300, -1500], [400, -400], [500, -250]]) {
+      rows.push([
+        'T-RU', 2, 'LA QUEBRADA', `RU-${cc}`, 'ROLL', 3, 2026,
+        '15/03/2026', 38000, null, '76.000.000-0', 'CENTRALIZACION',
+        null, 0, null, uf, null, null,
+        cc, cc, null, null, null, `Rollup familia ${cc}`, '1-2-01-002',
+      ])
+    }
+    const wb2 = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb2, XLSX.utils.aoa_to_sheet(rows), 'Sheet1')
+    return wb2
+  }
+
+  const base = parsearERP(buildMockWorkbook(), 2)
+  const conRoll = parsearERP(conRollups(), 2)
+
+  it('no deja ningun concepto 100/200/300/400/500 en el agregado', () => {
+    const rollups = Object.keys(conRoll.porCentroCosto).map(Number).filter(cc => cc % 100 === 0 && cc <= 500)
+    expect(rollups).toEqual([])
+  })
+
+  it('el total no se mueve: las contrapartidas no restan del gasto real', () => {
+    // -4.250 UF de rollups; sin el filtro el total caeria en esa cantidad
+    expect(conRoll.total_uf).toBeCloseTo(base.total_uf, 2)
+  })
+
+  it('tampoco entran al desglose por mes, que es lo que consume la proyeccion', () => {
+    for (const cc of [100, 200, 300, 400, 500]) {
+      expect(conRoll.porCentroCosto[cc]).toBeUndefined()
+    }
+  })
+
+  it('no cuentan como transacciones de la unidad', () => {
+    expect(conRoll.unidadNegocio.num_filas).toBe(base.unidadNegocio.num_filas)
+  })
+
+  it('avisa de lo excluido, con cantidad y monto', () => {
+    const aviso = conRoll.warnings.find(w => w.includes('rollup'))
+    expect(aviso).toBeDefined()
+    expect(aviso).toMatch(/5 contrapartida/)
+    expect(aviso).toMatch(/-4250\.00 UF/)
   })
 })
 

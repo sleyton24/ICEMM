@@ -12,7 +12,7 @@ export default function SinPartidaPanel({ sinPartida, sinPartidaEnriquecido }: P
   // Use enriched data if available, otherwise fall back to legacy format
   const items = sinPartidaEnriquecido && sinPartidaEnriquecido.length > 0
     ? sinPartidaEnriquecido
-    : sinPartida.filter(s => s.gasto_uf > 0).map(s => ({
+    : sinPartida.map(s => ({
         concepto_codigo: s.concepto1,
         descripcion: '',
         monto_uf: s.gasto_uf,
@@ -20,10 +20,15 @@ export default function SinPartidaPanel({ sinPartida, sinPartidaEnriquecido }: P
         proveedores_top: [] as { razon_social: string; monto_uf: number }[],
       }))
 
-  const positivos = items.filter(s => s.monto_uf > 0)
-  const total = positivos.reduce((s, p) => s + p.monto_uf, 0)
+  // Se muestran también los negativos. Antes se filtraban con `> 0`, y como el
+  // parser tampoco excluía las contrapartidas de rollup, ese filtro hacía
+  // desaparecer decenas de miles de UF de la pantalla sin dejar rastro. Los
+  // rollup ya no entran; un negativo que llegue hasta acá es una nota de
+  // crédito real y hay que verla.
+  const movimientos = [...items].sort((a, b) => Math.abs(b.monto_uf) - Math.abs(a.monto_uf))
+  const total = movimientos.reduce((s, p) => s + p.monto_uf, 0)
 
-  if (positivos.length === 0) return null
+  if (movimientos.length === 0) return null
 
   return (
     <div className="space-y-4">
@@ -46,13 +51,15 @@ export default function SinPartidaPanel({ sinPartida, sinPartidaEnriquecido }: P
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-50">
-            {positivos.map((s, i) => (
+            {movimientos.map((s, i) => (
               <tr key={s.concepto_codigo} className={`hover:bg-teal-light/20 transition-colors ${i % 2 === 1 ? 'bg-gray-50/50' : ''}`}>
                 <td className="px-4 py-3 font-mono font-semibold text-navy">{s.concepto_codigo}</td>
                 <td className="px-4 py-3 text-gray-500 tabular-nums">
                   {s.num_transacciones > 0 ? s.num_transacciones.toLocaleString('es-CL') : '—'}
                 </td>
-                <td className="px-4 py-3 tabular-nums font-semibold text-amber-600">{uf2(s.monto_uf)}</td>
+                <td className={`px-4 py-3 tabular-nums font-semibold ${s.monto_uf < 0 ? 'text-emerald-700' : 'text-amber-600'}`}>
+                  {uf2(s.monto_uf)}
+                </td>
                 <td className="px-4 py-3 text-xs text-gray-500">
                   {s.proveedores_top.length > 0
                     ? s.proveedores_top.map(p => p.razon_social).join(', ')
@@ -65,7 +72,7 @@ export default function SinPartidaPanel({ sinPartida, sinPartidaEnriquecido }: P
           <tfoot className="bg-gray-50 border-t-2 border-gray-200">
             <tr>
               <td colSpan={2} className="px-4 py-2.5 text-[11px] font-bold text-gray-500 uppercase">Total sin partida</td>
-              <td className="px-4 py-2.5 tabular-nums font-bold text-amber-600">UF {uf2(total)}</td>
+              <td className={`px-4 py-2.5 tabular-nums font-bold ${total < 0 ? 'text-emerald-700' : 'text-amber-600'}`}>UF {uf2(total)}</td>
               <td />
             </tr>
           </tfoot>
