@@ -64,6 +64,15 @@ model Project {
   nombre              String
   unidadNegocioCodigo Int?
   cutoffMesReal       String?  // "YYYY-MM"
+
+  // Ficha de obra. Entradas del predictor de curvas de costo; no se derivan de
+  // los archivos cargados. Nullable: los proyectos existentes no las tienen y
+  // el predictor avisa en vez de inventarlas.
+  tipoObra            String?  // "Edificio Habitacional" | "... + Locales Comerciales" | "Casas Habitacionales" | "Hotel"
+  m2                  Float?   // superficie construida
+  plazoMeses          Int?     // plazo contractual
+  montoContratoUF     Float?   // OJO: no es el total del itemizado
+
   fechaCreacion       DateTime @default(now())
   fechaActualizacion  DateTime @updatedAt
   archivos            ArchivoCargado[]

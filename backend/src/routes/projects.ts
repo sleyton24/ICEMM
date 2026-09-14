@@ -1,4 +1,4 @@
-import { Router } from 'express'
+import { Router, type Request } from 'express'
 import { z } from 'zod'
 import { prisma } from '../db.js'
 import { requireRole, assertProjectAccess } from '../middleware/auth.js'
@@ -10,6 +10,27 @@ const router = Router()
 // Sub-routers — assertProjectAccess cierra el IDOR también para informes/comentarios.
 router.use('/:id/informes', assertProjectAccess, informesRouter)
 router.use('/:id/comentarios', assertProjectAccess, comentariosRouter)
+
+/**
+ * Ficha de obra: entradas del predictor de curvas de costo. Todas opcionales —
+ * los proyectos existentes no las tienen y el predictor avisa en vez de
+ * suponer. `montoContratoUF` NO es el total del itemizado.
+ */
+const TIPOS_OBRA = [
+  'Edificio Habitacional',
+  'Edificio Habitacional + Locales Comerciales',
+  'Casas Habitacionales',
+  'Hotel',
+] as const
+
+const CAMPOS_FICHA_OBRA = ['tipoObra', 'm2', 'plazoMeses', 'montoContratoUF'] as const
+
+const fichaObraSchema = {
+  tipoObra: z.enum(TIPOS_OBRA).nullable().optional(),
+  m2: z.number().positive().nullable().optional(),
+  plazoMeses: z.number().int().positive().nullable().optional(),
+  montoContratoUF: z.number().positive().nullable().optional(),
+}
 
 const ITEMIZADO_SLOTS = ['presupuesto_original', 'presupuesto_redistribuido', 'ppto_horas_extra', 'proyectado'] as const
 type ItemizadoSlot = typeof ITEMIZADO_SLOTS[number]
@@ -31,10 +52,14 @@ router.get('/', async (req, res) => {
 })
 
 router.post('/', requireRole('admin', 'editor'), async (req, res) => {
-  const parsed = z.object({ nombre: z.string().min(1) }).safeParse(req.body)
-  if (!parsed.success) return res.status(400).json({ error: 'nombre requerido' })
+  const parsed = z.object({ nombre: z.string().min(1), ...fichaObraSchema }).safeParse(req.body)
+  if (!parsed.success) {
+    return res.status(400).json({ error: 'Datos inválidos', issues: parsed.error.issues })
+  }
+  const negado = fichaNegada(req, parsed.data)
+  if (negado) return res.status(403).json({ error: negado })
   const project = await prisma.project.create({
-    data: { nombre: parsed.data.nombre },
+    data: parsed.data,
     include: { archivos: true, erp: true },
   })
   // Si el creador es editor (no admin), auto-asignárselo para que pueda verlo
@@ -60,8 +85,13 @@ router.patch('/:id', requireRole('admin', 'editor'), assertProjectAccess, async 
     nombre: z.string().optional(),
     cutoffMesReal: z.string().nullable().optional(),
     unidadNegocioCodigo: z.number().int().nullable().optional(),
+    ...fichaObraSchema,
   }).safeParse(req.body)
-  if (!parsed.success) return res.status(400).json({ error: 'Datos inválidos' })
+  if (!parsed.success) {
+    return res.status(400).json({ error: 'Datos inválidos', issues: parsed.error.issues })
+  }
+  const negado = fichaNegada(req, parsed.data)
+  if (negado) return res.status(403).json({ error: negado })
 
   const project = await prisma.project.update({
     where: { id: req.params.id },
@@ -199,6 +229,20 @@ router.post('/:id/erp', requireRole('admin', 'editor'), assertProjectAccess, asy
  * Convert prisma Project (with archivos + erp) → DTO matching frontend Proyecto type.
  * The frontend expects `slots: { presupuesto_original, ... }` shape.
  */
+/**
+ * La ficha de obra alimenta el predictor de curvas, que es un módulo de admin.
+ * El resto del PATCH (nombre, cutoffMesReal) sigue abierto a editores, así que
+ * el control va por campo y no por ruta.
+ *
+ * Devuelve el mensaje de rechazo, o null si puede escribir.
+ */
+function fichaNegada(req: Request, datos: Record<string, unknown>): string | null {
+  const tocaFicha = CAMPOS_FICHA_OBRA.some(c => c in datos && datos[c] !== undefined)
+  if (!tocaFicha) return null
+  if (req.isBeta || req.user?.rol === 'admin') return null
+  return 'La ficha de obra (tipo, m², plazo y monto de contrato) solo la edita un administrador.'
+}
+
 function toProyectoDTO(p: any) {
   const slots: Record<string, any> = {
     presupuesto_original: null,
@@ -242,6 +286,10 @@ function toProyectoDTO(p: any) {
     nombre: p.nombre,
     unidadNegocioCodigo: p.unidadNegocioCodigo ?? undefined,
     cutoffMesReal: p.cutoffMesReal ?? null,
+    tipoObra: p.tipoObra ?? null,
+    m2: p.m2 ?? null,
+    plazoMeses: p.plazoMeses ?? null,
+    montoContratoUF: p.montoContratoUF ?? null,
     fechaCreacion: p.fechaCreacion.toISOString(),
     fechaActualizacion: p.fechaActualizacion.toISOString(),
     slots,

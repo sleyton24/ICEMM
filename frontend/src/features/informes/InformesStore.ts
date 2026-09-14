@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { api } from '../../api/client'
 import type { InformeListItem, InformeFull, InformeView } from './types'
+import { esDemoMode } from '../demo/demoMode'
 
 interface InformesState {
   /** Por proyecto: lista de informes aprobados */
@@ -37,6 +38,11 @@ export const useInformesStore = create<InformesState>((set, get) => ({
   viewPorProyecto: loadViews(),
 
   fetchInformes: async (projectId: string) => {
+    // En demo no hay backend: las obras de ejemplo solo tienen borrador.
+    if (esDemoMode()) {
+      set(state => ({ porProyecto: { ...state.porProyecto, [projectId]: [] } }))
+      return
+    }
     const informes = await api.get<InformeListItem[]>(`/projects/${projectId}/informes`)
     set(state => ({
       porProyecto: { ...state.porProyecto, [projectId]: informes },
@@ -46,6 +52,7 @@ export const useInformesStore = create<InformesState>((set, get) => ({
   fetchSnapshot: async (projectId: string, informeId: string) => {
     const cached = get().snapshots[informeId]
     if (cached) return cached
+    if (esDemoMode()) throw new Error('Sin informes aprobados en modo demo')
     const snap = await api.get<InformeFull>(`/projects/${projectId}/informes/${informeId}`)
     set(state => ({ snapshots: { ...state.snapshots, [informeId]: snap } }))
     return snap

@@ -6,6 +6,7 @@ import Top5Chart from './components/Top5Chart'
 import FamiliaCharts from './components/FamiliaCharts'
 import SinPartidaPanel from './components/SinPartidaPanel'
 import DirectorioReport from './components/DirectorioReport'
+import PrediccionPanel from './features/prediccion/PrediccionPanel'
 import ProjectSwitcher from './features/projects/ProjectSwitcher'
 import AdminPlanCuentasPage from './features/plan-cuentas/AdminPlanCuentasPage'
 import CutoffMesFilter from './features/projects/CutoffMesFilter'
@@ -13,8 +14,22 @@ import AuthGate from './features/auth/AuthGate'
 import AdminUsersPage from './features/auth/AdminUsersPage'
 import InformeSelector from './features/informes/InformeSelector'
 import { useCurrentUser } from './features/auth/useCurrentUser'
+import { esDemoMode, salirDemo } from './features/demo/demoMode'
 
-type Tab = 'tabla' | 'familias' | 'top5' | 'directorio'
+type Tab = 'tabla' | 'familias' | 'top5' | 'prediccion' | 'directorio'
+
+/**
+ * Pestañas del dashboard. `soloAdmin` esconde la pestaña del resto de los
+ * perfiles — es una restricción de interfaz, no de autorización: los datos que
+ * usa el módulo son los mismos que ya ve cualquiera con acceso al proyecto.
+ */
+const TABS: { id: Tab; label: string; soloAdmin?: boolean }[] = [
+  { id: 'tabla',      label: 'Tabla de Control' },
+  { id: 'familias',   label: 'Gráficos por Familia' },
+  { id: 'top5',       label: 'Top 5 Sobrecosto' },
+  { id: 'prediccion', label: 'Proyección de Curva', soloAdmin: true },
+  { id: 'directorio', label: 'Directorio' },
+]
 
 export default function App() {
   const [tab, setTab] = useState<Tab>('tabla')
@@ -22,6 +37,12 @@ export default function App() {
   const [showUsersAdmin, setShowUsersAdmin] = useState(false)
   const data = useDashboardData()
   const { user, esAdmin, esDirector } = useCurrentUser()
+  const demo = esDemoMode()
+
+  // Pestaña efectiva: si el perfil no tiene acceso a la que está abierta (rol
+  // cambiado, sesión vieja), se muestra la primera en vez de un panel en blanco.
+  // Se deriva en vez de corregir el estado, para no hacer setState en render.
+  const tabActiva: Tab = TABS.some(t => t.id === tab && (!t.soloAdmin || esAdmin)) ? tab : 'tabla'
 
   if (showAdmin) {
     return <AuthGate><AdminPlanCuentasPage onBack={() => setShowAdmin(false)} /></AuthGate>
@@ -67,6 +88,7 @@ export default function App() {
                 </div>
                 <button
                   onClick={() => {
+                    if (demo) { salirDemo(); return }
                     localStorage.removeItem('icemm.mock.user')
                     localStorage.removeItem('icemm.auth.token')
                     window.location.reload()
@@ -86,8 +108,15 @@ export default function App() {
 
         {/* Demo banner */}
         {data.isDemo && (
-          <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-lg px-4 py-2 text-xs text-amber-700">
-            <span className="font-bold">Demo</span> — Datos de ejemplo. Crea un proyecto y carga un archivo Excel para datos reales.
+          <div className="flex flex-wrap items-center gap-2 bg-amber-50 border border-amber-200 rounded-lg px-4 py-2 text-xs text-amber-700">
+            <span className="font-bold uppercase tracking-wider">Modo demo</span>
+            <span>
+              Datos de ejemplo generados en el navegador — <strong>no</strong> son cifras reales de ninguna obra.
+              No hay conexión al backend: cargar archivos y guardar comentarios no va a funcionar.
+            </span>
+            <button onClick={salirDemo} className="ml-auto font-medium underline hover:text-amber-900 transition-colors">
+              Salir de la demo
+            </button>
           </div>
         )}
 
@@ -96,17 +125,12 @@ export default function App() {
         {/* Tabs */}
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
           <nav className="flex border-b border-gray-100">
-            {([
-              { id: 'tabla',     label: 'Tabla de Control' },
-              { id: 'familias',  label: 'Gráficos por Familia' },
-              { id: 'top5',      label: 'Top 5 Sobrecosto' },
-              { id: 'directorio', label: 'Directorio' },
-            ] as { id: Tab; label: string }[]).map(t => (
+            {TABS.filter(t => !t.soloAdmin || esAdmin).map(t => (
               <button
                 key={t.id}
                 onClick={() => setTab(t.id)}
                 className={`px-5 py-3 text-sm font-medium transition-all relative
-                  ${tab === t.id
+                  ${tabActiva === t.id
                     ? 'text-navy after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[2px] after:bg-accent'
                     : 'text-gray-400 hover:text-navy'}`}
               >
@@ -116,10 +140,11 @@ export default function App() {
           </nav>
 
           <div className="p-5">
-            {tab === 'tabla'    && <TablaControl partidas={data.partidas} movimientos={data.movimientos} detallePartidas={data.detallePartidas} familias={data.familias} proyeccionAnteriorPorCodigo={data.proyeccionAnteriorPorCodigo} variacionAnteriorPorCodigo={data.variacionAnteriorPorCodigo} partidasAnteriorMeta={data.partidasAnteriorMeta} esVistaAprobada={data.esVistaAprobada} numeroInforme={data.numeroInforme} />}
-            {tab === 'familias' && <FamiliaCharts partidas={data.partidas} sinPartida={data.sinPartida} familias={data.familias} />}
-            {tab === 'top5'      && <Top5Chart partidas={data.partidas} />}
-            {tab === 'directorio' && <DirectorioReport />}
+            {tabActiva === 'tabla'    && <TablaControl partidas={data.partidas} movimientos={data.movimientos} detallePartidas={data.detallePartidas} familias={data.familias} proyeccionAnteriorPorCodigo={data.proyeccionAnteriorPorCodigo} variacionAnteriorPorCodigo={data.variacionAnteriorPorCodigo} partidasAnteriorMeta={data.partidasAnteriorMeta} esVistaAprobada={data.esVistaAprobada} numeroInforme={data.numeroInforme} />}
+            {tabActiva === 'familias' && <FamiliaCharts partidas={data.partidas} sinPartida={data.sinPartida} familias={data.familias} />}
+            {tabActiva === 'top5'      && <Top5Chart partidas={data.partidas} />}
+            {tabActiva === 'prediccion' && <PrediccionPanel />}
+            {tabActiva === 'directorio' && <DirectorioReport />}
           </div>
         </div>
 

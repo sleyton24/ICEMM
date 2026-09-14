@@ -2,6 +2,9 @@ import { create } from 'zustand'
 import { api } from '../../api/client'
 import type { Proyecto, ArchivoCargado, CargaERP, SlotTipo } from './types'
 
+/** Campos de la ficha de obra que alimentan el predictor. */
+export type FichaObra = Pick<Proyecto, 'tipoObra' | 'm2' | 'plazoMeses' | 'montoContratoUF'>
+
 const ACTIVE_KEY = 'icemm.activeProjectId'
 
 function loadActiveId(): string | null {
@@ -25,9 +28,12 @@ interface ProjectsState {
 
   // Actions (todas async — hablan al backend)
   fetchProjects: () => Promise<void>
-  createProject: (nombre: string) => Promise<Proyecto>
+  createProject: (nombre: string, ficha?: FichaObra) => Promise<Proyecto>
+  actualizarFicha: (projectId: string, ficha: FichaObra) => Promise<void>
   deleteProject: (id: string) => Promise<void>
   setActiveProject: (id: string | null) => void
+  /** Carga proyectos de demo en memoria, sin tocar el backend (ver features/demo). */
+  seedDemo: (proyectos: Proyecto[]) => void
   uploadSlot: (projectId: string, slot: ItemizadoSlot, data: ArchivoCargado) => Promise<void>
   uploadERPSlot: (projectId: string, data: CargaERP) => Promise<void>
   clearSlot: (projectId: string, slot: SlotTipo) => Promise<void>
@@ -61,8 +67,8 @@ export const useProjectsStore = create<ProjectsState>((set, get) => ({
     }
   },
 
-  createProject: async (nombre: string) => {
-    const proyecto = await api.post<Proyecto>('/projects', { nombre })
+  createProject: async (nombre: string, ficha?: FichaObra) => {
+    const proyecto = await api.post<Proyecto>('/projects', { nombre, ...(ficha ?? {}) })
     saveActiveId(proyecto.id)
     set(state => ({ projects: [proyecto, ...state.projects], activeProjectId: proyecto.id }))
     return proyecto
@@ -83,6 +89,12 @@ export const useProjectsStore = create<ProjectsState>((set, get) => ({
   setActiveProject: (id: string | null) => {
     saveActiveId(id)
     set({ activeProjectId: id })
+  },
+
+  seedDemo: (proyectos: Proyecto[]) => {
+    // No se persiste activeProjectId: la demo no debe pisar la seleccion real
+    // del usuario cuando vuelva a entrar sin ?demo=1.
+    set({ projects: proyectos, activeProjectId: proyectos[0]?.id ?? null, loading: false, error: null })
   },
 
   uploadSlot: async (projectId: string, slot: ItemizadoSlot, data: ArchivoCargado) => {
@@ -119,6 +131,13 @@ export const useProjectsStore = create<ProjectsState>((set, get) => ({
     await api.delete(`/projects/${projectId}/slots/${slot}`)
     // Refetch para reflejar el cambio
     const updated = await api.get<Proyecto>(`/projects/${projectId}`)
+    set(state => ({
+      projects: state.projects.map(p => p.id === projectId ? updated : p),
+    }))
+  },
+
+  actualizarFicha: async (projectId: string, ficha: FichaObra) => {
+    const updated = await api.patch<Proyecto>(`/projects/${projectId}`, ficha)
     set(state => ({
       projects: state.projects.map(p => p.id === projectId ? updated : p),
     }))

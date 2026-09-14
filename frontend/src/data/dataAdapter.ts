@@ -3,6 +3,7 @@ import { usePlanCuentasStore } from '../features/plan-cuentas/PlanCuentasStore'
 import { useInformesStore } from '../features/informes/InformesStore'
 import type { MovimientoSinPartida, Proyecto } from '../features/projects/types'
 import { mergeProyecto, type PartidaMerged } from '../features/data-upload/parser/mergeProyecto'
+import { esDemoMode } from '../features/demo/demoMode'
 import {
   FAMILIAS as mockFamilias,
   type Partida,
@@ -91,7 +92,7 @@ export function useDashboardData(): DashboardData {
     detallePartidas: {},
     familias: mockFamilias,
     fechaCorte: new Date().toISOString().slice(0, 10),
-    isDemo: false,
+    isDemo: esDemoMode(),
     projectName: activeProject?.nombre ?? 'Sin proyecto',
     proyeccionAnteriorPorCodigo: {},
     variacionAnteriorPorCodigo: {},
@@ -167,7 +168,7 @@ export function useDashboardData(): DashboardData {
     detallePartidas: {},
     familias,
     fechaCorte,
-    isDemo: false,
+    isDemo: esDemoMode(),
     projectName: activeProject.nombre,
     proyeccionAnteriorPorCodigo,
     variacionAnteriorPorCodigo,

@@ -4,10 +4,13 @@ import { api, setToken } from '../../api/client'
 import { useCurrentUserStore } from './useCurrentUser'
 import { useProjectsStore } from '../projects/ProjectsStore'
 import { usePlanCuentasStore } from '../plan-cuentas/PlanCuentasStore'
+import { esDemoMode, rolDemo } from '../demo/demoMode'
+import { crearProyectosDemo, USUARIO_DEMO } from '../demo/demoFixture'
 
 type AuthState =
   | { status: 'loading' }
   | { status: 'beta' }                      // backend en BETA_MODE — no se requiere login
+  | { status: 'demo' }                      // ?demo=1 — datos de ejemplo, sin backend
   | { status: 'authed'; user: AuthUser }
   | { status: 'login' }
   | { status: 'error'; message: string }
@@ -48,6 +51,16 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
   const clearCurrentUser = useCurrentUserStore(s => s.clear)
 
   const checkAuth = async () => {
+    // Modo demo (?demo=1): datos de ejemplo en memoria, sin backend ni login.
+    // Va primero para que la demo funcione aunque el servidor no responda.
+    if (esDemoMode()) {
+      setCurrentUser({ ...USUARIO_DEMO, rol: rolDemo() }, false)
+      useProjectsStore.getState().seedDemo(crearProyectosDemo())
+      // El plan de cuentas bundled ya es el estado inicial del store: no se pide al backend.
+      setState({ status: 'demo' })
+      return
+    }
+
     // Modo preview del login UI: ignora BETA, muestra login con cuentas mock
     if (FORCE_LOGIN_UI) {
       const stored = localStorage.getItem('icemm.mock.user')

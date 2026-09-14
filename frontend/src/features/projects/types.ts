@@ -9,6 +9,15 @@ export type FamiliaCanonica =
   | 'POST VENTA'
   | 'GASTOS OFICINA CENTRAL'
 
+/** Tipos de obra que conoce el modelo de curvas. */
+export const TIPOS_OBRA = [
+  'Edificio Habitacional',
+  'Edificio Habitacional + Locales Comerciales',
+  'Casas Habitacionales',
+  'Hotel',
+] as const
+export type TipoObra = typeof TIPOS_OBRA[number]
+
 export type EstadoPartida = 'CRITICO' | 'ALERTA' | 'EN CONTROL' | 'FAVORABLE' | 'SIN EJECUCION' | 'SOLO REAL'
 
 export type SlotTipo = 'presupuesto_original' | 'presupuesto_redistribuido' | 'ppto_horas_extra' | 'gasto_real_erp' | 'proyectado'
@@ -95,6 +104,17 @@ export interface Proyecto {
   unidadNegocioCodigo?: number      // se setea al primer upload de ERP
   /** Filtro de fecha para gasto real: "YYYY-MM" mostrando hasta ese mes inclusive. null = todos */
   cutoffMesReal?: string | null
+
+  // ── Ficha de obra ─────────────────────────────────────────────────────────
+  // Entradas del predictor de curvas de costo. No se derivan de los archivos:
+  // hay que capturarlas. Null en los proyectos creados antes de la ficha.
+  tipoObra?: TipoObra | null
+  /** Superficie construida. */
+  m2?: number | null
+  /** Plazo contractual en meses. */
+  plazoMeses?: number | null
+  /** Monto de contrato. OJO: no es el total del itemizado. */
+  montoContratoUF?: number | null
   fechaCreacion: string
   fechaActualizacion: string
   slots: {
