@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Upload } from 'lucide-react'
 import { useDashboardData } from './data/dataAdapter'
 import KpiCards from './components/KpiCards'
+import ResumenObra from './features/resumen/ResumenObra'
 import TablaControl from './components/TablaControl'
 import Top5Chart from './components/Top5Chart'
 import FamiliaCharts from './components/FamiliaCharts'
@@ -21,7 +22,7 @@ import { esDemoMode, salirDemo } from './features/demo/demoMode'
 import TemaToggle from './features/tema/TemaToggle'
 import { useTemaStore } from './features/tema/TemaStore'
 
-type Seccion = 'costos' | 'familias' | 'top5' | 'prediccion' | 'directorio'
+type Seccion = 'resumen' | 'costos' | 'familias' | 'top5' | 'prediccion' | 'directorio'
 
 /**
  * Secciones de la barra superior.
@@ -31,6 +32,7 @@ type Seccion = 'costos' | 'familias' | 'top5' | 'prediccion' | 'directorio'
  * los mismos que ya ve cualquiera con acceso al proyecto.
  */
 const SECCIONES: { id: Seccion; label: string; soloAdmin?: boolean }[] = [
+  { id: 'resumen',    label: 'Resumen' },
   { id: 'costos',     label: 'Costos' },
   { id: 'familias',   label: 'Familias' },
   { id: 'top5',       label: 'Top 5' },
@@ -47,7 +49,7 @@ const SECCIONES: { id: Seccion; label: string; soloAdmin?: boolean }[] = [
 const ANCHO = 'max-w-[1560px] mx-auto px-8'
 
 export default function App() {
-  const [seccion, setSeccion] = useState<Seccion>('costos')
+  const [seccion, setSeccion] = useState<Seccion>('resumen')
   const [showAdmin, setShowAdmin] = useState(false)
   const [showUsersAdmin, setShowUsersAdmin] = useState(false)
   const [showUpload, setShowUpload] = useState(false)
@@ -64,7 +66,7 @@ export default function App() {
   // Se deriva en vez de corregir el estado, para no hacer setState en render.
   const activa: Seccion = SECCIONES.some(s => s.id === seccion && (!s.soloAdmin || esAdmin))
     ? seccion
-    : 'costos'
+    : 'resumen'
 
   if (showAdmin) {
     return <AuthGate><AdminPlanCuentasPage onBack={() => setShowAdmin(false)} /></AuthGate>
@@ -181,10 +183,13 @@ export default function App() {
           </div>
         )}
 
-        <KpiCards partidas={data.partidas} fechaCorte={data.fechaCorte} />
+        {activa !== 'resumen' && (
+          <KpiCards partidas={data.partidas} fechaCorte={data.fechaCorte} />
+        )}
 
         {/* El contenido va directo sobre la superficie: cada sección trae sus
             propios paneles y la tarjeta que los envolvía sumaba un borde de más. */}
+        {activa === 'resumen'    && <ResumenObra partidas={data.partidas} fechaCorte={data.fechaCorte} conProyeccion={esAdmin} onIrACostos={() => setSeccion('costos')} />}
         {activa === 'costos'     && <TablaControl partidas={data.partidas} movimientos={data.movimientos} detallePartidas={data.detallePartidas} familias={data.familias} proyeccionAnteriorPorCodigo={data.proyeccionAnteriorPorCodigo} variacionAnteriorPorCodigo={data.variacionAnteriorPorCodigo} partidasAnteriorMeta={data.partidasAnteriorMeta} esVistaAprobada={data.esVistaAprobada} numeroInforme={data.numeroInforme} />}
         {activa === 'familias'   && <div className="bg-panel rounded-xl border border-gray-200 p-5"><FamiliaCharts partidas={data.partidas} sinPartida={data.sinPartida} familias={data.familias} /></div>}
         {activa === 'top5'       && <div className="bg-panel rounded-xl border border-gray-200 p-5"><Top5Chart partidas={data.partidas} /></div>}
