@@ -9,6 +9,8 @@ export interface ParametrosObra {
   /** Etiquetas legibles de lo que falta capturar. */
   faltantes: string[]
   serieReal: SerieRealMensual[]
+  /** La misma serie por familia del modelo, sobre el mismo rango de meses. */
+  serieRealPorFamilia: Record<string, SerieRealMensual[]>
   /** Primer mes con costo dentro del perímetro. */
   inicio: string | null
   excluido: { oficinaCentral: number; rollup: number; otros: number }
@@ -49,7 +51,10 @@ export function parametrosObra(
   const erp = proyecto.slots.gasto_real_erp
   const real = erp
     ? serieRealDesdeERP(erp, plan, { cutoffMes: proyecto.cutoffMesReal ?? null })
-    : { serie: [], inicio: null, corte: null, excluido: { oficinaCentral: 0, rollup: 0, otros: 0 }, advertencias: [] }
+    : {
+        serie: [], porFamilia: {}, inicio: null, corte: null,
+        excluido: { oficinaCentral: 0, rollup: 0, otros: 0 }, advertencias: [],
+      }
 
   const faltantes: string[] = []
   for (const campo of ['tipoObra', 'm2', 'plazoMeses', 'montoContratoUF'] as const) {
@@ -83,6 +88,7 @@ export function parametrosObra(
     obra,
     faltantes,
     serieReal: real.serie,
+    serieRealPorFamilia: real.porFamilia,
     inicio,
     excluido: real.excluido,
     advertencias,

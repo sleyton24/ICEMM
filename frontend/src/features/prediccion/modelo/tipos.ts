@@ -61,6 +61,13 @@ export interface OpcionesProyeccion {
   rdur?: number
   /** Nombres de las obras base a considerar. Por defecto, todas. */
   obrasActivas?: string[]
+  /**
+   * Proyectar una sola familia (clave de curvas-base: 'materiales',
+   * 'subcontratos', …) en vez de la obra completa. Cada familia tiene su
+   * propia curva y su propio calendario: Materiales gasta temprano,
+   * Subcontratos tarde. Sin esto se proyecta la obra entera.
+   */
+  familia?: string
 }
 
 export interface PuntoMensual {
@@ -99,7 +106,10 @@ export interface Comparable {
 export interface Proyeccion {
   obra: ObraInput
   opciones: Required<Pick<OpcionesProyeccion, 'lead' | 'skew' | 'modoPesos' | 'kRecencia'>>
-  /** Costo total proyectado = contrato × ejec. */
+  /**
+   * Costo total proyectado. Para la obra completa es contrato × ejec; en modo
+   * familia es la parte que le toca a esa familia (× su participación).
+   */
   total: number
   ejec: number
   ejecAuto: number
@@ -112,6 +122,8 @@ export interface Proyeccion {
   /** Dispersión del factor de ejecución entre las obras base. */
   sdE: number
   mix: Record<string, number>
+  /** Clave de la familia proyectada, o null si es la obra completa. */
+  familia: string | null
   meses: PuntoMensual[]
   comparables: Comparable[]
   /**

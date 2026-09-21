@@ -33,6 +33,13 @@ export function proyectar(obra: ObraInput, opciones: OpcionesProyeccion = {}): P
   const modoPesos = opciones.modoPesos ?? 'simil'
   const kRecencia = opciones.kRecencia ?? 1.0
 
+  const familia = opciones.familia ?? null
+  if (familia && !FAMILIAS_MODELO.includes(familia)) {
+    throw new Error(
+      `Familia desconocida "${familia}". El modelo solo tiene curva para: ${FAMILIAS_MODELO.join(', ')}.`,
+    )
+  }
+
   const OB = curvasBase.obras
   const { pesos: w, masa } = pesos(obra, OB, {
     modo: modoPesos,
@@ -57,8 +64,13 @@ export function proyectar(obra: ObraInput, opciones: OpcionesProyeccion = {}): P
   const sdE = Math.sqrt(acum(o => Math.pow(o.ejec - ejecAuto, 2)))
 
   // ── Paso 4: curva mezclada y dispersión ─────────────────────────────────
-  const cs = GRID.map((_, g) => acum(o => o.curva_s[g]))
-  const sd = GRID.map((_, g) => Math.sqrt(acum(o => Math.pow(o.curva_s[g] - cs[g], 2))))
+  // En modo familia se usan la curva y la dispersión DE ESA FAMILIA, que el
+  // artefacto trae por obra. No es la curva de la obra reescalada: cada
+  // familia tiene su propio calendario (Materiales gasta al 39% del ciclo,
+  // Subcontratos al 53%), y ese desfase es justamente lo que se quiere ver.
+  const curvaDe = (o: typeof OB[number]) => (familia ? o.fam[familia].curva : o.curva_s)
+  const cs = GRID.map((_, g) => acum(o => curvaDe(o)[g]))
+  const sd = GRID.map((_, g) => Math.sqrt(acum(o => Math.pow(curvaDe(o)[g] - cs[g], 2))))
 
   const mix: Record<string, number> = {}
   const fcur: Record<string, number[]> = {}
@@ -66,6 +78,11 @@ export function proyectar(obra: ObraInput, opciones: OpcionesProyeccion = {}): P
     mix[f] = acum(o => o.fam[f].share)
     fcur[f] = GRID.map((_, g) => acum(o => o.fam[f].curva[g]))
   }
+
+  // El total a repartir: la obra entera, o lo que le toca a la familia.
+  const totalCurva = familia ? total * mix[familia] : total
+  // En modo familia solo se recorre esa clave, así no hay que reconciliar nada.
+  const clavesFamilia = familia ? [familia] : FAMILIAS_MODELO
 
   // ── Paso 5: serie mensual ───────────────────────────────────────────────
   // El arranque efectivo se define como el cruce del 1% de avance, así que los
@@ -79,7 +96,7 @@ export function proyectar(obra: ObraInput, opciones: OpcionesProyeccion = {}): P
     const t = j <= lead ? 0 : skewT((j - lead) / N, skew)
     const familias: Record<string, number> = {}
     let acumTotal = 0
-    for (const f of FAMILIAS_MODELO) {
+    for (const f of clavesFamilia) {
       const v = j <= lead ? b0 * (j / lead) : b0 + (1 - b0) * interp(fcur[f], t)
       familias[f] = total * mix[f] * v
       acumTotal += familias[f]
@@ -102,17 +119,18 @@ export function proyectar(obra: ObraInput, opciones: OpcionesProyeccion = {}): P
   }
 
   // Las cinco curvas de familia no cierran exactamente en `total`: se reescala.
+  // En modo familia hay una sola curva y cierra sola, así que el factor da 1.
   const cierre = meses[NT - 1].acum || 1
-  const k = total / cierre
+  const k = totalCurva / cierre
   for (const r of meses) {
-    for (const f of FAMILIAS_MODELO) r.familias[f] *= k
+    for (const f of clavesFamilia) r.familias[f] *= k
     r.acum *= k
   }
   meses.forEach((r, idx) => {
     const prev = idx ? meses[idx - 1] : null
     r.mes = r.acum - (prev ? prev.acum : 0)
-    r.pctAcum = r.acum / total
-    for (const f of FAMILIAS_MODELO) {
+    r.pctAcum = r.acum / totalCurva
+    for (const f of clavesFamilia) {
       r.familiasMes[f] = r.familias[f] - (prev ? prev.familias[f] : 0)
     }
   })
@@ -144,7 +162,7 @@ export function proyectar(obra: ObraInput, opciones: OpcionesProyeccion = {}): P
   return {
     obra,
     opciones: { lead, skew, modoPesos, kRecencia },
-    total, ejec, ejecAuto, rdur, rdurAuto, N, NT, sdE, mix,
-    meses, comparables, masaSimilitud: masa, advertencias,
+    total: totalCurva, ejec, ejecAuto, rdur, rdurAuto, N, NT, sdE, mix,
+    familia, meses, comparables, masaSimilitud: masa, advertencias,
   }
 }

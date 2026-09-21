@@ -11,6 +11,7 @@ import { parametrosObra } from './datos/parametrosObra'
 import { proyectar } from './modelo/proyectar'
 import { repronosticar } from './modelo/repronostico'
 import type { Escenario } from './modelo/tipos'
+import { FAMILIAS_MODELO, familiaPorClave } from './modelo/familias'
 import FichaObraForm from './FichaObraForm'
 
 const uf0 = (n: number) => n.toLocaleString('es-CL', { maximumFractionDigits: 0 })
@@ -32,12 +33,24 @@ export default function PrediccionPanel() {
   const [skew, setSkew] = useState(0)
   const [escenario, setEscenario] = useState<Escenario>('plazo')
   const [usarEjecObra, setUsarEjecObra] = useState(false)
+  // null = la obra completa; si no, la clave de la familia del modelo.
+  const [familia, setFamilia] = useState<string | null>(null)
   const [editandoFicha, setEditandoFicha] = useState(false)
 
   const totalProyectadoObra = useMemo(
     () => data.partidas.reduce((s, p) => s + p.proyeccion, 0),
     [data.partidas],
   )
+
+  /** Lo que la obra proyecta para la familia elegida, para contrastar. */
+  const proyectadoObraSeleccion = useMemo(() => {
+    if (!familia) return totalProyectadoObra
+    const codigo = familiaPorClave(familia)?.codigo
+    if (!codigo) return 0
+    return data.partidas
+      .filter(p => Math.floor(Number(p.codigo2) / 100) * 100 === codigo)
+      .reduce((s, p) => s + p.proyeccion, 0)
+  }, [familia, data.partidas, totalProyectadoObra])
 
   const params = useMemo(
     () => proyecto ? parametrosObra(proyecto, plan, totalProyectadoObra) : null,
@@ -48,14 +61,15 @@ export default function PrediccionPanel() {
     if (!params?.obra) return null
     try {
       const ejec = usarEjecObra && params.ejecSegunObra ? params.ejecSegunObra : undefined
-      const p = proyectar(params.obra, { lead, skew, ejec })
-      if (params.serieReal.length === 0) return { proy: p, repro: null, error: null }
-      const r = repronosticar(p, params.serieReal, { mesCorte: params.serieReal.length, escenario })
+      const p = proyectar(params.obra, { lead, skew, ejec, familia: familia ?? undefined })
+      const real = familia ? (params.serieRealPorFamilia[familia] ?? []) : params.serieReal
+      if (real.length === 0) return { proy: p, repro: null, error: null }
+      const r = repronosticar(p, real, { mesCorte: real.length, escenario })
       return { proy: p, repro: r, error: null }
     } catch (e) {
       return { proy: null, repro: null, error: e instanceof Error ? e.message : String(e) }
     }
-  }, [params, lead, skew, escenario, usarEjecObra])
+  }, [params, lead, skew, escenario, usarEjecObra, familia])
 
   if (!proyecto) {
     return <p className="text-center text-sm text-gray-400 py-12">Seleccioná una obra para proyectar.</p>
@@ -96,7 +110,7 @@ export default function PrediccionPanel() {
 
   const proy = resultado!.proy!
   const repro = resultado!.repro
-  const serieReal = params.serieReal
+  const serieReal = familia ? (params.serieRealPorFamilia[familia] ?? []) : params.serieReal
   const advertencias = [...(repro?.advertencias ?? proy.advertencias), ...params.advertencias]
 
   const chartData = proy.meses.map((m, i) => ({
@@ -111,7 +125,13 @@ export default function PrediccionPanel() {
   }))
 
   const cierreModelo = repro ? repro.reproyeccion.totalNuevo : proy.total
-  const brechaObra = totalProyectadoObra > 0 ? cierreModelo - totalProyectadoObra : null
+  const proyObra = proyectadoObraSeleccion
+  const brechaObra = proyObra > 0 ? cierreModelo - proyObra : null
+  const famActual = familia ? familiaPorClave(familia) : null
+  const ambito = famActual ? famActual.etiqueta.toLowerCase() : 'la obra completa'
+  // En modo familia el contrato no es el divisor correcto: lo que corresponde
+  // es la parte del contrato que le toca a esa familia según el mix histórico.
+  const baseContrato = familia ? proy.obra.contrato * proy.mix[familia] : proy.obra.contrato
 
   return (
     <div className="space-y-5">
@@ -127,16 +147,50 @@ export default function PrediccionPanel() {
         </div>
       )}
 
+      {/* ── Selector de ámbito: obra completa o una familia ──────────── */}
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-[11px] font-medium text-gray-400 uppercase tracking-wider mr-1">Proyectar</span>
+        <button
+          onClick={() => setFamilia(null)}
+          className={`text-[11px] px-3 py-1.5 rounded-full font-medium transition-all ${
+            familia === null
+              ? 'bg-navy text-white shadow-sm'
+              : 'bg-white text-gray-500 border border-gray-200 hover:border-gray-300 hover:text-navy'}`}>
+          Toda la obra
+        </button>
+        {FAMILIAS_MODELO.map(f => {
+          const activa = familia === f.clave
+          return (
+            <button
+              key={f.clave}
+              onClick={() => setFamilia(f.clave)}
+              title={`Cuentas ${f.codigo}–${f.codigo + 99}`}
+              className={`flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-full font-medium transition-all ${
+                activa
+                  ? 'bg-navy text-white shadow-sm'
+                  : 'bg-white text-gray-500 border border-gray-200 hover:border-gray-300 hover:text-navy'}`}>
+              <span className={`tabular-nums ${activa ? 'text-white/50' : 'text-gray-300'}`}>{f.codigo}</span>
+              {f.etiqueta}
+            </button>
+          )
+        })}
+      </div>
+
       {/* ── KPIs ─────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <Kpi label="Cierre proyectado — modelo" valor={`UF ${uf0(cierreModelo)}`}
-             sub={`contrato × ${proy.ejec.toFixed(3)}`} acento="#233032" />
-        <Kpi label="Cierre proyectado — obra" valor={totalProyectadoObra > 0 ? `UF ${uf0(totalProyectadoObra)}` : '—'}
-             sub={totalProyectadoObra > 0 ? `contrato × ${(totalProyectadoObra / proy.obra.contrato).toFixed(3)}` : 'sin slot proyectado'}
+        <Kpi label={famActual ? `Cierre ${famActual.etiqueta} — modelo` : 'Cierre proyectado — modelo'}
+             valor={`UF ${uf0(cierreModelo)}`}
+             sub={famActual
+               ? `${pct1(proy.mix[familia!])} del contrato × ${proy.ejec.toFixed(3)}`
+               : `contrato × ${proy.ejec.toFixed(3)}`}
+             acento="#233032" />
+        <Kpi label={famActual ? `Cierre ${famActual.etiqueta} — obra` : 'Cierre proyectado — obra'}
+             valor={proyObra > 0 ? `UF ${uf0(proyObra)}` : '—'}
+             sub={proyObra > 0 ? `× ${(proyObra / baseContrato).toFixed(3)} sobre esa base` : 'sin slot proyectado'}
              acento="#809494" />
         <Kpi label="Brecha entre ambos" valor={brechaObra !== null ? `UF ${uf0(Math.abs(brechaObra))}` : '—'}
              sub={brechaObra !== null ? (brechaObra < 0 ? 'el modelo proyecta menos' : 'el modelo proyecta más') : ''}
-             acento={brechaObra !== null && Math.abs(brechaObra) > proy.sdE * proy.obra.contrato * 1.2816 ? '#E00544' : '#253136'} />
+             acento={brechaObra !== null && Math.abs(brechaObra) > proy.sdE * baseContrato * 1.2816 ? '#E00544' : '#253136'} />
         <Kpi label="Duración estimada" valor={`${proy.NT} meses`}
              sub={`${proy.N} efectivos + ${proy.opciones.lead} de arranque`} acento="#101820" />
       </div>
@@ -144,9 +198,12 @@ export default function PrediccionPanel() {
       {/* ── Gráfico ──────────────────────────────────────────────────── */}
       <div className="rounded-lg border border-gray-200 overflow-hidden">
         <div className="px-5 py-3 bg-navy">
-          <h2 className="text-sm font-semibold text-white font-slab">CURVA DE COSTO ACUMULADO</h2>
+          <h2 className="text-sm font-semibold text-white font-slab">
+            CURVA DE COSTO ACUMULADO{famActual ? ` — ${famActual.etiqueta.toUpperCase()}` : ''}
+          </h2>
           <p className="text-[11px] text-white/50">
-            {proy.obra.nombre} · {serieReal.length} meses observados de {proy.NT}
+            {proy.obra.nombre} · {serieReal.length} meses observados de {proy.NT} · proyectando {ambito}
+            {famActual && ` (cuentas ${famActual.codigo}–${famActual.codigo + 99})`}
           </p>
         </div>
         <div className="p-4">
@@ -173,6 +230,19 @@ export default function PrediccionPanel() {
                     connectNulls={false} />
             </ComposedChart>
           </ResponsiveContainer>
+
+          {famActual && (
+            <div className="flex items-start gap-2 mt-2 text-[11px] text-gray-500 bg-surface border border-gray-200 rounded-lg px-3 py-2">
+              <Info className="h-3.5 w-3.5 flex-shrink-0 mt-0.5 text-teal-muted" />
+              <span>
+                Esta es la curva propia de {famActual.etiqueta.toLowerCase()}, no la de la obra
+                reescalada: cada familia tiene su calendario. El modelo llega hasta este nivel —
+                bajar a la cuenta individual ({famActual.codigo + 1}, {famActual.codigo + 2}…)
+                necesita el costo por cuenta de las siete obras históricas que faltan en el
+                consolidado.
+              </span>
+            </div>
+          )}
 
           <div className="flex items-start gap-2 mt-2 text-[11px] text-gray-500 bg-surface border border-gray-200 rounded-lg px-3 py-2">
             <Info className="h-3.5 w-3.5 flex-shrink-0 mt-0.5 text-teal-muted" />

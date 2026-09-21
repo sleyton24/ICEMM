@@ -4,6 +4,7 @@ import type { SerieRealMensual } from '../modelo/tipos'
 import { sumarMeses } from '../modelo/curva'
 import { esOficinaCentral } from '../../plan-cuentas/oficinaCentral'
 import { esRollupFamilia } from '../../plan-cuentas/rollupFamilia'
+import { familiaDeCuenta, FAMILIAS_MODELO } from '../modelo/familias'
 
 /**
  * Familia 600 (OTROS). Queda FUERA del perímetro del predictor: 605 es
@@ -25,6 +26,13 @@ function esFueraDePerimetro(cc: number, plan: PlanCuentas): boolean {
 
 export interface SerieRealResultado {
   serie: SerieRealMensual[]
+  /**
+   * La misma serie desagregada por familia del modelo, sobre EL MISMO rango de
+   * meses que `serie`. Comparten el eje: así el gráfico de una familia arranca
+   * en el mismo mes que el de la obra y los meses siguen alineados por posición,
+   * que es como el re-pronóstico indexa.
+   */
+  porFamilia: Record<string, SerieRealMensual[]>
   /** Primer mes con costo dentro del perímetro. Es el `inicio` del modelo. */
   inicio: string | null
   /** Último mes incluido. */
@@ -61,6 +69,8 @@ export function serieRealDesdeERP(
   const excluido = { oficinaCentral: 0, rollup: 0, otros: 0 }
 
   const porMes = new Map<string, number>()
+  const porMesFamilia = new Map<string, Map<string, number>>()
+  for (const f of FAMILIAS_MODELO) porMesFamilia.set(f.clave, new Map())
 
   for (const [ccStr, mesMap] of Object.entries(porCcMes)) {
     const cc = Number(ccStr)
@@ -72,11 +82,19 @@ export function serieRealDesdeERP(
       if (esFueraDePerimetro(cc, plan)) { excluido.otros += vals.monto_uf; continue }
 
       porMes.set(mes, (porMes.get(mes) ?? 0) + vals.monto_uf)
+
+      const fam = familiaDeCuenta(cc, plan)
+      if (fam) {
+        const m = porMesFamilia.get(fam.clave)!
+        m.set(mes, (m.get(mes) ?? 0) + vals.monto_uf)
+      }
     }
   }
 
   if (porMes.size === 0) {
-    return { serie: [], inicio: null, corte: null, excluido, advertencias }
+    const vacio: Record<string, SerieRealMensual[]> = {}
+    for (const f of FAMILIAS_MODELO) vacio[f.clave] = []
+    return { serie: [], porFamilia: vacio, inicio: null, corte: null, excluido, advertencias }
   }
 
   const conMovimiento = [...porMes.keys()].sort()
@@ -93,6 +111,18 @@ export function serieRealDesdeERP(
     acum += mes
     serie.push({ ym, mes, acum })
     if (ym === corte) break
+  }
+
+  // Cada familia se acumula sobre el MISMO rango de meses que la serie total.
+  const porFamilia: Record<string, SerieRealMensual[]> = {}
+  for (const f of FAMILIAS_MODELO) {
+    const m = porMesFamilia.get(f.clave)!
+    let acumF = 0
+    porFamilia[f.clave] = serie.map(({ ym }) => {
+      const mes = m.get(ym) ?? 0
+      acumF += mes
+      return { ym, mes, acum: acumF }
+    })
   }
 
   if (huecos > 0) {
@@ -115,5 +145,5 @@ export function serieRealDesdeERP(
     )
   }
 
-  return { serie, inicio, corte, excluido, advertencias }
+  return { serie, porFamilia, inicio, corte, excluido, advertencias }
 }
