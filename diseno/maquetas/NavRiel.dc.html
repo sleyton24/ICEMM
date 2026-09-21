@@ -1,0 +1,249 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Roboto+Slab:wght@400;500;700&display=swap">
+  <style>
+    body { margin: 0; font-family: 'Roboto', system-ui, sans-serif; }
+    a { color: #233032; text-decoration: none; }
+    a:hover { color: #101820; }
+    .num { font-family: 'Roboto Slab', Georgia, serif; font-variant-numeric: tabular-nums; }
+  </style>
+</helmet>
+
+<div style="display: flex; width: 1440px; height: 1040px; background: #F7F8FA; color: #101820;">
+
+  <!-- ══ Riel de 64px: iconos con etiqueta al pasar el mouse ══ -->
+  <div style="display: flex; flex-direction: column; align-items: center; width: 64px; flex-shrink: 0; background: #FFFFFF; border-right: 1px solid #E8EBEF; padding: 16px 0;">
+
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 3px; padding-bottom: 16px; border-bottom: 1px solid #E8EBEF; width: 100%;">
+      <span class="num" style="font-size: 14px; font-weight: 700; letter-spacing: -0.3px;">EMM</span>
+      <span style="width: 3px; height: 3px; border-radius: 50%; background: #E00544;"></span>
+    </div>
+
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 5px; padding-top: 16px;">
+      <!-- Activo: etiqueta desplegada como ejemplo del hover -->
+      <div style="display: flex; align-items: center; gap: 10px; background: #101820; border-radius: 7px; padding: 10px 13px; position: relative; z-index: 2;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-6 9 6v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M9 21V12h6v9"/></svg>
+        <span style="font-size: 13px; font-weight: 500; color: #FFFFFF; white-space: nowrap;">Resumen</span>
+      </div>
+
+      <div style="display: flex; align-items: center; justify-content: center; width: 42px; height: 42px; border-radius: 7px; position: relative;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#809494" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18M3 12h18M3 19h18"/></svg>
+        <span class="num" style="position: absolute; top: 4px; right: 3px; font-size: 8px; color: #FFFFFF; background: #809494; border-radius: 7px; padding: 1px 4px;">174</span>
+      </div>
+
+      <div style="display: flex; align-items: center; justify-content: center; width: 42px; height: 42px; border-radius: 7px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#809494" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
+      </div>
+
+      <div style="display: flex; align-items: center; justify-content: center; width: 42px; height: 42px; border-radius: 7px; position: relative;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#809494" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17c4-9 8 3 12-4 2-3.5 4-4 6-4"/></svg>
+        <span style="position: absolute; top: 5px; right: 5px; width: 5px; height: 5px; border-radius: 50%; background: #E00544;"></span>
+      </div>
+
+      <div style="display: flex; align-items: center; justify-content: center; width: 42px; height: 42px; border-radius: 7px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#809494" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="1.5"/><path d="M3 10h18M9 10v10"/></svg>
+      </div>
+    </div>
+
+    <div style="margin-top: auto; display: flex; flex-direction: column; align-items: center; gap: 12px;">
+      <div style="display: flex; align-items: center; justify-content: center; width: 42px; height: 42px; border-radius: 7px; border: 1px solid #E3E8E7;">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#55605F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg>
+      </div>
+      <div style="width: 28px; height: 28px; border-radius: 50%; background: #233032; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700;">SL</div>
+    </div>
+  </div>
+
+  <!-- ══ Contenido — 1296px útiles ══ -->
+  <div style="display: flex; flex-direction: column; flex-grow: 1; min-width: 0;">
+
+    <div style="display: flex; align-items: center; gap: 16px; padding: 16px 36px 15px 36px; background: #FFFFFF; border-bottom: 1px solid #E8EBEF;">
+      <div style="display: flex; align-items: center; gap: 9px; background: #F1F4F3; border: 1px solid #E3E8E7; border-radius: 6px; padding: 7px 13px;">
+        <span class="num" style="font-size: 14px; font-weight: 500;">Edificio Vista Poniente</span>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#55605F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <span style="display: flex; align-items: center; gap: 5px; font-size: 10px; color: #8A6D1F; background: #FDF6E3; border: 1px solid #F0E2BC; border-radius: 3px; padding: 3px 8px;">
+        <span style="width: 4px; height: 4px; border-radius: 50%; background: #C9962B;"></span>Borrador
+      </span>
+      <span style="font-size: 11px; color: #9DA39B;">Resumen</span>
+
+      <div style="display: flex; align-items: center; gap: 22px; margin-left: auto;">
+        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 1px;">
+          <span style="font-size: 9px; letter-spacing: 1px; color: #9DA39B;">REAL HASTA</span>
+          <span class="num" style="font-size: 13px; font-weight: 500;">Jun 2026</span>
+        </div>
+        <div style="width: 1px; height: 26px; background: #E8EBEF;"></div>
+        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 1px;">
+          <span style="font-size: 9px; letter-spacing: 1px; color: #9DA39B;">CORTE</span>
+          <span class="num" style="font-size: 13px; font-weight: 500;">08 jul 2026</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 22px; padding: 26px 36px 32px 36px;">
+
+      <div style="display: flex; align-items: baseline; justify-content: space-between;">
+        <h1 class="num" style="margin: 0; font-size: 25px; font-weight: 500; letter-spacing: -0.5px;">Resumen de obra</h1>
+        <span style="font-size: 11px; color: #9DA39B;">174 partidas en 7 familias</span>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 22px;">
+
+        <div style="grid-column: span 5; display: flex; flex-direction: column; gap: 13px; background: #FFFFFF; border: 1px solid #E8EBEF; border-radius: 8px; padding: 24px 26px;">
+          <span style="font-size: 10px; letter-spacing: 1.2px; color: #9DA39B;">RESULTADO PROYECTADO</span>
+          <div style="display: flex; align-items: baseline; gap: 12px;">
+            <span class="num" style="font-size: 44px; font-weight: 700; letter-spacing: -1.3px; color: #E00544; line-height: 1;">−9.707</span>
+            <span class="num" style="font-size: 16px; color: #809494;">UF</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 9px;">
+            <span style="display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 500; color: #E00544;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#E00544" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7l8 8 4-4 4 4"/></svg>−3,0%
+            </span>
+            <span style="font-size: 12px; color: #809494;">sobre el presupuesto vigente</span>
+          </div>
+          <div style="height: 1px; background: #E8EBEF; margin: 3px 0;"></div>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; justify-content: space-between; font-size: 12px;">
+              <span style="color: #55605F;">Venta total <span style="color: #9DA39B;">(ppto vigente)</span></span>
+              <span class="num" style="font-weight: 500;">320.177,83</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 12px;">
+              <span style="color: #55605F;">Costo proyectado</span>
+              <span class="num" style="font-weight: 500;">329.884,52</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="grid-column: span 3; display: flex; flex-direction: column; justify-content: space-between; background: #FFFFFF; border: 1px solid #E8EBEF; border-radius: 8px; padding: 24px 26px;">
+          <span style="font-size: 10px; letter-spacing: 1.2px; color: #9DA39B;">EJECUTADO</span>
+          <div style="display: flex; flex-direction: column; gap: 11px;">
+            <div style="display: flex; align-items: baseline; gap: 8px;">
+              <span class="num" style="font-size: 32px; font-weight: 500; letter-spacing: -0.9px; line-height: 1;">12,2</span>
+              <span class="num" style="font-size: 16px; color: #809494;">%</span>
+            </div>
+            <div style="height: 5px; border-radius: 3px; background: #EDF0EF; overflow: hidden;">
+              <div style="width: 12.2%; height: 100%; background: #233032;"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 11px; color: #809494;">
+              <span class="num">39.004,81 UF</span><span>mes 6 de 34</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="grid-column: span 4; display: flex; flex-direction: column; gap: 14px; background: #FFFFFF; border: 1px solid #E8EBEF; border-radius: 8px; padding: 24px 26px;">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <span style="font-size: 10px; letter-spacing: 1.2px; color: #9DA39B;">SEMÁFORO POR FAMILIA</span>
+            <span class="num" style="font-size: 10px; color: #9DA39B;">7</span>
+          </div>
+          <div style="display: flex; gap: 4px; height: 6px;">
+            <div style="flex-grow: 1; border-radius: 2px; background: #E00544;"></div>
+            <div style="flex-grow: 1; border-radius: 2px; background: #C9962B;"></div>
+            <div style="flex-grow: 4; border-radius: 2px; background: #2F7A55;"></div>
+            <div style="flex-grow: 1; border-radius: 2px; background: #4C93B8;"></div>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 18px;">
+            <div style="display: flex; align-items: center; gap: 8px;"><span style="width: 6px; height: 6px; border-radius: 50%; background: #E00544;"></span><span style="font-size: 12px; color: #55605F;">Crítico</span><span class="num" style="margin-left: auto; font-size: 13px; font-weight: 700;">1</span></div>
+            <div style="display: flex; align-items: center; gap: 8px;"><span style="width: 6px; height: 6px; border-radius: 50%; background: #C9962B;"></span><span style="font-size: 12px; color: #55605F;">Alerta</span><span class="num" style="margin-left: auto; font-size: 13px; font-weight: 700;">1</span></div>
+            <div style="display: flex; align-items: center; gap: 8px;"><span style="width: 6px; height: 6px; border-radius: 50%; background: #2F7A55;"></span><span style="font-size: 12px; color: #55605F;">En control</span><span class="num" style="margin-left: auto; font-size: 13px; font-weight: 700;">4</span></div>
+            <div style="display: flex; align-items: center; gap: 8px;"><span style="width: 6px; height: 6px; border-radius: 50%; background: #4C93B8;"></span><span style="font-size: 12px; color: #55605F;">Favorable</span><span class="num" style="margin-left: auto; font-size: 13px; font-weight: 700;">1</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 22px;">
+
+        <div style="grid-column: span 8; display: flex; flex-direction: column; gap: 16px; background: #FFFFFF; border: 1px solid #E8EBEF; border-radius: 8px; padding: 22px 26px 18px 26px;">
+          <div style="display: flex; align-items: flex-start; justify-content: space-between;">
+            <div style="display: flex; flex-direction: column; gap: 3px;">
+              <span class="num" style="font-size: 15px; font-weight: 500;">Curva de costo acumulado</span>
+              <span style="font-size: 11px; color: #809494;">6 meses observados de 34 · la obra va adelantada del patrón histórico</span>
+            </div>
+            <div style="display: flex; gap: 15px;">
+              <span style="display: flex; align-items: center; gap: 6px; font-size: 11px; color: #55605F;"><span style="width: 14px; height: 2px; background: #233032;"></span>Modelo</span>
+              <span style="display: flex; align-items: center; gap: 6px; font-size: 11px; color: #55605F;"><span style="width: 14px; height: 2px; background: #2F7A55;"></span>Real</span>
+              <span style="display: flex; align-items: center; gap: 6px; font-size: 11px; color: #55605F;"><span style="width: 14px; height: 0; border-top: 2px dashed #E00544;"></span>Re-anclada</span>
+            </div>
+          </div>
+
+          <svg width="100%" height="190" viewBox="0 0 860 190" preserveAspectRatio="none">
+            <line x1="0" y1="46" x2="860" y2="46" stroke="#EDF0EF" stroke-width="1"/>
+            <line x1="0" y1="95" x2="860" y2="95" stroke="#EDF0EF" stroke-width="1"/>
+            <line x1="0" y1="144" x2="860" y2="144" stroke="#EDF0EF" stroke-width="1"/>
+            <line x1="0" y1="182" x2="860" y2="182" stroke="#DDE2E1" stroke-width="1"/>
+            <path d="M0 180 C 124 178, 200 170, 272 151 C 356 128, 440 89, 535 58 C 630 29, 734 15, 860 11 L 860 38 C 734 43, 630 54, 535 81 C 440 110, 356 145, 272 167 C 200 182, 124 184, 0 185 Z" fill="#233032" opacity="0.07"/>
+            <path d="M0 182 C 124 181, 200 175, 272 159 C 356 139, 440 103, 535 70 C 630 39, 734 23, 860 19" fill="none" stroke="#233032" stroke-width="2"/>
+            <path d="M0 178 C 105 172, 158 165, 205 155" fill="none" stroke="#2F7A55" stroke-width="2.4"/>
+            <circle cx="0" cy="178" r="2.6" fill="#2F7A55"/><circle cx="51" cy="173" r="2.6" fill="#2F7A55"/><circle cx="103" cy="167" r="2.6" fill="#2F7A55"/><circle cx="154" cy="161" r="2.6" fill="#2F7A55"/><circle cx="205" cy="155" r="2.6" fill="#2F7A55"/>
+            <path d="M205 155 C 315 136, 420 93, 535 60 C 630 33, 734 19, 860 15" fill="none" stroke="#E00544" stroke-width="2" stroke-dasharray="6 4"/>
+            <line x1="205" y1="8" x2="205" y2="182" stroke="#C6CFCE" stroke-width="1" stroke-dasharray="3 3"/>
+          </svg>
+
+          <div style="display: flex; justify-content: space-between; font-size: 10px; color: #9DA39B;">
+            <span class="num">ene 26</span><span class="num">jun 26</span><span class="num">dic 26</span><span class="num">jun 27</span><span class="num">dic 27</span><span class="num">oct 28</span>
+          </div>
+        </div>
+
+        <div style="grid-column: span 4; display: flex; flex-direction: column; gap: 13px; background: #FFFFFF; border: 1px solid #E8EBEF; border-radius: 8px; padding: 22px 26px;">
+          <span style="font-size: 10px; letter-spacing: 1.2px; color: #9DA39B;">QUÉ MIRAR PRIMERO</span>
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div style="display: flex; gap: 11px;">
+              <span style="width: 3px; border-radius: 2px; background: #E00544; flex-shrink: 0;"></span>
+              <div style="display: flex; flex-direction: column; gap: 3px;">
+                <div style="display: flex; align-items: baseline; gap: 8px;"><span style="font-size: 13px; font-weight: 500;">Materiales</span><span class="num" style="font-size: 13px; font-weight: 700; color: #E00544;">−14,0%</span></div>
+                <span style="font-size: 11px; color: #809494; line-height: 1.45;">6.572 UF sobre lo vigente. Hormigones y acero A63 concentran la desviación.</span>
+              </div>
+            </div>
+            <div style="display: flex; gap: 11px;">
+              <span style="width: 3px; border-radius: 2px; background: #C9962B; flex-shrink: 0;"></span>
+              <div style="display: flex; flex-direction: column; gap: 3px;">
+                <div style="display: flex; align-items: baseline; gap: 8px;"><span style="font-size: 13px; font-weight: 500;">Mano de obra</span><span class="num" style="font-size: 13px; font-weight: 700; color: #A8761C;">−7,0%</span></div>
+                <span style="font-size: 11px; color: #809494; line-height: 1.45;">3.716 UF. Dentro de banda, pero creciendo tres cortes seguidos.</span>
+              </div>
+            </div>
+            <div style="display: flex; gap: 11px;">
+              <span style="width: 3px; border-radius: 2px; background: #DBE8E8; flex-shrink: 0;"></span>
+              <div style="display: flex; flex-direction: column; gap: 3px;">
+                <div style="display: flex; align-items: baseline; gap: 8px;"><span style="font-size: 13px; font-weight: 500;">Subcontratos</span><span class="num" style="font-size: 13px; font-weight: 700; color: #55605F;">−1,0%</span></div>
+                <span style="font-size: 11px; color: #809494; line-height: 1.45;">Partidas dispersas que se compensan. La familia cierra en control.</span>
+              </div>
+            </div>
+          </div>
+          <a href="#" style="display: flex; align-items: center; gap: 6px; margin-top: auto; font-size: 12px; font-weight: 500; padding-top: 4px;">
+            Ver las 174 cuentas
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#233032" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: stretch; background: #FFFFFF; border: 1px solid #E8EBEF; border-radius: 8px; overflow: hidden;">
+        <div style="display: flex; flex-direction: column; gap: 5px; padding: 20px 26px; flex-grow: 1;">
+          <span style="font-size: 10px; letter-spacing: 1.2px; color: #9DA39B;">CIERRE SEGÚN EL MODELO</span>
+          <span class="num" style="font-size: 24px; font-weight: 500; letter-spacing: -0.6px;">280.193 <span style="font-size: 13px; color: #809494;">UF</span></span>
+          <span style="font-size: 11px; color: #809494;">contrato × 0,904 · mezcla de 8 obras históricas</span>
+        </div>
+        <div style="width: 1px; background: #E8EBEF;"></div>
+        <div style="display: flex; flex-direction: column; gap: 5px; padding: 20px 26px; flex-grow: 1;">
+          <span style="font-size: 10px; letter-spacing: 1.2px; color: #9DA39B;">CIERRE SEGÚN LA OBRA</span>
+          <span class="num" style="font-size: 24px; font-weight: 500; letter-spacing: -0.6px;">329.885 <span style="font-size: 13px; color: #809494;">UF</span></span>
+          <span style="font-size: 11px; color: #809494;">contrato × 1,064 · slot proyectado</span>
+        </div>
+        <div style="width: 1px; background: #E8EBEF;"></div>
+        <div style="display: flex; flex-direction: column; gap: 5px; padding: 20px 26px; flex-grow: 1; background: #FDF3F6;">
+          <span style="font-size: 10px; letter-spacing: 1.2px; color: #B0325C;">BRECHA A RESOLVER</span>
+          <span class="num" style="font-size: 24px; font-weight: 700; letter-spacing: -0.6px; color: #E00544;">49.692 <span style="font-size: 13px; font-weight: 400;">UF</span></span>
+          <span style="font-size: 11px; color: #B0325C;">queda fuera de la banda del modelo</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

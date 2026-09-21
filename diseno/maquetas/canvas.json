@@ -1,0 +1,37 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 1440, "h": 1040, "title": "Resumen de obra" },
+    { "file": "Costos.dc.html", "x": 1560, "y": 0, "w": 1440, "h": 1000, "title": "Costos — Tabla de control" }
+  ],
+  "annotations": [
+    {
+      "id": "el-tema",
+      "x": 0,
+      "y": -232,
+      "w": 700,
+      "text": "BARRA SUPERIOR, CON TEMA ELEGIBLE\n\nEl interruptor es real: hacé clic en el par sol/luna que está arriba a la derecha, en cualquiera de las dos pantallas, y el tema cambia entero. También se puede accionar desde el control \"oscuro\" que aparece sobre cada artboard.\n\nCada pantalla lleva su propio interruptor y son independientes: podés dejar una en claro y la otra en oscuro para compararlas lado a lado.\n\nEn la app real esto sería una preferencia por usuario, guardada en su sesión. Mismo lugar en la barra, mismo gesto."
+    },
+    {
+      "id": "como-se-hizo",
+      "x": 760,
+      "y": -232,
+      "w": 680,
+      "text": "QUÉ CAMBIÓ RESPECTO DE LA VERSIÓN ANTERIOR\n\n· Se fue el menú lateral. Los 232px vuelven al contenido: la tabla pasa de 1128 a 1360px útiles y las once columnas entran sin apretar.\n\n· El selector de obra sube a la barra, al lado de la marca. En esta app la obra no es una sección más: es el contexto de todo lo demás.\n\n· Las dos direcciones visuales dejaron de ser alternativas y pasaron a ser un mismo sistema con dos temas. La tipografía es la de EMM (Roboto + Roboto Slab) en ambos.\n\nSi además querés probar la tipografía de la dirección B (Archivo + IBM Plex Mono para las cifras), es un cambio aparte y lo puedo sumar como tercera variante."
+    },
+    {
+      "id": "nota-tabla",
+      "x": 3120,
+      "y": 0,
+      "w": 640,
+      "text": "EL DESCENSO AL DETALLE\n\n174 cuentas en tres niveles. Dos cambios de fondo:\n\n1. Las once columnas numéricas se agrupan en PRESUPUESTO · EJECUCIÓN · RESULTADO. El ojo ya no tiene que adivinar qué está mirando.\n\n2. La barra de desviación a la derecha deja ver de un vistazo qué familia se fue y para qué lado, sin leer un número.\n\nLa nota sobre Subcontratos hace visible, dentro de la propia tabla, el argumento del semáforo por familia: adentro hay partidas en −31,8% y en +24,1% que se compensan.\n\nEn tema oscuro la fila TOTAL OBRA no puede ser negra sobre negro: usa un navy más claro que el panel para seguir leyéndose como cabecera."
+    },
+    {
+      "id": "pendiente",
+      "x": 3120,
+      "y": 560,
+      "w": 640,
+      "text": "QUÉ FALTA\n\n· Familias, Directorio multi-obra y la pantalla de carga de archivos. Las hago en este mismo sistema cuando me digas.\n\n· Son maquetas estáticas salvo el interruptor de tema. Si para la presentación querés recorrerlas con clics, avisame.\n\n· Las cifras son las de la demo: coherentes entre sí, no de una obra real."
+    }
+  ],
+  "launch": { "view": "canvas" }
+}

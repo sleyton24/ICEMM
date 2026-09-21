@@ -1,0 +1,293 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Roboto+Slab:wght@400;500;700&display=swap">
+  <style>
+    body { margin: 0; font-family: 'Roboto', system-ui, sans-serif; }
+    a { color: #233032; text-decoration: none; }
+    a:hover { color: #101820; }
+    .num { font-family: 'Roboto Slab', Georgia, serif; font-variant-numeric: tabular-nums; }
+  </style>
+</helmet>
+
+<div style="display: flex; flex-direction: column; width: 1440px; height: 1040px; background: {{t.fondo}}; color: {{t.texto}};">
+
+  <!-- ══ Barra superior ══ -->
+  <div style="display: flex; flex-direction: column; background: {{t.barra}}; border-bottom: 1px solid {{t.borde}};">
+
+    <div style="display: flex; align-items: center; gap: 26px; padding: 15px 40px 13px 40px;">
+      <div style="display: flex; align-items: baseline; gap: 6px;">
+        <span class="num" style="font-size: 19px; font-weight: 700; letter-spacing: -0.4px; color: {{t.texto}};">EMM</span>
+        <span style="width: 3px; height: 3px; border-radius: 50%; background: #E00544;"></span>
+      </div>
+
+      <div style="width: 1px; height: 26px; background: {{t.borde}};"></div>
+
+      <div style="display: flex; align-items: center; gap: 9px; background: {{t.chip}}; border: 1px solid {{t.bordeFuerte}}; border-radius: 6px; padding: 7px 13px;">
+        <span class="num" style="font-size: 14px; font-weight: 500; color: {{t.texto}};">Edificio Vista Poniente</span>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="{{t.texto2}}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+
+      <span style="display: flex; align-items: center; gap: 5px; font-size: 10px; color: {{t.alertaTexto}}; background: {{t.alertaFondo}}; border: 1px solid {{t.alertaBorde}}; border-radius: 3px; padding: 3px 8px;">
+        <span style="width: 4px; height: 4px; border-radius: 50%; background: {{t.alerta}};"></span>Borrador
+      </span>
+
+      <div style="display: flex; align-items: center; gap: 18px; margin-left: auto;">
+        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 1px;">
+          <span style="font-size: 9px; letter-spacing: 1px; color: {{t.texto4}};">REAL HASTA</span>
+          <span class="num" style="font-size: 13px; font-weight: 500; color: {{t.texto}};">Jun 2026</span>
+        </div>
+
+        <div style="width: 1px; height: 26px; background: {{t.borde}};"></div>
+
+        <!-- Interruptor de tema -->
+        <div onClick="{{alternar}}" style="display: flex; align-items: center; gap: 2px; background: {{t.chip}}; border: 1px solid {{t.bordeFuerte}}; border-radius: 20px; padding: 3px; cursor: pointer;">
+          <span style="display: flex; align-items: center; justify-content: center; width: 26px; height: 22px; border-radius: 16px; background: {{t.pastillaClaro}};">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="{{t.iconoClaro}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+          </span>
+          <span style="display: flex; align-items: center; justify-content: center; width: 26px; height: 22px; border-radius: 16px; background: {{t.pastillaOscuro}};">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="{{t.iconoOscuro}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.6 6.6 0 0 0 10.5 10.5z"/></svg>
+          </span>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 9px;">
+          <div style="width: 26px; height: 26px; border-radius: 50%; background: {{t.avatar}}; color: {{t.avatarTexto}}; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700;">SL</div>
+          <span style="font-size: 12px; font-weight: 500; color: {{t.texto}};">S. Leyton</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="{{t.texto4}}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 2px; padding: 0 40px;">
+      <div style="display: flex; align-items: center; gap: 8px; padding: 11px 15px; box-shadow: inset 0 -2px 0 #E00544;">
+        <span style="font-size: 13px; font-weight: 500; color: {{t.texto}};">Resumen</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 7px; padding: 11px 15px;">
+        <span style="font-size: 13px; color: {{t.texto2}};">Costos</span>
+        <span class="num" style="font-size: 10px; color: {{t.texto4}}; background: {{t.chip}}; border-radius: 9px; padding: 1px 6px;">174</span>
+      </div>
+      <div style="padding: 11px 15px;"><span style="font-size: 13px; color: {{t.texto2}};">Familias</span></div>
+      <div style="display: flex; align-items: center; gap: 7px; padding: 11px 15px;">
+        <span style="font-size: 13px; color: {{t.texto2}};">Proyección</span>
+        <span style="font-size: 8px; letter-spacing: 0.7px; color: {{t.texto3}}; border: 1px solid {{t.bordeFuerte}}; border-radius: 3px; padding: 2px 4px;">ADMIN</span>
+      </div>
+      <div style="padding: 11px 15px;"><span style="font-size: 13px; color: {{t.texto2}};">Directorio</span></div>
+
+      <div style="display: flex; align-items: center; gap: 7px; margin-left: auto; padding: 8px 13px; border: 1px solid {{t.bordeFuerte}}; border-radius: 6px; margin-bottom: 7px;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="{{t.texto2}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg>
+        <span style="font-size: 12px; color: {{t.texto2}};">Cargar archivos</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ Cuerpo ══ -->
+  <div style="display: flex; flex-direction: column; gap: 22px; padding: 26px 40px 32px 40px;">
+
+    <div style="display: flex; align-items: baseline; justify-content: space-between;">
+      <h1 class="num" style="margin: 0; font-size: 25px; font-weight: 500; letter-spacing: -0.5px; color: {{t.texto}};">Resumen de obra</h1>
+      <span style="font-size: 11px; color: {{t.texto4}};">Corte 08 jul 2026 · 174 partidas en 7 familias</span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 22px;">
+
+      <div style="grid-column: span 5; display: flex; flex-direction: column; gap: 13px; background: {{t.panel}}; border: 1px solid {{t.borde}}; border-radius: 8px; padding: 24px 26px;">
+        <span style="font-size: 10px; letter-spacing: 1.2px; color: {{t.texto4}};">RESULTADO PROYECTADO</span>
+        <div style="display: flex; align-items: baseline; gap: 12px;">
+          <span class="num" style="font-size: 44px; font-weight: 700; letter-spacing: -1.3px; color: {{t.neg}}; line-height: 1;">−9.707</span>
+          <span class="num" style="font-size: 16px; color: {{t.texto3}};">UF</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 9px;">
+          <span style="display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 500; color: {{t.neg}};">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="{{t.neg}}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7l8 8 4-4 4 4"/></svg>−3,0%
+          </span>
+          <span style="font-size: 12px; color: {{t.texto3}};">sobre el presupuesto vigente</span>
+        </div>
+        <div style="height: 1px; background: {{t.borde}}; margin: 3px 0;"></div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="display: flex; justify-content: space-between; font-size: 12px;">
+            <span style="color: {{t.texto2}};">Venta total <span style="color: {{t.texto4}};">(ppto vigente)</span></span>
+            <span class="num" style="font-weight: 500; color: {{t.texto}};">320.177,83</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 12px;">
+            <span style="color: {{t.texto2}};">Costo proyectado</span>
+            <span class="num" style="font-weight: 500; color: {{t.texto}};">329.884,52</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="grid-column: span 3; display: flex; flex-direction: column; justify-content: space-between; background: {{t.panel}}; border: 1px solid {{t.borde}}; border-radius: 8px; padding: 24px 26px;">
+        <span style="font-size: 10px; letter-spacing: 1.2px; color: {{t.texto4}};">EJECUTADO</span>
+        <div style="display: flex; flex-direction: column; gap: 11px;">
+          <div style="display: flex; align-items: baseline; gap: 8px;">
+            <span class="num" style="font-size: 32px; font-weight: 500; letter-spacing: -0.9px; line-height: 1; color: {{t.texto}};">12,2</span>
+            <span class="num" style="font-size: 16px; color: {{t.texto3}};">%</span>
+          </div>
+          <div style="height: 5px; border-radius: 3px; background: {{t.lineaFondo}}; overflow: hidden;">
+            <div style="width: 12.2%; height: 100%; background: {{t.barraAvance}};"></div>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 11px; color: {{t.texto3}};">
+            <span class="num">39.004,81 UF</span><span>mes 6 de 34</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="grid-column: span 4; display: flex; flex-direction: column; gap: 14px; background: {{t.panel}}; border: 1px solid {{t.borde}}; border-radius: 8px; padding: 24px 26px;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <span style="font-size: 10px; letter-spacing: 1.2px; color: {{t.texto4}};">SEMÁFORO POR FAMILIA</span>
+          <span class="num" style="font-size: 10px; color: {{t.texto4}};">7</span>
+        </div>
+        <div style="display: flex; gap: 4px; height: 6px;">
+          <div style="flex-grow: 1; border-radius: 2px; background: {{t.neg}};"></div>
+          <div style="flex-grow: 1; border-radius: 2px; background: {{t.alerta}};"></div>
+          <div style="flex-grow: 4; border-radius: 2px; background: {{t.pos}};"></div>
+          <div style="flex-grow: 1; border-radius: 2px; background: {{t.info}};"></div>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 18px;">
+          <div style="display: flex; align-items: center; gap: 8px;"><span style="width: 6px; height: 6px; border-radius: 50%; background: {{t.neg}};"></span><span style="font-size: 12px; color: {{t.texto2}};">Crítico</span><span class="num" style="margin-left: auto; font-size: 13px; font-weight: 700; color: {{t.texto}};">1</span></div>
+          <div style="display: flex; align-items: center; gap: 8px;"><span style="width: 6px; height: 6px; border-radius: 50%; background: {{t.alerta}};"></span><span style="font-size: 12px; color: {{t.texto2}};">Alerta</span><span class="num" style="margin-left: auto; font-size: 13px; font-weight: 700; color: {{t.texto}};">1</span></div>
+          <div style="display: flex; align-items: center; gap: 8px;"><span style="width: 6px; height: 6px; border-radius: 50%; background: {{t.pos}};"></span><span style="font-size: 12px; color: {{t.texto2}};">En control</span><span class="num" style="margin-left: auto; font-size: 13px; font-weight: 700; color: {{t.texto}};">4</span></div>
+          <div style="display: flex; align-items: center; gap: 8px;"><span style="width: 6px; height: 6px; border-radius: 50%; background: {{t.info}};"></span><span style="font-size: 12px; color: {{t.texto2}};">Favorable</span><span class="num" style="margin-left: auto; font-size: 13px; font-weight: 700; color: {{t.texto}};">1</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 22px;">
+
+      <div style="grid-column: span 8; display: flex; flex-direction: column; gap: 16px; background: {{t.panel}}; border: 1px solid {{t.borde}}; border-radius: 8px; padding: 22px 26px 18px 26px;">
+        <div style="display: flex; align-items: flex-start; justify-content: space-between;">
+          <div style="display: flex; flex-direction: column; gap: 3px;">
+            <span class="num" style="font-size: 15px; font-weight: 500; color: {{t.texto}};">Curva de costo acumulado</span>
+            <span style="font-size: 11px; color: {{t.texto3}};">6 meses observados de 34 · la obra va adelantada del patrón histórico</span>
+          </div>
+          <div style="display: flex; gap: 15px;">
+            <span style="display: flex; align-items: center; gap: 6px; font-size: 11px; color: {{t.texto2}};"><span style="width: 14px; height: 2px; background: {{t.linea}};"></span>Modelo</span>
+            <span style="display: flex; align-items: center; gap: 6px; font-size: 11px; color: {{t.texto2}};"><span style="width: 14px; height: 2px; background: {{t.pos}};"></span>Real</span>
+            <span style="display: flex; align-items: center; gap: 6px; font-size: 11px; color: {{t.texto2}};"><span style="width: 14px; height: 0; border-top: 2px dashed {{t.neg}};"></span>Re-anclada</span>
+          </div>
+        </div>
+
+        <svg width="100%" height="190" viewBox="0 0 900 190" preserveAspectRatio="none">
+          <line x1="0" y1="46" x2="900" y2="46" stroke="{{t.grid}}" stroke-width="1"/>
+          <line x1="0" y1="95" x2="900" y2="95" stroke="{{t.grid}}" stroke-width="1"/>
+          <line x1="0" y1="144" x2="900" y2="144" stroke="{{t.grid}}" stroke-width="1"/>
+          <line x1="0" y1="182" x2="900" y2="182" stroke="{{t.gridFuerte}}" stroke-width="1"/>
+          <path d="M0 180 C 130 178, 210 170, 285 151 C 373 128, 461 89, 560 58 C 659 29, 768 15, 900 11 L 900 38 C 768 43, 659 54, 560 81 C 461 110, 373 145, 285 167 C 210 182, 130 184, 0 185 Z" fill="{{t.linea}}" opacity="{{t.curvaOp}}"/>
+          <path d="M0 182 C 130 181, 210 175, 285 159 C 373 139, 461 103, 560 70 C 659 39, 768 23, 900 19" fill="none" stroke="{{t.linea}}" stroke-width="2"/>
+          <path d="M0 178 C 110 172, 165 165, 215 155" fill="none" stroke="{{t.pos}}" stroke-width="2.4"/>
+          <circle cx="0" cy="178" r="2.6" fill="{{t.pos}}"/><circle cx="54" cy="173" r="2.6" fill="{{t.pos}}"/><circle cx="108" cy="167" r="2.6" fill="{{t.pos}}"/><circle cx="161" cy="161" r="2.6" fill="{{t.pos}}"/><circle cx="215" cy="155" r="2.6" fill="{{t.pos}}"/>
+          <path d="M215 155 C 330 136, 440 93, 560 60 C 659 33, 768 19, 900 15" fill="none" stroke="{{t.neg}}" stroke-width="2" stroke-dasharray="6 4"/>
+          <line x1="215" y1="8" x2="215" y2="182" stroke="{{t.corte}}" stroke-width="1" stroke-dasharray="3 3"/>
+        </svg>
+
+        <div style="display: flex; justify-content: space-between; font-size: 10px; color: {{t.texto4}};">
+          <span class="num">ene 26</span><span class="num">jun 26</span><span class="num">dic 26</span><span class="num">jun 27</span><span class="num">dic 27</span><span class="num">oct 28</span>
+        </div>
+      </div>
+
+      <div style="grid-column: span 4; display: flex; flex-direction: column; gap: 13px; background: {{t.panel}}; border: 1px solid {{t.borde}}; border-radius: 8px; padding: 22px 26px;">
+        <span style="font-size: 10px; letter-spacing: 1.2px; color: {{t.texto4}};">QUÉ MIRAR PRIMERO</span>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <div style="display: flex; gap: 11px;">
+            <span style="width: 3px; border-radius: 2px; background: {{t.neg}}; flex-shrink: 0;"></span>
+            <div style="display: flex; flex-direction: column; gap: 3px;">
+              <div style="display: flex; align-items: baseline; gap: 8px;"><span style="font-size: 13px; font-weight: 500; color: {{t.texto}};">Materiales</span><span class="num" style="font-size: 13px; font-weight: 700; color: {{t.neg}};">−14,0%</span></div>
+              <span style="font-size: 11px; color: {{t.texto3}}; line-height: 1.45;">6.572 UF sobre lo vigente. Hormigones y acero A63 concentran la desviación.</span>
+            </div>
+          </div>
+          <div style="display: flex; gap: 11px;">
+            <span style="width: 3px; border-radius: 2px; background: {{t.alerta}}; flex-shrink: 0;"></span>
+            <div style="display: flex; flex-direction: column; gap: 3px;">
+              <div style="display: flex; align-items: baseline; gap: 8px;"><span style="font-size: 13px; font-weight: 500; color: {{t.texto}};">Mano de obra</span><span class="num" style="font-size: 13px; font-weight: 700; color: {{t.alertaTexto}};">−7,0%</span></div>
+              <span style="font-size: 11px; color: {{t.texto3}}; line-height: 1.45;">3.716 UF. Dentro de banda, pero creciendo tres cortes seguidos.</span>
+            </div>
+          </div>
+          <div style="display: flex; gap: 11px;">
+            <span style="width: 3px; border-radius: 2px; background: {{t.bordeFuerte}}; flex-shrink: 0;"></span>
+            <div style="display: flex; flex-direction: column; gap: 3px;">
+              <div style="display: flex; align-items: baseline; gap: 8px;"><span style="font-size: 13px; font-weight: 500; color: {{t.texto}};">Subcontratos</span><span class="num" style="font-size: 13px; font-weight: 700; color: {{t.texto2}};">−1,0%</span></div>
+              <span style="font-size: 11px; color: {{t.texto3}}; line-height: 1.45;">Partidas dispersas que se compensan. La familia cierra en control.</span>
+            </div>
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px; margin-top: auto; font-size: 12px; font-weight: 500; padding-top: 4px; color: {{t.texto}};">
+          Ver las 174 cuentas
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="{{t.texto}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <div style="display: flex; align-items: stretch; background: {{t.panel}}; border: 1px solid {{t.borde}}; border-radius: 8px; overflow: hidden;">
+      <div style="display: flex; flex-direction: column; gap: 5px; padding: 20px 26px; flex-grow: 1;">
+        <span style="font-size: 10px; letter-spacing: 1.2px; color: {{t.texto4}};">CIERRE SEGÚN EL MODELO</span>
+        <span class="num" style="font-size: 24px; font-weight: 500; letter-spacing: -0.6px; color: {{t.texto}};">280.193 <span style="font-size: 13px; color: {{t.texto3}};">UF</span></span>
+        <span style="font-size: 11px; color: {{t.texto3}};">contrato × 0,904 · mezcla de 8 obras históricas</span>
+      </div>
+      <div style="width: 1px; background: {{t.borde}};"></div>
+      <div style="display: flex; flex-direction: column; gap: 5px; padding: 20px 26px; flex-grow: 1;">
+        <span style="font-size: 10px; letter-spacing: 1.2px; color: {{t.texto4}};">CIERRE SEGÚN LA OBRA</span>
+        <span class="num" style="font-size: 24px; font-weight: 500; letter-spacing: -0.6px; color: {{t.texto}};">329.885 <span style="font-size: 13px; color: {{t.texto3}};">UF</span></span>
+        <span style="font-size: 11px; color: {{t.texto3}};">contrato × 1,064 · slot proyectado</span>
+      </div>
+      <div style="width: 1px; background: {{t.borde}};"></div>
+      <div style="display: flex; flex-direction: column; gap: 5px; padding: 20px 26px; flex-grow: 1; background: {{t.negSuave}};">
+        <span style="font-size: 10px; letter-spacing: 1.2px; color: {{t.negTexto}};">BRECHA A RESOLVER</span>
+        <span class="num" style="font-size: 24px; font-weight: 700; letter-spacing: -0.6px; color: {{t.neg}};">49.692 <span style="font-size: 13px; font-weight: 400;">UF</span></span>
+        <span style="font-size: 11px; color: {{t.negTexto}};">queda fuera de la banda del modelo</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</x-dc>
+
+<script data-dc-script data-props='{"oscuro":{"editor":"boolean","default":false,"section":"Tema"}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const st = this.state || {};
+    const oscuro = st.oscuro === undefined ? (this.props.oscuro ?? false) : st.oscuro;
+
+    const claro = {
+      fondo: '#F7F8FA', panel: '#FFFFFF', barra: '#FFFFFF', chip: '#F1F4F3',
+      borde: '#E8EBEF', bordeFuerte: '#E3E8E7',
+      texto: '#101820', texto2: '#55605F', texto3: '#809494', texto4: '#9DA39B',
+      neg: '#E00544', negSuave: '#FDF3F6', negTexto: '#B0325C',
+      pos: '#2F7A55', info: '#4C93B8',
+      alerta: '#C9962B', alertaTexto: '#A8761C', alertaFondo: '#FDF6E3', alertaBorde: '#F0E2BC',
+      linea: '#233032', lineaFondo: '#EDF0EF', barraAvance: '#233032',
+      grid: '#EDF0EF', gridFuerte: '#DDE2E1', corte: '#C6CFCE', curvaOp: '0.07',
+      avatar: '#233032', avatarTexto: '#FFFFFF',
+      pastillaClaro: '#FFFFFF', pastillaOscuro: 'transparent',
+      iconoClaro: '#101820', iconoOscuro: '#9DA39B',
+    };
+
+    const oscuroT = {
+      fondo: '#0B1116', panel: '#121C23', barra: '#0E161C', chip: '#16222A',
+      borde: '#1C272D', bordeFuerte: '#2A3A42',
+      texto: '#FFFFFF', texto2: '#96A6A6', texto3: '#809494', texto4: '#5E6E72',
+      neg: '#FF3D6E', negSuave: '#24101A', negTexto: '#FF8DAB',
+      pos: '#6FD3A8', info: '#6BB8DE',
+      alerta: '#D9B45F', alertaTexto: '#D9B45F', alertaFondo: '#241D0E', alertaBorde: '#3B300F',
+      linea: '#96A6A6', lineaFondo: '#1C272D', barraAvance: '#6FD3A8',
+      grid: '#1C272D', gridFuerte: '#2A3A42', corte: '#3A4A52', curvaOp: '0.12',
+      avatar: '#DBE8E8', avatarTexto: '#0B1116',
+      pastillaClaro: 'transparent', pastillaOscuro: '#2A3A42',
+      iconoClaro: '#5E6E72', iconoOscuro: '#FFFFFF',
+    };
+
+    return {
+      t: oscuro ? oscuroT : claro,
+      oscuro,
+      alternar: () => this.setState({ oscuro: !oscuro }),
+    };
+  }
+}
+</script>
+</body>
+</html>
