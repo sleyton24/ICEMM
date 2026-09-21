@@ -85,7 +85,7 @@ export default function ComentariosSection({ codigo }: { codigo: string }) {
           <button
             type="submit"
             disabled={!nuevo.trim() || enviando}
-            className="flex items-center gap-1.5 px-3 py-2 bg-navy text-white text-xs font-medium rounded-lg hover:bg-navy-light transition-colors disabled:opacity-40 disabled:cursor-not-allowed self-end"
+            className="flex items-center gap-1.5 px-3 py-2 bg-cabecera text-white text-xs font-medium rounded-lg hover:bg-cabecera-alt transition-colors disabled:opacity-40 disabled:cursor-not-allowed self-end"
           >
             <Send className="h-3.5 w-3.5" />
             {enviando ? 'Enviando...' : 'Enviar'}
@@ -112,7 +112,7 @@ export default function ComentariosSection({ codigo }: { codigo: string }) {
               <div key={c.id} className="bg-gray-50 border border-gray-100 rounded-lg p-3">
                 <div className="flex items-start justify-between gap-2 mb-1">
                   <div>
-                    <p className="text-xs font-semibold text-navy">{c.autorNombre || c.autorEmail}</p>
+                    <p className="text-xs font-semibold text-tinta">{c.autorNombre || c.autorEmail}</p>
                     <p className="text-[10px] text-gray-400">{new Date(c.fechaCreacion).toLocaleString('es-CL')}</p>
                   </div>
                   {puedeEliminar && (

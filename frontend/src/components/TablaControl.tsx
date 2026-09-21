@@ -7,6 +7,7 @@ import {
 import { ChevronUp, ChevronDown, ChevronsUpDown, Search, Layers, List, ChevronRight, TrendingUp, TrendingDown, Minus } from 'lucide-react'
 import type { Partida, Movimiento, DetallePartida } from '../data/dataAdapter'
 import { estadoPorGrupo } from '../data/estado'
+import { usePaleta } from '../features/tema/paleta'
 import { usePlanCuentasStore } from '../features/plan-cuentas/PlanCuentasStore'
 import { useProjectsStore } from '../features/projects/ProjectsStore'
 import CuentaDetalleModal from './CuentaDetalleModal'
@@ -53,6 +54,7 @@ interface Props {
 
 export default function TablaControl({ partidas, movimientos, detallePartidas, familias: FAMILIAS, proyeccionAnteriorPorCodigo: _proyeccionAnt = {}, variacionAnteriorPorCodigo = {}, partidasAnteriorMeta = {}, esVistaAprobada = false, numeroInforme = null }: Props) {
   void _proyeccionAnt
+  const paleta = usePaleta()
   const planCuentas = usePlanCuentasStore(s => s.plan)
   const activeProject = useProjectsStore(s => s.projects.find(p => p.id === s.activeProjectId) ?? null)
   const [cuentaDetalle, setCuentaDetalle] = useState<{ cc: number; nombre: string } | null>(null)
@@ -158,7 +160,7 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
     },
     {
       accessorKey: 'ppto_vigente', header: 'Ppto Vigente',
-      cell: ({ getValue }) => <span className="tabular-nums font-medium text-navy">{uf2(getValue() as number)}</span>,
+      cell: ({ getValue }) => <span className="tabular-nums font-medium text-tinta">{uf2(getValue() as number)}</span>,
     },
     {
       accessorKey: 'proyeccion', header: 'Proyectado',
@@ -219,7 +221,7 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
       id: 'detalle', header: '', enableSorting: false,
       cell: ({ row }) => (
         <button onClick={() => setDrilldown(row.original)}
-          className="text-[11px] font-medium text-teal-muted hover:text-navy transition-colors">detalle</button>
+          className="text-[11px] font-medium text-teal-muted hover:text-tinta transition-colors">detalle</button>
       ),
     },
   ], [])
@@ -257,7 +259,7 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
               value={globalFilter}
               onChange={e => setGlobalFilter(e.target.value)}
               placeholder="Buscar recurso o cuenta..."
-              className="pl-9 pr-4 py-2 text-sm bg-white border border-gray-200 rounded-lg w-56
+              className="pl-9 pr-4 py-2 text-sm bg-panel border border-gray-200 rounded-lg w-56
                 focus:outline-none focus:ring-2 focus:ring-teal-muted/30 focus:border-teal-muted
                 placeholder:text-gray-300"
             />
@@ -267,8 +269,8 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
               <button key={e} onClick={() => setEstadoFiltro(e)}
                 className={`text-[11px] px-3 py-1.5 rounded-full font-medium transition-all
                   ${estadoFiltro === e
-                    ? 'bg-navy text-white shadow-sm'
-                    : 'bg-white text-gray-500 border border-gray-200 hover:border-gray-300 hover:text-navy'}`}>
+                    ? 'bg-cabecera text-white shadow-sm'
+                    : 'bg-panel text-gray-500 border border-gray-200 hover:border-gray-300 hover:text-tinta'}`}>
                 {e}
               </button>
             ))}
@@ -278,12 +280,12 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
         <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-0.5">
           <button onClick={() => setPorFamilia(false)}
             className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-all
-              ${!porFamilia ? 'bg-white shadow-sm text-navy' : 'text-gray-400 hover:text-gray-600'}`}>
+              ${!porFamilia ? 'bg-panel shadow-sm text-tinta' : 'text-gray-400 hover:text-gray-600'}`}>
             <List className="h-3.5 w-3.5" /> Plana
           </button>
           <button onClick={() => setPorFamilia(true)}
             className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-all
-              ${porFamilia ? 'bg-white shadow-sm text-navy' : 'text-gray-400 hover:text-gray-600'}`}>
+              ${porFamilia ? 'bg-panel shadow-sm text-tinta' : 'text-gray-400 hover:text-gray-600'}`}>
             <Layers className="h-3.5 w-3.5" /> Familias
           </button>
         </div>
@@ -296,7 +298,7 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
             <table className="w-full text-sm">
               <thead>
                 {table.getHeaderGroups().map(hg => (
-                  <tr key={hg.id} className="bg-navy">
+                  <tr key={hg.id} className="bg-cabecera">
                     {hg.headers.map(h => (
                       <th key={h.id}
                         className={`px-3 py-2.5 text-left text-[11px] font-medium text-white/80 uppercase tracking-wider
@@ -315,7 +317,7 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
                   </tr>
                 ))}
               </thead>
-              <tbody className="bg-white divide-y divide-gray-50">
+              <tbody className="bg-panel divide-y divide-gray-50">
                 {table.getRowModel().rows.map((row, i) => (
                   <tr key={row.id}
                     onDoubleClick={() => setDrilldown(row.original)}
@@ -344,13 +346,13 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
         return (
         <div className="space-y-3">
           <div className="flex gap-3 text-[11px]">
-            <button onClick={expandAll} className="text-teal-muted hover:text-navy font-medium transition-colors">Expandir todo</button>
+            <button onClick={expandAll} className="text-teal-muted hover:text-tinta font-medium transition-colors">Expandir todo</button>
             <span className="text-gray-200">|</span>
-            <button onClick={collapseAll} className="text-teal-muted hover:text-navy font-medium transition-colors">Colapsar todo</button>
+            <button onClick={collapseAll} className="text-teal-muted hover:text-tinta font-medium transition-colors">Colapsar todo</button>
           </div>
 
           {/* Total general de la obra */}
-          <div className="rounded-lg border border-navy overflow-hidden">
+          <div className="rounded-lg border border-cabecera overflow-hidden">
             <table className="w-full text-sm table-fixed">
               <colgroup>
                 <col className="w-[55px]" />
@@ -369,7 +371,7 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
                 <col className="w-[45px]" />
               </colgroup>
               <thead>
-                <tr className="bg-navy">
+                <tr className="bg-cabecera">
                   <th className="px-3 py-3" />
                   <th className="px-3 py-3 text-left">
                     <span className="font-bold text-white text-sm tracking-wide uppercase">TOTAL OBRA</span>
@@ -432,7 +434,7 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
 
                   {/* Family header */}
                   <thead>
-                    <tr className="bg-navy-light cursor-pointer" onClick={() => toggleFamilia(familia)}>
+                    <tr className="bg-cabecera-alt cursor-pointer" onClick={() => toggleFamilia(familia)}>
                       <th className="px-3 py-2.5 text-left">
                         <ChevronRight className={`h-4 w-4 text-white/40 transition-transform ${abierta ? 'rotate-90' : ''}`} />
                       </th>
@@ -470,7 +472,7 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
                       <th className="px-3 py-2.5 text-center"><VarArrow pct={varPct} /></th>
                       <th className="px-3 py-2.5" />
                     </tr>
-                    <tr className="bg-navy-light/80">
+                    <tr className="bg-cabecera-alt/80">
                       {headers.map((h, i) => (
                         <th key={`${h}-${i}`} className={`px-3 py-1 text-[10px] font-medium text-white/40 uppercase tracking-wider ${i >= 2 ? 'text-right' : 'text-left'}`}>{h}</th>
                       ))}
@@ -479,7 +481,7 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
 
                   {/* Detail rows grouped by collapsible account (codigo2) */}
                   {abierta && (
-                    <tbody className="bg-white divide-y divide-gray-50">
+                    <tbody className="bg-panel divide-y divide-gray-50">
                       {(() => {
                         const cuentaMap = new Map<string, Partida[]>()
                         for (const p of ps) {
@@ -507,13 +509,13 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
                               onDoubleClick={(e) => { e.stopPropagation(); setCuentaComentarios({ cc, nombre: ccNombreLocal }) }}
                               className="bg-gray-100/60 hover:bg-gray-100 cursor-pointer border-t border-gray-200"
                               title="Click: expandir / Doble click: comentarios">
-                              <td className="px-3 py-2 font-mono text-xs font-bold text-navy">
+                              <td className="px-3 py-2 font-mono text-xs font-bold text-tinta">
                                 <span className="flex items-center gap-1">
                                   <ChevronRight className={`h-3 w-3 text-gray-400 transition-transform ${ccOpen ? 'rotate-90' : ''}`} />
                                   {cc}
                                 </span>
                               </td>
-                              <td className="px-3 py-2 text-[11px] font-semibold text-navy truncate">
+                              <td className="px-3 py-2 text-[11px] font-semibold text-tinta truncate">
                                 {(() => {
                                   const ccNum = parseInt(cc, 10)
                                   const cuentaInfo = planCuentas.cuentas.find(c => c.codigo === ccNum)
@@ -527,14 +529,14 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
                                   </span>
                                 )}
                               </td>
-                              <td className="px-3 py-2 tabular-nums font-semibold text-navy text-right">{uf2(ccTot.ppto_original)}</td>
+                              <td className="px-3 py-2 tabular-nums font-semibold text-tinta text-right">{uf2(ccTot.ppto_original)}</td>
                               <td className="px-3 py-2 tabular-nums font-semibold text-right">
-                                <span className={ccDiffRedist > 0 ? 'text-emerald-600' : ccDiffRedist < 0 ? 'text-accent' : 'text-navy'}>{uf2(ccTot.redistribuido)}</span>
+                                <span className={ccDiffRedist > 0 ? 'text-emerald-600' : ccDiffRedist < 0 ? 'text-accent' : 'text-tinta'}>{uf2(ccTot.redistribuido)}</span>
                               </td>
                               <td className="px-3 py-2 tabular-nums font-semibold text-violet-600 text-right">{uf2(ccTot.ppto_horas_extra)}</td>
-                              <td className="px-3 py-2 tabular-nums font-bold text-navy text-right">{uf2(ccTot.ppto_vigente)}</td>
-                              <td className="px-3 py-2 tabular-nums font-semibold text-navy text-right">{uf2(ccTot.proyeccion)}</td>
-                              <td className="px-3 py-2 tabular-nums font-semibold text-navy text-right">{uf2(ccTot.gasto_real)}</td>
+                              <td className="px-3 py-2 tabular-nums font-bold text-tinta text-right">{uf2(ccTot.ppto_vigente)}</td>
+                              <td className="px-3 py-2 tabular-nums font-semibold text-tinta text-right">{uf2(ccTot.proyeccion)}</td>
+                              <td className="px-3 py-2 tabular-nums font-semibold text-tinta text-right">{uf2(ccTot.gasto_real)}</td>
                               <td className="px-3 py-2 tabular-nums text-gray-500 font-semibold text-right">{uf2(ccTot.ytg)}</td>
                               <td className="px-3 py-2 tabular-nums font-semibold text-right">
                                 <span className={varColor(ccTot.variacion_uf)}>{signed(ccTot.variacion_uf)}</span>
@@ -609,7 +611,7 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
                                   <td className="px-3 py-1.5 tabular-nums text-xs text-right">
                                     <span className={p.ppto_horas_extra > 0 ? 'text-violet-600 font-medium' : 'text-gray-400'}>{uf2(p.ppto_horas_extra)}</span>
                                   </td>
-                                  <td className="px-3 py-1.5 tabular-nums text-xs text-right font-medium text-navy">{uf2(p.ppto_vigente)}</td>
+                                  <td className="px-3 py-1.5 tabular-nums text-xs text-right font-medium text-tinta">{uf2(p.ppto_vigente)}</td>
                                   <td className="px-3 py-1.5 tabular-nums text-xs text-right">
                                     <span className={varColor(p.proyeccion - p.redistribuido)}>{uf2(p.proyeccion)}</span>
                                   </td>
@@ -632,7 +634,7 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
                                   </td>
                                   <td className="px-3 py-1.5"><VarArrow pct={p.variacion_pct} /></td>
                                   <td className="px-3 py-1.5">
-                                    <button onClick={() => setDrilldown(p)} className="text-[10px] text-teal-muted hover:text-navy font-medium transition-colors">detalle</button>
+                                    <button onClick={() => setDrilldown(p)} className="text-[10px] text-teal-muted hover:text-tinta font-medium transition-colors">detalle</button>
                                   </td>
                                 </tr>
                               )
@@ -664,12 +666,12 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
 
       {/* Cuenta comentarios modal */}
       {cuentaComentarios && (
-        <div className="fixed inset-0 bg-navy/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setCuentaComentarios(null)}>
-          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] flex flex-col border border-gray-100" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-cabecera/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setCuentaComentarios(null)}>
+          <div className="bg-panel rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] flex flex-col border border-gray-100" onClick={e => e.stopPropagation()}>
             <div className="flex items-start justify-between px-6 py-4 border-b border-gray-100">
               <div>
                 <p className="text-[11px] text-teal-muted font-medium uppercase tracking-wider">Cuenta {cuentaComentarios.cc}</p>
-                <h3 className="text-lg font-bold text-navy font-slab">{cuentaComentarios.nombre}</h3>
+                <h3 className="text-lg font-bold text-tinta font-slab">{cuentaComentarios.nombre}</h3>
               </div>
               <button onClick={() => setCuentaComentarios(null)} className="text-gray-300 hover:text-gray-500 text-2xl leading-none">&times;</button>
             </div>
@@ -677,7 +679,7 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
               <ComentariosSection codigo={cuentaComentarios.cc} />
             </div>
             <div className="flex justify-end px-6 py-3 border-t border-gray-100">
-              <button onClick={() => setCuentaComentarios(null)} className="px-4 py-2 bg-navy text-white text-sm font-medium rounded-lg hover:bg-navy-light">Cerrar</button>
+              <button onClick={() => setCuentaComentarios(null)} className="px-4 py-2 bg-cabecera text-white text-sm font-medium rounded-lg hover:bg-cabecera-alt">Cerrar</button>
             </div>
           </div>
         </div>
@@ -688,16 +690,16 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
         const detalle = detallePartidas[drilldown.codigo2] || []
         const movs = movimientos[drilldown.codigo2] || []
         return (
-          <div className="fixed inset-0 bg-navy/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          <div className="fixed inset-0 bg-cabecera/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
             onClick={() => setDrilldown(null)}>
-            <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[85vh] flex flex-col border border-gray-100"
+            <div className="bg-panel rounded-2xl shadow-2xl max-w-4xl w-full max-h-[85vh] flex flex-col border border-gray-100"
               onClick={e => e.stopPropagation()}>
 
               {/* Header */}
               <div className="flex justify-between items-start p-6 pb-4 border-b border-gray-100">
                 <div>
                   <p className="text-[11px] text-teal-muted font-medium uppercase tracking-wide mb-1">{drilldown.familia}</p>
-                  <h3 className="font-bold text-navy text-lg font-slab">{drilldown.codigo2} — {drilldown.partida}</h3>
+                  <h3 className="font-bold text-tinta text-lg font-slab">{drilldown.codigo2} — {drilldown.partida}</h3>
                 </div>
                 <button onClick={() => setDrilldown(null)} className="text-gray-300 hover:text-gray-500 text-2xl leading-none ml-4 transition-colors">&times;</button>
               </div>
@@ -705,16 +707,16 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
               {/* Mini KPIs */}
               <div className="grid grid-cols-5 gap-2 text-center text-xs px-6 py-4">
                 {[
-                  { label: 'PPTO Inic',   val: uf2(drilldown.ppto_original),  color: '#233032' },
-                  { label: 'Redistrib.',   val: uf2(drilldown.redistribuido),  color: '#809494' },
-                  { label: 'Gastado',      val: uf2(drilldown.gasto_real),     color: '#101820' },
-                  { label: 'Saldo',        val: uf2(drilldown.ytg),            color: '#9DA39B' },
-                  { label: 'Var (R-P)',    val: signed(drilldown.variacion_uf), color: drilldown.variacion_uf >= 0 ? '#16a34a' : '#E00544' },
+                  { label: 'PPTO Inic',   val: uf2(drilldown.ppto_original),  color: paleta.kpi.presupuesto },
+                  { label: 'Redistrib.',   val: uf2(drilldown.redistribuido),  color: paleta.kpi.vigente },
+                  { label: 'Gastado',      val: uf2(drilldown.gasto_real),     color: paleta.kpi.real },
+                  { label: 'Saldo',        val: uf2(drilldown.ytg),            color: paleta.ejeTenue },
+                  { label: 'Var (R-P)',    val: signed(drilldown.variacion_uf), color: drilldown.variacion_uf >= 0 ? paleta.positivo : paleta.negativo },
                 ].map(k => (
                   <div key={k.label} className="bg-surface rounded-lg p-3 border border-gray-100 relative overflow-hidden">
                     <div className="absolute top-0 left-0 right-0 h-0.5" style={{ backgroundColor: k.color }} />
                     <p className="text-gray-400 text-[10px] uppercase tracking-wide">{k.label}</p>
-                    <p className="font-bold text-navy mt-0.5">{k.val}</p>
+                    <p className="font-bold text-tinta mt-0.5">{k.val}</p>
                   </div>
                 ))}
               </div>
@@ -727,7 +729,7 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
                     <div className="overflow-x-auto rounded-lg border border-gray-200">
                       <table className="w-full text-sm">
                         <thead>
-                          <tr className="bg-navy">
+                          <tr className="bg-cabecera">
                             <th className="px-3 py-2 text-left text-[11px] font-medium text-white/80 uppercase tracking-wider">Código</th>
                             <th className="px-3 py-2 text-left text-[11px] font-medium text-white/80 uppercase tracking-wider">Resumen</th>
                             <th className="px-3 py-2 text-center text-[11px] font-medium text-white/80 uppercase tracking-wider">Ud</th>
@@ -736,7 +738,7 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
                             <th className="px-3 py-2 text-right text-[11px] font-medium text-white/80 uppercase tracking-wider">Total UF</th>
                           </tr>
                         </thead>
-                        <tbody className="bg-white divide-y divide-gray-50">
+                        <tbody className="bg-panel divide-y divide-gray-50">
                           {detalle.map((d, i) => (
                             <tr key={i} className={`${i % 2 === 1 ? 'bg-gray-50/50' : ''}`}>
                               <td className="px-3 py-2 text-gray-400 font-mono text-xs">{d.codigo}</td>
@@ -744,14 +746,14 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
                               <td className="px-3 py-2 text-gray-400 text-center">{d.ud}</td>
                               <td className="px-3 py-2 text-gray-600 tabular-nums text-right">{d.cantidad.toLocaleString('es-CL', { maximumFractionDigits: 2 })}</td>
                               <td className="px-3 py-2 text-gray-600 tabular-nums text-right">{d.precio_unitario.toLocaleString('es-CL', { maximumFractionDigits: 3 })}</td>
-                              <td className="px-3 py-2 text-navy font-medium tabular-nums text-right">{uf2(d.total)}</td>
+                              <td className="px-3 py-2 text-tinta font-medium tabular-nums text-right">{uf2(d.total)}</td>
                             </tr>
                           ))}
                         </tbody>
                         <tfoot className="bg-gray-50 border-t border-gray-200">
                           <tr>
                             <td colSpan={5} className="px-3 py-2 text-right text-[11px] font-semibold text-gray-500 uppercase">Total</td>
-                            <td className="px-3 py-2 text-right font-bold tabular-nums text-navy">
+                            <td className="px-3 py-2 text-right font-bold tabular-nums text-tinta">
                               {uf2(detalle.reduce((s, d) => s + d.total, 0))}
                             </td>
                           </tr>
@@ -760,7 +762,7 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
                     </div>
                   ) : (
                     <p className="text-xs text-gray-300 py-4 text-center bg-surface rounded-lg border border-gray-100">
-                      Ejecutar <code className="bg-gray-100 px-1.5 py-0.5 rounded text-navy">python exportar_detalle.py</code> para cargar sub-partidas
+                      Ejecutar <code className="bg-gray-100 px-1.5 py-0.5 rounded text-tinta">python exportar_detalle.py</code> para cargar sub-partidas
                     </p>
                   )}
                 </div>
@@ -771,19 +773,19 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
                     <div className="overflow-x-auto rounded-lg border border-gray-200">
                       <table className="w-full text-sm">
                         <thead>
-                          <tr className="bg-navy">
+                          <tr className="bg-cabecera">
                             {['Fecha', 'Proveedor', 'Glosa', 'Monto UF'].map(h => (
                               <th key={h} className="px-3 py-2 text-left text-[11px] font-medium text-white/80 uppercase tracking-wider">{h}</th>
                             ))}
                           </tr>
                         </thead>
-                        <tbody className="bg-white divide-y divide-gray-50">
+                        <tbody className="bg-panel divide-y divide-gray-50">
                           {movs.map((m, i) => (
                             <tr key={i} className={`${i % 2 === 1 ? 'bg-gray-50/50' : ''}`}>
                               <td className="px-3 py-2 text-gray-500 whitespace-nowrap">{m.fecha}</td>
                               <td className="px-3 py-2 text-gray-700">{m.proveedor}</td>
                               <td className="px-3 py-2 text-gray-500">{m.glosa}</td>
-                              <td className="px-3 py-2 text-navy font-medium tabular-nums">{uf2(m.monto_uf)}</td>
+                              <td className="px-3 py-2 text-tinta font-medium tabular-nums">{uf2(m.monto_uf)}</td>
                             </tr>
                           ))}
                         </tbody>

@@ -4,18 +4,8 @@ import {
   ResponsiveContainer, Cell, PieChart, Pie, Legend,
 } from 'recharts'
 import type { Partida, SinPartida } from '../data/dataAdapter'
+import { usePaleta } from '../features/tema/paleta'
 
-const COLORES_FAMILIA: Record<string, string> = {
-  'MATERIALES':               '#f59e0b',
-  'MANO DE OBRA':             '#1e293b',
-  'SUBCONTRATOS':             '#06b6d4',
-  'GASTOS GENERALES':         '#ec4899',
-  'EQUIPOS Y MAQUINARIAS':    '#8b5cf6',
-  'OTROS':                    '#9ca3af',
-  'EDIFICACIONES COMERCIALES':'#f97316',
-  'POST VENTA':               '#10b981',
-  'GASTOS OFICINA CENTRAL':   '#6366f1',
-}
 
 const NOMBRE_CORTO: Record<string, string> = {
   'MATERIALES':               'Materiales',
@@ -35,8 +25,8 @@ const ufK = (n: number) => `${(n / 1000).toFixed(0)}k`
 const CustomTooltipBar = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null
   return (
-    <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-3 text-sm space-y-1 min-w-48">
-      <p className="font-semibold text-navy text-xs">{label}</p>
+    <div className="bg-panel border border-gray-200 rounded-lg shadow-lg p-3 text-sm space-y-1 min-w-48">
+      <p className="font-semibold text-tinta text-xs">{label}</p>
       {payload.map((p: any) => (
         <p key={p.name} className="text-gray-600 flex justify-between gap-4">
           <span style={{ color: p.color }}>{p.name}</span>
@@ -54,6 +44,7 @@ interface Props {
 }
 
 export default function FamiliaCharts({ partidas, sinPartida, familias: FAMILIAS }: Props) {
+  const paleta = usePaleta()
   const familiaData = useMemo(() => {
     return FAMILIAS.map(fam => {
       const ps = partidas.filter(p => p.familia === fam)
@@ -70,7 +61,7 @@ export default function FamiliaCharts({ partidas, sinPartida, familias: FAMILIAS
         ejec: Math.round(ejec * 10) / 10,
         nPartidas,
         nEjecutadas,
-        color: COLORES_FAMILIA[fam] || '#9ca3af',
+        color: paleta.familia[fam] ?? paleta.ejeTenue,
       }
     })
   }, [partidas, FAMILIAS])
@@ -90,16 +81,16 @@ export default function FamiliaCharts({ partidas, sinPartida, familias: FAMILIAS
     <div className="space-y-5">
       {/* Bar chart — horizontal for readability */}
       <div className="bg-surface rounded-lg border border-gray-100 p-5">
-        <h2 className="text-sm font-semibold text-navy font-slab mb-4">Ppto Vigente vs Real + Proyección por Familia (UF)</h2>
+        <h2 className="text-sm font-semibold text-tinta font-slab mb-4">Ppto Vigente vs Real + Proyección por Familia (UF)</h2>
         <ResponsiveContainer width="100%" height={Math.max(280, familiaData.length * 50)}>
           <BarChart data={familiaData} layout="vertical" margin={{ left: 10, right: 30, top: 4, bottom: 4 }}>
-            <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e5e7eb" />
-            <XAxis type="number" tick={{ fontSize: 11, fill: '#9ca3af' }} tickFormatter={ufK} />
+            <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke={paleta.grilla} />
+            <XAxis type="number" tick={{ fontSize: 11, fill: paleta.ejeTenue }} tickFormatter={ufK} />
             <YAxis
               type="category"
               dataKey="nameCorto"
               width={90}
-              tick={{ fontSize: 11, fill: '#374151' }}
+              tick={{ fontSize: 11, fill: paleta.ejeFuerte }}
               interval={0}
             />
             <Tooltip content={<CustomTooltipBar />} />
@@ -134,7 +125,7 @@ export default function FamiliaCharts({ partidas, sinPartida, familias: FAMILIAS
       {/* Pie + Progress bars */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="bg-surface rounded-lg border border-gray-100 p-5">
-          <h2 className="text-sm font-semibold text-navy font-slab mb-1">Distribución Ppto Vigente</h2>
+          <h2 className="text-sm font-semibold text-tinta font-slab mb-1">Distribución Ppto Vigente</h2>
           <p className="text-[11px] text-gray-400 mb-3">Total: UF {uf2(totalPpto)}</p>
           <ResponsiveContainer width="100%" height={280}>
             <PieChart>
@@ -164,7 +155,7 @@ export default function FamiliaCharts({ partidas, sinPartida, familias: FAMILIAS
         </div>
 
         <div className="bg-surface rounded-lg border border-gray-100 p-5">
-          <h2 className="text-sm font-semibold text-navy font-slab mb-1">% de Ejecución por Familia</h2>
+          <h2 className="text-sm font-semibold text-tinta font-slab mb-1">% de Ejecución por Familia</h2>
           <p className="text-[11px] text-gray-400 mb-4">(Real + Proyección) / Ppto Vigente</p>
           <div className="space-y-4">
             {familiaData.filter(f => f.ppto > 0).map(f => (
@@ -208,7 +199,7 @@ export default function FamiliaCharts({ partidas, sinPartida, familias: FAMILIAS
 
       {/* Summary table */}
       <div className="rounded-lg border border-gray-200 overflow-hidden">
-        <div className="px-5 py-3 bg-navy">
+        <div className="px-5 py-3 bg-cabecera">
           <h2 className="text-sm font-semibold text-white font-slab">Resumen por Familia</h2>
         </div>
         <table className="w-full text-sm">
@@ -219,7 +210,7 @@ export default function FamiliaCharts({ partidas, sinPartida, familias: FAMILIAS
               ))}
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-50">
+          <tbody className="bg-panel divide-y divide-gray-50">
             {familiaData.map((f, i) => {
               const varUF = f.real - f.ppto
               return (
@@ -256,16 +247,16 @@ export default function FamiliaCharts({ partidas, sinPartida, familias: FAMILIAS
           <tfoot className="bg-gray-50 border-t-2 border-gray-200">
             <tr>
               <td className="px-4 py-2.5 text-[11px] font-bold text-gray-500 uppercase">Total</td>
-              <td className="px-4 py-2.5 tabular-nums font-semibold text-navy">{partidas.length}</td>
-              <td className="px-4 py-2.5 tabular-nums font-semibold text-navy">{partidas.filter(p => p.proyeccion !== 0).length}</td>
-              <td className="px-4 py-2.5 tabular-nums font-bold text-navy">{uf2(totalPpto)}</td>
-              <td className="px-4 py-2.5 tabular-nums font-bold text-navy">{uf2(totalReal)}</td>
+              <td className="px-4 py-2.5 tabular-nums font-semibold text-tinta">{partidas.length}</td>
+              <td className="px-4 py-2.5 tabular-nums font-semibold text-tinta">{partidas.filter(p => p.proyeccion !== 0).length}</td>
+              <td className="px-4 py-2.5 tabular-nums font-bold text-tinta">{uf2(totalPpto)}</td>
+              <td className="px-4 py-2.5 tabular-nums font-bold text-tinta">{uf2(totalReal)}</td>
               <td className="px-4 py-2.5 tabular-nums font-bold">
                 <span className={totalReal - totalPpto >= 0 ? 'text-accent' : 'text-emerald-600'}>
                   {totalReal - totalPpto >= 0 ? '+' : ''}{uf2(totalReal - totalPpto)}
                 </span>
               </td>
-              <td className="px-4 py-2.5 tabular-nums font-bold text-navy">
+              <td className="px-4 py-2.5 tabular-nums font-bold text-tinta">
                 {totalPpto > 0 ? ((totalReal / totalPpto) * 100).toFixed(1) : '0.0'}%
               </td>
             </tr>

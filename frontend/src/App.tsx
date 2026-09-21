@@ -15,6 +15,8 @@ import AdminUsersPage from './features/auth/AdminUsersPage'
 import InformeSelector from './features/informes/InformeSelector'
 import { useCurrentUser } from './features/auth/useCurrentUser'
 import { esDemoMode, salirDemo } from './features/demo/demoMode'
+import TemaToggle from './features/tema/TemaToggle'
+import { useTemaStore } from './features/tema/TemaStore'
 
 type Tab = 'tabla' | 'familias' | 'top5' | 'prediccion' | 'directorio'
 
@@ -38,6 +40,9 @@ export default function App() {
   const data = useDashboardData()
   const { user, esAdmin, esDirector } = useCurrentUser()
   const demo = esDemoMode()
+  // El logo es tinta oscura + magenta sobre transparente: sobre fondo oscuro
+  // desaparece. La variante clara conserva el magenta de marca.
+  const temaOscuro = useTemaStore(s => s.tema) === 'oscuro'
 
   // Pestaña efectiva: si el perfil no tiene acceso a la que está abierta (rol
   // cambiado, sesión vieja), se muestra la primera en vez de un panel en blanco.
@@ -55,33 +60,34 @@ export default function App() {
     <AuthGate>
     <div className="min-h-screen bg-surface">
       {/* Top accent bar */}
-      <div className="h-1 bg-gradient-to-r from-navy via-teal to-accent" />
+      <div className="h-1 bg-gradient-to-r from-cabecera via-teal to-accent" />
 
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 shadow-sm">
+      <header className="bg-panel border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <img src="/icemm-logo.png" alt="ICEMM" className="h-10 object-contain" />
+            <img src={temaOscuro ? "/icemm-logo-oscuro.png" : "/icemm-logo.png"} alt="ICEMM" className="h-10 object-contain" />
             <div className="border-l border-gray-200 pl-4">
               <p className="text-[11px] font-medium text-teal-muted uppercase tracking-widest">Informe de Resultado de Obra</p>
-              <p className="text-sm font-semibold text-navy">{data.projectName}</p>
+              <p className="text-sm font-semibold text-tinta">{data.projectName}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <InformeSelector esAdmin={esAdmin} esDirector={esDirector} />
             <CutoffMesFilter />
             <ProjectSwitcher />
+            <TemaToggle />
             <div className="text-right">
               <p className="text-xs text-gray-400">Fecha de corte</p>
-              <p className="text-sm font-semibold text-navy tabular-nums">{data.fechaCorte}</p>
+              <p className="text-sm font-semibold text-tinta tabular-nums">{data.fechaCorte}</p>
             </div>
             {user && (
               <div className="flex items-center gap-2 border-l border-gray-200 pl-3">
                 <div className="text-right">
                   <p className="text-[11px] text-gray-400">{user.nombre}</p>
                   <span className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${
-                    user.rol === 'admin' ? 'bg-navy text-white' :
-                    user.rol === 'editor' ? 'bg-teal-light text-navy' :
+                    user.rol === 'admin' ? 'bg-cabecera text-white' :
+                    user.rol === 'editor' ? 'bg-teal-light text-tinta' :
                     user.rol === 'director' ? 'bg-emerald-100 text-emerald-700' :
                     'bg-gray-100 text-gray-500'
                   }`}>{user.rol}</span>
@@ -123,7 +129,7 @@ export default function App() {
         <KpiCards partidas={data.partidas} fechaCorte={data.fechaCorte} />
 
         {/* Tabs */}
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+        <div className="bg-panel rounded-xl border border-gray-200 shadow-sm">
           <nav className="flex border-b border-gray-100">
             {TABS.filter(t => !t.soloAdmin || esAdmin).map(t => (
               <button
@@ -131,8 +137,8 @@ export default function App() {
                 onClick={() => setTab(t.id)}
                 className={`px-5 py-3 text-sm font-medium transition-all relative
                   ${tabActiva === t.id
-                    ? 'text-navy after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[2px] after:bg-accent'
-                    : 'text-gray-400 hover:text-navy'}`}
+                    ? 'text-tinta after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[2px] after:bg-accent'
+                    : 'text-gray-400 hover:text-tinta'}`}
               >
                 {t.label}
               </button>
@@ -150,7 +156,7 @@ export default function App() {
 
         {/* Sin Partida Presupuestaria */}
         {(data.sinPartida.length > 0 || data.sinPartidaEnriquecido.length > 0) && (
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+          <div className="bg-panel rounded-xl border border-gray-200 shadow-sm p-5">
             <SinPartidaPanel sinPartida={data.sinPartida} sinPartidaEnriquecido={data.sinPartidaEnriquecido} />
           </div>
         )}

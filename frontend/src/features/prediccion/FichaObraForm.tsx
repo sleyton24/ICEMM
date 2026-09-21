@@ -54,7 +54,7 @@ export default function FichaObraForm({ proyecto, onListo }: Props) {
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="text-sm font-bold text-navy font-slab">Ficha de obra</h3>
+        <h3 className="text-sm font-bold text-tinta font-slab">Ficha de obra</h3>
         <p className="text-xs text-gray-500 mt-0.5">
           El predictor necesita estos cuatro datos y no están en ningún archivo cargado.
         </p>
@@ -73,7 +73,7 @@ export default function FichaObraForm({ proyecto, onListo }: Props) {
           <select
             value={tipoObra}
             onChange={e => setTipoObra(e.target.value as TipoObra | '')}
-            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-teal-muted/30"
+            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-panel focus:outline-none focus:ring-2 focus:ring-teal-muted/30"
           >
             <option value="">Seleccioná…</option>
             {TIPOS_OBRA.map(t => <option key={t} value={t}>{t}</option>)}
@@ -118,7 +118,7 @@ export default function FichaObraForm({ proyecto, onListo }: Props) {
       <button
         onClick={guardar}
         disabled={guardando}
-        className="px-4 py-2 bg-navy text-white text-sm font-medium rounded-lg hover:bg-navy-light transition-colors disabled:opacity-50"
+        className="px-4 py-2 bg-cabecera text-white text-sm font-medium rounded-lg hover:bg-cabecera-alt transition-colors disabled:opacity-50"
       >
         {guardando ? 'Guardando…' : 'Guardar ficha'}
       </button>

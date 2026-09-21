@@ -13,12 +13,12 @@ export default function UploadPreviewModal({ result, slotLabel, onConfirm, onCan
   const { partidas, subtotalesFamilia, totalGeneral, redondeo, warnings, nombreProyecto } = result
 
   return (
-    <div className="fixed inset-0 bg-navy/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onCancel}>
-      <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[85vh] flex flex-col border border-gray-100" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 bg-cabecera/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onCancel}>
+      <div className="bg-panel rounded-2xl shadow-2xl max-w-3xl w-full max-h-[85vh] flex flex-col border border-gray-100" onClick={e => e.stopPropagation()}>
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-100">
           <p className="text-[11px] text-teal-muted font-medium uppercase tracking-wider">{slotLabel}</p>
-          <h3 className="text-lg font-bold text-navy font-slab">Preview de carga</h3>
+          <h3 className="text-lg font-bold text-tinta font-slab">Preview de carga</h3>
           {nombreProyecto && <p className="text-xs text-gray-400 mt-0.5">{nombreProyecto}</p>}
         </div>
 
@@ -27,15 +27,15 @@ export default function UploadPreviewModal({ result, slotLabel, onConfirm, onCan
           <div className="grid grid-cols-3 gap-3">
             <div className="bg-surface rounded-lg p-3 border border-gray-100 text-center">
               <p className="text-[10px] text-gray-400 uppercase tracking-wide">Partidas</p>
-              <p className="text-xl font-bold text-navy">{partidas.length}</p>
+              <p className="text-xl font-bold text-tinta">{partidas.length}</p>
             </div>
             <div className="bg-surface rounded-lg p-3 border border-gray-100 text-center">
               <p className="text-[10px] text-gray-400 uppercase tracking-wide">Familias</p>
-              <p className="text-xl font-bold text-navy">{Object.keys(subtotalesFamilia).length}</p>
+              <p className="text-xl font-bold text-tinta">{Object.keys(subtotalesFamilia).length}</p>
             </div>
             <div className="bg-surface rounded-lg p-3 border border-gray-100 text-center">
               <p className="text-[10px] text-gray-400 uppercase tracking-wide">Total General</p>
-              <p className="text-lg font-bold text-navy">UF {uf2(totalGeneral)}</p>
+              <p className="text-lg font-bold text-tinta">UF {uf2(totalGeneral)}</p>
             </div>
           </div>
 
@@ -45,20 +45,20 @@ export default function UploadPreviewModal({ result, slotLabel, onConfirm, onCan
             <div className="rounded-lg border border-gray-200 overflow-hidden">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-navy">
+                  <tr className="bg-cabecera">
                     <th className="px-3 py-2 text-left text-[11px] font-medium text-white/80 uppercase tracking-wider">Familia</th>
                     <th className="px-3 py-2 text-right text-[11px] font-medium text-white/80 uppercase tracking-wider">Partidas</th>
                     <th className="px-3 py-2 text-right text-[11px] font-medium text-white/80 uppercase tracking-wider">Total UF</th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-50">
+                <tbody className="bg-panel divide-y divide-gray-50">
                   {Object.entries(subtotalesFamilia).map(([fam, total]) => {
                     const count = partidas.filter(p => p.familia === fam).length
                     return (
                       <tr key={fam}>
                         <td className="px-3 py-2 text-gray-700 font-medium">{fam}</td>
                         <td className="px-3 py-2 text-gray-500 tabular-nums text-right">{count}</td>
-                        <td className="px-3 py-2 text-navy font-medium tabular-nums text-right">{uf2(total)}</td>
+                        <td className="px-3 py-2 text-tinta font-medium tabular-nums text-right">{uf2(total)}</td>
                       </tr>
                     )
                   })}
@@ -72,7 +72,7 @@ export default function UploadPreviewModal({ result, slotLabel, onConfirm, onCan
                   )}
                   <tr>
                     <td colSpan={2} className="px-3 py-2 text-right text-[11px] font-bold text-gray-500 uppercase">Total</td>
-                    <td className="px-3 py-2 text-right font-bold text-navy tabular-nums">{uf2(totalGeneral)}</td>
+                    <td className="px-3 py-2 text-right font-bold text-tinta tabular-nums">{uf2(totalGeneral)}</td>
                   </tr>
                 </tfoot>
               </table>
@@ -100,7 +100,7 @@ export default function UploadPreviewModal({ result, slotLabel, onConfirm, onCan
                       <td className="px-2 py-1.5 text-gray-500 text-xs">{p.codigo2}</td>
                       <td className="px-2 py-1.5 text-gray-700 text-xs truncate max-w-48">{p.descripcion}</td>
                       <td className="px-2 py-1.5 text-gray-400 text-[10px]">{p.familia}</td>
-                      <td className="px-2 py-1.5 text-navy font-medium tabular-nums text-xs text-right">{uf2(p.total)}</td>
+                      <td className="px-2 py-1.5 text-tinta font-medium tabular-nums text-xs text-right">{uf2(p.total)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -129,7 +129,7 @@ export default function UploadPreviewModal({ result, slotLabel, onConfirm, onCan
           <button onClick={onCancel} className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700 font-medium transition-colors">
             Cancelar
           </button>
-          <button onClick={onConfirm} className="px-5 py-2 bg-navy text-white text-sm font-medium rounded-lg hover:bg-navy-light transition-colors shadow-sm">
+          <button onClick={onConfirm} className="px-5 py-2 bg-cabecera text-white text-sm font-medium rounded-lg hover:bg-cabecera-alt transition-colors shadow-sm">
             Confirmar carga
           </button>
         </div>

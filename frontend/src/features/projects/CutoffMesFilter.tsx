@@ -25,7 +25,7 @@ export default function CutoffMesFilter() {
   const value = cutoff ?? '__all__'
 
   return (
-    <div className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 rounded-lg bg-white">
+    <div className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 rounded-lg bg-panel">
       <Calendar className="h-3.5 w-3.5 text-teal-muted" />
       <label className="text-[10px] font-medium text-gray-400 uppercase tracking-wider">Real hasta</label>
       <select
@@ -34,7 +34,7 @@ export default function CutoffMesFilter() {
           const v = e.target.value
           setCutoffMesReal(project.id, v === '__all__' ? null : v)
         }}
-        className="text-xs font-semibold text-navy bg-transparent border-0 focus:outline-none cursor-pointer pr-1"
+        className="text-xs font-semibold text-tinta bg-transparent border-0 focus:outline-none cursor-pointer pr-1"
       >
         <option value="__all__">Todos los meses</option>
         {meses.map(m => (

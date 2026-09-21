@@ -151,7 +151,7 @@ function Celda({ valor, variante }: { valor: number; variante: Variante }) {
     case 'signed':
       return <span className={valor >= 0 ? 'text-emerald-600 font-medium' : 'text-accent font-medium'}>{signed(valor)}</span>
     case 'destacado':
-      return <span className="font-semibold text-navy">{uf2(valor)}</span>
+      return <span className="font-semibold text-tinta">{uf2(valor)}</span>
     case 'total':
       return <span className={`font-bold ${valor >= 0 ? 'text-emerald-700' : 'text-accent'}`}>{uf2(valor)}</span>
     default:
@@ -219,17 +219,17 @@ export default function DirectorioReport() {
         <div className="relative">
           <button
             onClick={() => setAbierto(!abierto)}
-            className="flex items-center gap-2 px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg hover:border-gray-300 transition-colors"
+            className="flex items-center gap-2 px-3 py-2 text-sm bg-panel border border-gray-200 rounded-lg hover:border-gray-300 transition-colors"
           >
             <span className="text-[11px] font-medium text-teal-muted uppercase tracking-wider">Obras</span>
-            <span className="text-navy font-medium max-w-56 truncate">{etiquetaSelector}</span>
+            <span className="text-tinta font-medium max-w-56 truncate">{etiquetaSelector}</span>
             <ChevronDown className={`h-3.5 w-3.5 text-gray-400 transition-transform ${abierto ? 'rotate-180' : ''}`} />
           </button>
 
           {abierto && (
             <>
               <div className="fixed inset-0 z-40" onClick={() => setAbierto(false)} />
-              <div className="absolute left-0 top-full mt-1 w-80 bg-white rounded-xl border border-gray-200 shadow-lg z-50 overflow-hidden">
+              <div className="absolute left-0 top-full mt-1 w-80 bg-panel rounded-xl border border-gray-200 shadow-lg z-50 overflow-hidden">
                 <div className="flex items-center justify-between px-4 py-2 border-b border-gray-100 bg-surface">
                   <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
                     Seleccioná una o varias
@@ -237,14 +237,14 @@ export default function DirectorioReport() {
                   <div className="flex gap-2 text-[11px]">
                     <button
                       onClick={() => setSeleccionManual(proyectos.map(p => p.id))}
-                      className="text-teal-muted hover:text-navy font-medium transition-colors"
+                      className="text-teal-muted hover:text-tinta font-medium transition-colors"
                     >
                       Todas
                     </button>
                     <span className="text-gray-200">|</span>
                     <button
                       onClick={() => setSeleccionManual([])}
-                      className="text-teal-muted hover:text-navy font-medium transition-colors"
+                      className="text-teal-muted hover:text-tinta font-medium transition-colors"
                     >
                       Ninguna
                     </button>
@@ -266,11 +266,11 @@ export default function DirectorioReport() {
                           ${marcada ? 'bg-teal-light/30' : 'hover:bg-surface'}`}
                       >
                         <span className={`h-4 w-4 rounded border flex items-center justify-center flex-shrink-0
-                          ${marcada ? 'bg-navy border-navy' : 'border-gray-300 bg-white'}`}>
+                          ${marcada ? 'bg-cabecera border-cabecera' : 'border-gray-300 bg-panel'}`}>
                           {marcada && <Check className="h-3 w-3 text-white" />}
                         </span>
                         <span className="min-w-0 flex-1">
-                          <span className={`block text-sm truncate ${marcada ? 'font-semibold text-navy' : 'text-gray-700'}`}>
+                          <span className={`block text-sm truncate ${marcada ? 'font-semibold text-tinta' : 'text-gray-700'}`}>
                             {p.nombre}
                           </span>
                           <span className="block text-[10px] text-gray-400">
@@ -332,7 +332,7 @@ export default function DirectorioReport() {
 
         return (
           <div key={d.proyecto.id} className="rounded-lg border border-gray-200 overflow-hidden">
-            <div className="px-5 py-3 bg-navy">
+            <div className="px-5 py-3 bg-cabecera">
               <h2 className="text-sm font-semibold text-white font-slab">VISIÓN DE PLAN DE CUENTAS DE OBRA</h2>
               <p className="text-[11px] text-white/50">{d.proyecto.nombre}</p>
             </div>
@@ -352,7 +352,7 @@ export default function DirectorioReport() {
                     <th className="px-3 py-2.5 text-right text-[10px] font-semibold text-gray-500 uppercase tracking-wider">EE.RR. Proyectado<div className="text-[9px] text-gray-300">(7=4-5)</div></th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-50">
+                <tbody className="bg-panel divide-y divide-gray-50">
                   {filasFamilia.map(({ familia, totales }, i) => {
                     const saldo = totales.proyeccion - totales.gasto_real
                     const eerr = totales.ppto_vigente - totales.proyeccion
@@ -362,7 +362,7 @@ export default function DirectorioReport() {
                         <td className="px-3 py-2 tabular-nums text-right text-gray-600">{uf2(totales.ppto_original)}</td>
                         <td className="px-3 py-2 tabular-nums text-right text-gray-600">{uf2(totales.redistribuido)}</td>
                         <td className="px-3 py-2 tabular-nums text-right text-violet-600">{uf2(totales.ppto_horas_extra)}</td>
-                        <td className="px-3 py-2 tabular-nums text-right font-semibold text-navy">{uf2(totales.ppto_vigente)}</td>
+                        <td className="px-3 py-2 tabular-nums text-right font-semibold text-tinta">{uf2(totales.ppto_vigente)}</td>
                         <td className="px-3 py-2 tabular-nums text-right text-gray-700">{uf2(totales.proyeccion)}</td>
                         <td className="px-3 py-2 tabular-nums text-right text-gray-700">{uf2(totales.gasto_real)}</td>
                         <td className="px-3 py-2 tabular-nums text-right text-gray-500">{uf2(saldo)}</td>
@@ -375,16 +375,16 @@ export default function DirectorioReport() {
                     )
                   })}
                 </tbody>
-                <tfoot className="bg-navy/5 border-t-2 border-navy/20">
+                <tfoot className="bg-cabecera/5 border-t-2 border-cabecera/20">
                   <tr>
-                    <td className="px-3 py-2.5 font-bold text-navy uppercase text-xs">Total</td>
-                    <td className="px-3 py-2.5 tabular-nums text-right font-bold text-navy">{uf2(totalesTabla1.ppto_original)}</td>
-                    <td className="px-3 py-2.5 tabular-nums text-right font-bold text-navy">{uf2(totalesTabla1.redistribuido)}</td>
+                    <td className="px-3 py-2.5 font-bold text-tinta uppercase text-xs">Total</td>
+                    <td className="px-3 py-2.5 tabular-nums text-right font-bold text-tinta">{uf2(totalesTabla1.ppto_original)}</td>
+                    <td className="px-3 py-2.5 tabular-nums text-right font-bold text-tinta">{uf2(totalesTabla1.redistribuido)}</td>
                     <td className="px-3 py-2.5 tabular-nums text-right font-bold text-violet-700">{uf2(totalesTabla1.ppto_horas_extra)}</td>
-                    <td className="px-3 py-2.5 tabular-nums text-right font-bold text-navy">{uf2(totalesTabla1.ppto_vigente)}</td>
-                    <td className="px-3 py-2.5 tabular-nums text-right font-bold text-navy">{uf2(totalesTabla1.proyeccion)}</td>
-                    <td className="px-3 py-2.5 tabular-nums text-right font-bold text-navy">{uf2(totalesTabla1.gasto_real)}</td>
-                    <td className="px-3 py-2.5 tabular-nums text-right font-bold text-navy">{uf2(totalesTabla1.proyeccion - totalesTabla1.gasto_real)}</td>
+                    <td className="px-3 py-2.5 tabular-nums text-right font-bold text-tinta">{uf2(totalesTabla1.ppto_vigente)}</td>
+                    <td className="px-3 py-2.5 tabular-nums text-right font-bold text-tinta">{uf2(totalesTabla1.proyeccion)}</td>
+                    <td className="px-3 py-2.5 tabular-nums text-right font-bold text-tinta">{uf2(totalesTabla1.gasto_real)}</td>
+                    <td className="px-3 py-2.5 tabular-nums text-right font-bold text-tinta">{uf2(totalesTabla1.proyeccion - totalesTabla1.gasto_real)}</td>
                     <td className="px-3 py-2.5 tabular-nums text-right font-bold">
                       <span className={totalesTabla1.ppto_vigente - totalesTabla1.proyeccion >= 0 ? 'text-emerald-600' : 'text-accent'}>
                         {signed(totalesTabla1.ppto_vigente - totalesTabla1.proyeccion)}
@@ -403,7 +403,7 @@ export default function DirectorioReport() {
           ════════════════════════════════════════════════════════════════ */}
       {datosProyectos.length > 0 && (
         <div className="rounded-lg border border-gray-200 overflow-hidden">
-          <div className="px-5 py-3 bg-navy">
+          <div className="px-5 py-3 bg-cabecera">
             <h2 className="text-sm font-semibold text-white font-slab">VISIÓN DE VENTAS Y RESULTADO DE OBRA</h2>
             <p className="text-[11px] text-white/50">
               {datosProyectos.length} obra{datosProyectos.length !== 1 ? 's' : ''} seleccionada{datosProyectos.length !== 1 ? 's' : ''}
@@ -422,13 +422,13 @@ export default function DirectorioReport() {
                     </th>
                   ))}
                   {multiObra && (
-                    <th className="px-3 py-2.5 text-right text-[11px] font-bold text-navy uppercase tracking-wider min-w-32 bg-navy/5 border-l-2 border-navy/20">
+                    <th className="px-3 py-2.5 text-right text-[11px] font-bold text-tinta uppercase tracking-wider min-w-32 bg-cabecera/5 border-l-2 border-cabecera/20">
                       Consolidado
                     </th>
                   )}
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-50">
+              <tbody className="bg-panel divide-y divide-gray-50">
                 {BLOQUES.map(bloque => (
                   <Fragment key={bloque.titulo}>
                     <tr className={bloque.claseTitulo}>
@@ -454,7 +454,7 @@ export default function DirectorioReport() {
                           </td>
                         ))}
                         {multiObra && (
-                          <td className="px-3 py-2 tabular-nums text-right bg-navy/5 border-l-2 border-navy/20">
+                          <td className="px-3 py-2 tabular-nums text-right bg-cabecera/5 border-l-2 border-cabecera/20">
                             <Celda valor={fila.get(consolidado)} variante={fila.variante} />
                           </td>
                         )}

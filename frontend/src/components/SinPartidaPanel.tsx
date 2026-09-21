@@ -44,16 +44,16 @@ export default function SinPartidaPanel({ sinPartida, sinPartidaEnriquecido }: P
       <div className="overflow-x-auto rounded-lg border border-gray-200">
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-navy">
+            <tr className="bg-cabecera">
               {['Concepto', 'Transacciones', 'Gasto Real (UF)', 'Top Proveedores'].map(h => (
                 <th key={h} className="px-4 py-2.5 text-left text-[11px] font-medium text-white/80 uppercase tracking-wider">{h}</th>
               ))}
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-50">
+          <tbody className="bg-panel divide-y divide-gray-50">
             {movimientos.map((s, i) => (
               <tr key={s.concepto_codigo} className={`hover:bg-teal-light/20 transition-colors ${i % 2 === 1 ? 'bg-gray-50/50' : ''}`}>
-                <td className="px-4 py-3 font-mono font-semibold text-navy">{s.concepto_codigo}</td>
+                <td className="px-4 py-3 font-mono font-semibold text-tinta">{s.concepto_codigo}</td>
                 <td className="px-4 py-3 text-gray-500 tabular-nums">
                   {s.num_transacciones > 0 ? s.num_transacciones.toLocaleString('es-CL') : '—'}
                 </td>
@@ -79,7 +79,7 @@ export default function SinPartidaPanel({ sinPartida, sinPartidaEnriquecido }: P
         </table>
       </div>
 
-      <div className="bg-surface border border-gray-200 rounded-lg p-4 text-xs text-navy space-y-1">
+      <div className="bg-surface border border-gray-200 rounded-lg p-4 text-xs text-tinta space-y-1">
         <p className="font-semibold">Próximos pasos sugeridos:</p>
         <ol className="list-decimal list-inside space-y-0.5 text-gray-600">
           <li>Confirmar con el área contable si estos centros de costo corresponden a partidas existentes con otro código.</li>

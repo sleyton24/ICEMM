@@ -83,14 +83,14 @@ export default function AdminPlanCuentasPage({ onBack }: { onBack: () => void })
 
   return (
     <div className="min-h-screen bg-surface">
-      <div className="h-1 bg-gradient-to-r from-navy via-teal to-accent" />
+      <div className="h-1 bg-gradient-to-r from-cabecera via-teal to-accent" />
 
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 shadow-sm">
+      <header className="bg-panel border-b border-gray-200 shadow-sm">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <div>
-            <button onClick={onBack} className="text-xs text-teal-muted hover:text-navy transition-colors mb-1">&larr; Volver al dashboard</button>
-            <h1 className="text-lg font-bold text-navy font-slab">Plan de Cuentas ICEMM</h1>
+            <button onClick={onBack} className="text-xs text-teal-muted hover:text-tinta transition-colors mb-1">&larr; Volver al dashboard</button>
+            <h1 className="text-lg font-bold text-tinta font-slab">Plan de Cuentas ICEMM</h1>
             <p className="text-[11px] text-gray-400">
               {plan.familias.length} familias · {plan.cuentas.length} cuentas · {maestro.productos.length > 0 ? `${uf2(maestro.productos.length)} productos` : 'sin maestro'}
               {' · '}
@@ -105,7 +105,7 @@ export default function AdminPlanCuentasPage({ onBack }: { onBack: () => void })
                 <RotateCcw className="h-3.5 w-3.5" /> Restaurar bundleada
               </button>
             )}
-            <button onClick={() => setShowUpload(true)} className="flex items-center gap-1.5 px-4 py-2 text-xs font-medium text-white bg-navy rounded-lg hover:bg-navy-light transition-colors">
+            <button onClick={() => setShowUpload(true)} className="flex items-center gap-1.5 px-4 py-2 text-xs font-medium text-white bg-cabecera rounded-lg hover:bg-cabecera-alt transition-colors">
               <Upload className="h-3.5 w-3.5" /> Subir nueva versión
             </button>
           </div>
@@ -115,13 +115,13 @@ export default function AdminPlanCuentasPage({ onBack }: { onBack: () => void })
       <div className="max-w-5xl mx-auto px-6 py-6 space-y-6">
 
         {/* Plan de cuentas */}
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+        <div className="bg-panel rounded-xl border border-gray-200 shadow-sm">
           <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
-            <h2 className="text-sm font-semibold text-navy font-slab">Cuentas de Costo</h2>
+            <h2 className="text-sm font-semibold text-tinta font-slab">Cuentas de Costo</h2>
             <div className="flex gap-2 text-[11px]">
-              <button onClick={expandAll} className="text-teal-muted hover:text-navy transition-colors">Expandir todo</button>
+              <button onClick={expandAll} className="text-teal-muted hover:text-tinta transition-colors">Expandir todo</button>
               <span className="text-gray-200">|</span>
-              <button onClick={collapseAll} className="text-teal-muted hover:text-navy transition-colors">Colapsar</button>
+              <button onClick={collapseAll} className="text-teal-muted hover:text-tinta transition-colors">Colapsar</button>
             </div>
           </div>
 
@@ -139,7 +139,7 @@ export default function AdminPlanCuentasPage({ onBack }: { onBack: () => void })
                     <span className="w-6 h-6 rounded flex items-center justify-center text-[10px] font-bold text-white" style={{ backgroundColor: fam.color }}>
                       {fam.letra}
                     </span>
-                    <span className="text-sm font-semibold text-navy">{fam.codigo}</span>
+                    <span className="text-sm font-semibold text-tinta">{fam.codigo}</span>
                     <span className="text-sm text-gray-700 flex-1">{fam.nombre}</span>
                     <span className="text-[11px] text-gray-400 tabular-nums">{subcuentas.length} cuentas</span>
                   </button>
@@ -156,8 +156,8 @@ export default function AdminPlanCuentasPage({ onBack }: { onBack: () => void })
                         </thead>
                         <tbody className="divide-y divide-gray-100">
                           {subcuentas.map(c => (
-                            <tr key={c.codigo} className="hover:bg-white/50">
-                              <td className="px-3 py-1.5 font-mono text-navy font-medium">{c.codigo}</td>
+                            <tr key={c.codigo} className="hover:bg-panel/50">
+                              <td className="px-3 py-1.5 font-mono text-tinta font-medium">{c.codigo}</td>
                               <td className="px-3 py-1.5 text-gray-600">{c.descripcion}</td>
                               <td className="px-3 py-1.5 text-center text-gray-400">{c.letra}</td>
                             </tr>
@@ -178,9 +178,9 @@ export default function AdminPlanCuentasPage({ onBack }: { onBack: () => void })
 
         {/* Maestro de productos */}
         {maestro.productos.length > 0 && (
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+          <div className="bg-panel rounded-xl border border-gray-200 shadow-sm">
             <div className="px-5 py-3 border-b border-gray-100">
-              <h2 className="text-sm font-semibold text-navy font-slab">Maestro de Productos</h2>
+              <h2 className="text-sm font-semibold text-tinta font-slab">Maestro de Productos</h2>
               <p className="text-[11px] text-gray-400">{uf2(maestro.productos.length)} productos</p>
             </div>
             <div className="p-5">
@@ -214,7 +214,7 @@ export default function AdminPlanCuentasPage({ onBack }: { onBack: () => void })
                 <div className="rounded-lg border border-gray-200 overflow-hidden">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="bg-navy">
+                      <tr className="bg-cabecera">
                         <th className="px-3 py-2 text-left text-[10px] font-medium text-white/80 uppercase tracking-wider">Código</th>
                         <th className="px-3 py-2 text-left text-[10px] font-medium text-white/80 uppercase tracking-wider">Descripción</th>
                         <th className="px-3 py-2 text-left text-[10px] font-medium text-white/80 uppercase tracking-wider">Ud</th>
@@ -224,7 +224,7 @@ export default function AdminPlanCuentasPage({ onBack }: { onBack: () => void })
                     <tbody className="divide-y divide-gray-50">
                       {filteredProductos.map((p, i) => (
                         <tr key={p.codigo} className={i % 2 === 1 ? 'bg-gray-50/50' : ''}>
-                          <td className="px-3 py-1.5 font-mono text-xs text-navy">{p.codigo}</td>
+                          <td className="px-3 py-1.5 font-mono text-xs text-tinta">{p.codigo}</td>
                           <td className="px-3 py-1.5 text-gray-600 text-xs truncate max-w-xs">{p.descripcion}</td>
                           <td className="px-3 py-1.5 text-gray-400 text-xs">{p.unidadMedida}</td>
                           <td className="px-3 py-1.5 text-gray-500 text-xs">{p.ctaCto}</td>
@@ -289,11 +289,11 @@ function UploadModal({ onFile, error, preview, onConfirm, onCancel }: {
   const hasBlockingErrors = preview && preview.errors.length > 0
 
   return (
-    <div className="fixed inset-0 bg-navy/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onCancel}>
-      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] flex flex-col border border-gray-100" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 bg-cabecera/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onCancel}>
+      <div className="bg-panel rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] flex flex-col border border-gray-100" onClick={e => e.stopPropagation()}>
         <div className="px-6 py-4 border-b border-gray-100">
           <p className="text-[11px] text-teal-muted font-medium uppercase tracking-wider">Plan de Cuentas</p>
-          <h3 className="text-lg font-bold text-navy font-slab">Subir nueva versión</h3>
+          <h3 className="text-lg font-bold text-tinta font-slab">Subir nueva versión</h3>
         </div>
 
         <div className="overflow-y-auto flex-1 px-6 py-4 space-y-4">
@@ -311,10 +311,10 @@ function UploadModal({ onFile, error, preview, onConfirm, onCancel }: {
               onDrop={handleDrop}
               onClick={() => inputRef.current?.click()}
               className={`flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-xl cursor-pointer transition-all
-                ${dragOver ? 'border-navy bg-teal-light/20' : 'border-gray-200 hover:border-teal-muted hover:bg-surface'}`}
+                ${dragOver ? 'border-cabecera bg-teal-light/20' : 'border-gray-200 hover:border-teal-muted hover:bg-surface'}`}
             >
               <FileSpreadsheet className="h-8 w-8 text-teal-muted mb-3" />
-              <p className="text-sm font-medium text-navy">MAESTRO_MATERIALES_ICEMM.xlsm</p>
+              <p className="text-sm font-medium text-tinta">MAESTRO_MATERIALES_ICEMM.xlsm</p>
               <p className="text-[11px] text-gray-400 mt-1">Arrastra el archivo aquí o haz clic para seleccionar</p>
               <input ref={inputRef} type="file" accept=".xlsm,.xlsx" className="hidden" onChange={handleChange} />
             </div>
@@ -326,15 +326,15 @@ function UploadModal({ onFile, error, preview, onConfirm, onCancel }: {
               <div className="grid grid-cols-3 gap-3">
                 <div className="bg-surface rounded-lg p-3 border border-gray-100 text-center">
                   <p className="text-[10px] text-gray-400 uppercase">Familias</p>
-                  <p className="text-xl font-bold text-navy">{preview.plan.familias.length}</p>
+                  <p className="text-xl font-bold text-tinta">{preview.plan.familias.length}</p>
                 </div>
                 <div className="bg-surface rounded-lg p-3 border border-gray-100 text-center">
                   <p className="text-[10px] text-gray-400 uppercase">Cuentas</p>
-                  <p className="text-xl font-bold text-navy">{preview.plan.cuentas.length}</p>
+                  <p className="text-xl font-bold text-tinta">{preview.plan.cuentas.length}</p>
                 </div>
                 <div className="bg-surface rounded-lg p-3 border border-gray-100 text-center">
                   <p className="text-[10px] text-gray-400 uppercase">Productos</p>
-                  <p className="text-xl font-bold text-navy">{preview.maestro.productos.length.toLocaleString('es-CL')}</p>
+                  <p className="text-xl font-bold text-tinta">{preview.maestro.productos.length.toLocaleString('es-CL')}</p>
                 </div>
               </div>
 
@@ -342,7 +342,7 @@ function UploadModal({ onFile, error, preview, onConfirm, onCancel }: {
               <div className="rounded-lg border border-gray-200 overflow-hidden">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="bg-navy">
+                    <tr className="bg-cabecera">
                       <th className="px-3 py-2 text-left text-[10px] font-medium text-white/80 uppercase">Código</th>
                       <th className="px-3 py-2 text-left text-[10px] font-medium text-white/80 uppercase">Familia</th>
                       <th className="px-3 py-2 text-center text-[10px] font-medium text-white/80 uppercase">Letra</th>
@@ -354,7 +354,7 @@ function UploadModal({ onFile, error, preview, onConfirm, onCancel }: {
                       const count = preview.plan.cuentas.filter(c => c.familiaCodigo === f.codigo).length
                       return (
                         <tr key={f.codigo} className={i % 2 === 1 ? 'bg-gray-50/50' : ''}>
-                          <td className="px-3 py-2 font-mono font-semibold text-navy">{f.codigo}</td>
+                          <td className="px-3 py-2 font-mono font-semibold text-tinta">{f.codigo}</td>
                           <td className="px-3 py-2 text-gray-700">{f.nombre}</td>
                           <td className="px-3 py-2 text-center">
                             <span className="inline-block w-5 h-5 rounded text-[10px] font-bold text-white leading-5 text-center" style={{ backgroundColor: f.color }}>
@@ -394,7 +394,7 @@ function UploadModal({ onFile, error, preview, onConfirm, onCancel }: {
             Cancelar
           </button>
           {preview && !hasBlockingErrors && (
-            <button onClick={onConfirm} className="px-5 py-2 bg-navy text-white text-sm font-medium rounded-lg hover:bg-navy-light transition-colors shadow-sm">
+            <button onClick={onConfirm} className="px-5 py-2 bg-cabecera text-white text-sm font-medium rounded-lg hover:bg-cabecera-alt transition-colors shadow-sm">
               Confirmar carga
             </button>
           )}

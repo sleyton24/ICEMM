@@ -26,13 +26,13 @@ export default function CuentaDetalleModal({ cc, cuentaNombre, transacciones, cu
   })
 
   return (
-    <div className="fixed inset-0 bg-navy/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div className="bg-white rounded-2xl shadow-2xl max-w-7xl w-full max-h-[90vh] flex flex-col border border-gray-100" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 bg-cabecera/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div className="bg-panel rounded-2xl shadow-2xl max-w-7xl w-full max-h-[90vh] flex flex-col border border-gray-100" onClick={e => e.stopPropagation()}>
         {/* Header */}
         <div className="flex items-start justify-between px-6 py-4 border-b border-gray-100">
           <div>
             <p className="text-[11px] text-blue-500 font-medium uppercase tracking-wider">Detalle Gasto Real</p>
-            <h3 className="text-lg font-bold text-navy font-slab">Cuenta {cc} — {cuentaNombre}</h3>
+            <h3 className="text-lg font-bold text-tinta font-slab">Cuenta {cc} — {cuentaNombre}</h3>
             <p className="text-xs text-gray-400 mt-1">
               {ordenadas.length.toLocaleString('es-CL')} transacciones · Total UF {uf2(total)}
               {cutoffMes && <span className="ml-2 text-blue-500">· Hasta {cutoffMes}</span>}
@@ -47,7 +47,7 @@ export default function CuentaDetalleModal({ cc, cuentaNombre, transacciones, cu
         <div className="overflow-auto flex-1 px-6 py-4">
           <div className="rounded-lg border border-gray-200 overflow-hidden">
             <table className="w-full text-xs">
-              <thead className="bg-navy">
+              <thead className="bg-cabecera">
                 <tr>
                   <th className="px-2 py-2 text-left text-[10px] font-medium text-white/80 uppercase tracking-wider">Unidad</th>
                   <th className="px-2 py-2 text-left text-[10px] font-medium text-white/80 uppercase tracking-wider">Nº Doc</th>
@@ -62,7 +62,7 @@ export default function CuentaDetalleModal({ cc, cuentaNombre, transacciones, cu
                   <th className="px-2 py-2 text-left text-[10px] font-medium text-white/80 uppercase tracking-wider">Glosa</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-50">
+              <tbody className="bg-panel divide-y divide-gray-50">
                 {ordenadas.map((t, i) => (
                   <tr key={i} className={`hover:bg-teal-light/20 ${i % 2 === 1 ? 'bg-gray-50/40' : ''}`}>
                     <td className="px-2 py-1.5 text-gray-500 truncate max-w-32">{t.unidadNegocioDescripcion}</td>
@@ -73,7 +73,7 @@ export default function CuentaDetalleModal({ cc, cuentaNombre, transacciones, cu
                     <td className="px-2 py-1.5 tabular-nums text-gray-500 text-right">{t.valor_uf ? t.valor_uf.toLocaleString('es-CL') : '—'}</td>
                     <td className="px-2 py-1.5 text-gray-500 font-mono">{t.rut_proveedor}</td>
                     <td className="px-2 py-1.5 text-gray-700 truncate max-w-48">{t.razon_social}</td>
-                    <td className="px-2 py-1.5 tabular-nums font-semibold text-navy text-right">{uf2(t.monto_uf)}</td>
+                    <td className="px-2 py-1.5 tabular-nums font-semibold text-tinta text-right">{uf2(t.monto_uf)}</td>
                     <td className="px-2 py-1.5 tabular-nums text-blue-500 font-mono text-right">{t.concepto1_codigo}</td>
                     <td className="px-2 py-1.5 text-gray-600 truncate max-w-64">{t.glosa_detalle}</td>
                   </tr>
@@ -89,7 +89,7 @@ export default function CuentaDetalleModal({ cc, cuentaNombre, transacciones, cu
               <tfoot className="bg-gray-50 border-t-2 border-gray-200">
                 <tr>
                   <td colSpan={8} className="px-2 py-2 text-right text-[11px] font-bold text-gray-500 uppercase">Total</td>
-                  <td className="px-2 py-2 tabular-nums font-bold text-navy text-right">{uf2(total)}</td>
+                  <td className="px-2 py-2 tabular-nums font-bold text-tinta text-right">{uf2(total)}</td>
                   <td colSpan={2} />
                 </tr>
               </tfoot>
@@ -99,7 +99,7 @@ export default function CuentaDetalleModal({ cc, cuentaNombre, transacciones, cu
 
         {/* Footer */}
         <div className="flex justify-end px-6 py-4 border-t border-gray-100">
-          <button onClick={onClose} className="px-5 py-2 bg-navy text-white text-sm font-medium rounded-lg hover:bg-navy-light transition-colors">
+          <button onClick={onClose} className="px-5 py-2 bg-cabecera text-white text-sm font-medium rounded-lg hover:bg-cabecera-alt transition-colors">
             Cerrar
           </button>
         </div>

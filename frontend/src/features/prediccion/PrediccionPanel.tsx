@@ -154,8 +154,8 @@ export default function PrediccionPanel() {
           onClick={() => setFamilia(null)}
           className={`text-[11px] px-3 py-1.5 rounded-full font-medium transition-all ${
             familia === null
-              ? 'bg-navy text-white shadow-sm'
-              : 'bg-white text-gray-500 border border-gray-200 hover:border-gray-300 hover:text-navy'}`}>
+              ? 'bg-cabecera text-white shadow-sm'
+              : 'bg-panel text-gray-500 border border-gray-200 hover:border-gray-300 hover:text-tinta'}`}>
           Toda la obra
         </button>
         {FAMILIAS_MODELO.map(f => {
@@ -167,8 +167,8 @@ export default function PrediccionPanel() {
               title={`Cuentas ${f.codigo}–${f.codigo + 99}`}
               className={`flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-full font-medium transition-all ${
                 activa
-                  ? 'bg-navy text-white shadow-sm'
-                  : 'bg-white text-gray-500 border border-gray-200 hover:border-gray-300 hover:text-navy'}`}>
+                  ? 'bg-cabecera text-white shadow-sm'
+                  : 'bg-panel text-gray-500 border border-gray-200 hover:border-gray-300 hover:text-tinta'}`}>
               <span className={`tabular-nums ${activa ? 'text-white/50' : 'text-gray-300'}`}>{f.codigo}</span>
               {f.etiqueta}
             </button>
@@ -197,7 +197,7 @@ export default function PrediccionPanel() {
 
       {/* ── Gráfico ──────────────────────────────────────────────────── */}
       <div className="rounded-lg border border-gray-200 overflow-hidden">
-        <div className="px-5 py-3 bg-navy">
+        <div className="px-5 py-3 bg-cabecera">
           <h2 className="text-sm font-semibold text-white font-slab">
             CURVA DE COSTO ACUMULADO{famActual ? ` — ${famActual.etiqueta.toUpperCase()}` : ''}
           </h2>
@@ -259,9 +259,9 @@ export default function PrediccionPanel() {
       {/* ── Controles ────────────────────────────────────────────────── */}
       <div className="rounded-lg border border-gray-200 p-4 space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold text-navy font-slab">Parámetros</h3>
+          <h3 className="text-sm font-bold text-tinta font-slab">Parámetros</h3>
           <button onClick={() => setEditandoFicha(true)}
-                  className="text-[11px] text-teal-muted hover:text-navy font-medium transition-colors">
+                  className="text-[11px] text-teal-muted hover:text-tinta font-medium transition-colors">
             Editar ficha de obra
           </button>
         </div>
@@ -269,10 +269,10 @@ export default function PrediccionPanel() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <label className="block">
             <span className="text-[11px] font-medium text-gray-500 uppercase tracking-wider">
-              Meses de arranque · <span className="tabular-nums text-navy font-bold">{lead}</span>
+              Meses de arranque · <span className="tabular-nums text-tinta font-bold">{lead}</span>
             </span>
             <input type="range" min={0} max={18} value={lead} onChange={e => setLead(+e.target.value)}
-                   className="w-full mt-1 accent-navy" />
+                   className="w-full mt-1 accent-tinta" />
             <span className="text-[10px] text-gray-400">
               Meses previos al cruce del 1% de avance. Sin esto el modelo se desvía hasta 39%.
             </span>
@@ -280,10 +280,10 @@ export default function PrediccionPanel() {
 
           <label className="block">
             <span className="text-[11px] font-medium text-gray-500 uppercase tracking-wider">
-              Sesgo de curva · <span className="tabular-nums text-navy font-bold">{skew > 0 ? '+' : ''}{skew}</span>
+              Sesgo de curva · <span className="tabular-nums text-tinta font-bold">{skew > 0 ? '+' : ''}{skew}</span>
             </span>
             <input type="range" min={-30} max={30} value={skew} onChange={e => setSkew(+e.target.value)}
-                   className="w-full mt-1 accent-navy" />
+                   className="w-full mt-1 accent-tinta" />
             <span className="text-[10px] text-gray-400">
               Negativo adelanta el gasto; positivo lo atrasa.
             </span>
@@ -299,8 +299,8 @@ export default function PrediccionPanel() {
               <button key={e.id} onClick={() => setEscenario(e.id)} title={e.detalle}
                 className={`text-[11px] px-3 py-1.5 rounded-full font-medium transition-all ${
                   escenario === e.id
-                    ? 'bg-navy text-white shadow-sm'
-                    : 'bg-white text-gray-500 border border-gray-200 hover:border-gray-300 hover:text-navy'}`}>
+                    ? 'bg-cabecera text-white shadow-sm'
+                    : 'bg-panel text-gray-500 border border-gray-200 hover:border-gray-300 hover:text-tinta'}`}>
                 {e.label}
               </button>
             ))}
@@ -311,7 +311,7 @@ export default function PrediccionPanel() {
         {params.ejecSegunObra && (
           <label className="flex items-start gap-2 text-xs text-gray-600 bg-surface border border-gray-200 rounded-lg px-3 py-2">
             <input type="checkbox" checked={usarEjecObra} onChange={e => setUsarEjecObra(e.target.checked)}
-                   className="mt-0.5 accent-navy" />
+                   className="mt-0.5 accent-tinta" />
             <span>
               Usar el factor de ejecución que proyecta la obra
               (<strong className="tabular-nums">{proy.obra.contrato ? pct1(params.ejecSegunObra) : '—'}</strong>)
@@ -326,7 +326,7 @@ export default function PrediccionPanel() {
 
       {/* ── Comparables ──────────────────────────────────────────────── */}
       <div className="rounded-lg border border-gray-200 overflow-hidden">
-        <div className="px-5 py-3 bg-navy flex items-center gap-2">
+        <div className="px-5 py-3 bg-cabecera flex items-center gap-2">
           <TrendingUp className="h-4 w-4 text-white/60" />
           <div>
             <h2 className="text-sm font-semibold text-white font-slab">DE QUÉ OBRAS SALE ESTA PROYECCIÓN</h2>
@@ -344,7 +344,7 @@ export default function PrediccionPanel() {
                 ))}
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-50">
+            <tbody className="bg-panel divide-y divide-gray-50">
               {proy.comparables.map((c, i) => (
                 <tr key={c.nombre} className={i % 2 === 1 ? 'bg-gray-50/50' : ''}>
                   <td className="px-3 py-2 font-medium text-gray-700">{c.nombre}</td>
@@ -353,7 +353,7 @@ export default function PrediccionPanel() {
                       <div className="h-1.5 bg-gray-100 rounded-full flex-1 min-w-16 overflow-hidden">
                         <div className="h-full bg-teal-muted rounded-full" style={{ width: `${c.peso * 100}%` }} />
                       </div>
-                      <span className="tabular-nums text-xs text-navy font-semibold w-11 text-right">{pct1(c.peso)}</span>
+                      <span className="tabular-nums text-xs text-tinta font-semibold w-11 text-right">{pct1(c.peso)}</span>
                     </div>
                   </td>
                   <td className="px-3 py-2 text-right text-xs text-gray-500">{c.tipo}</td>
@@ -372,10 +372,10 @@ export default function PrediccionPanel() {
 
 function Kpi({ label, valor, sub, acento }: { label: string; valor: string; sub: string; acento: string }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 relative overflow-hidden">
+    <div className="bg-panel rounded-xl border border-gray-100 shadow-sm p-4 relative overflow-hidden">
       <div className="absolute top-0 left-0 w-1 h-full rounded-l-xl" style={{ backgroundColor: acento }} />
       <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wide mb-1.5 pl-2">{label}</p>
-      <p className="text-base font-bold text-navy leading-tight pl-2 tabular-nums">{valor}</p>
+      <p className="text-base font-bold text-tinta leading-tight pl-2 tabular-nums">{valor}</p>
       {sub && <p className="text-[11px] text-gray-400 mt-1 pl-2">{sub}</p>}
     </div>
   )

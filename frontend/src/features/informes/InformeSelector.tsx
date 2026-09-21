@@ -100,7 +100,7 @@ export default function InformeSelector({ esAdmin = true, esDirector = false }: 
         className={`flex items-center gap-1.5 px-3 py-1.5 border rounded-lg text-xs transition-colors
           ${view.tipo === 'aprobado'
             ? 'border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
-            : 'border-gray-200 bg-white text-navy hover:bg-surface'}`}
+            : 'border-gray-200 bg-panel text-tinta hover:bg-surface'}`}
       >
         {view.tipo === 'aprobado' ? <Lock className="h-3.5 w-3.5" /> : <FileText className="h-3.5 w-3.5 text-teal-muted" />}
         <span className="font-medium">{labelActual}</span>
@@ -108,7 +108,7 @@ export default function InformeSelector({ esAdmin = true, esDirector = false }: 
       </button>
 
       {open && (
-        <div className="absolute top-full mt-1 right-0 w-72 bg-white rounded-xl shadow-lg border border-gray-100 z-50 overflow-hidden">
+        <div className="absolute top-full mt-1 right-0 w-72 bg-panel rounded-xl shadow-lg border border-gray-100 z-50 overflow-hidden">
           {/* Borrador — oculto para director */}
           {!esDirector && (
             <button
@@ -118,7 +118,7 @@ export default function InformeSelector({ esAdmin = true, esDirector = false }: 
             >
               <FileText className="h-4 w-4 text-teal-muted flex-shrink-0 mt-0.5" />
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-navy">Borrador (editable)</p>
+                <p className="text-sm font-medium text-tinta">Borrador (editable)</p>
                 <p className="text-[11px] text-gray-400">Estado actual del proyecto</p>
               </div>
               {view.tipo === 'borrador' && <Check className="h-4 w-4 text-teal-muted flex-shrink-0" />}
@@ -137,7 +137,7 @@ export default function InformeSelector({ esAdmin = true, esDirector = false }: 
                     <button onClick={() => handleSelectInforme(i.id)} className="flex items-start gap-2 flex-1 text-left min-w-0">
                       <Lock className="h-4 w-4 text-emerald-600 flex-shrink-0 mt-0.5" />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-navy">Informe N°{i.numero}</p>
+                        <p className="text-sm font-medium text-tinta">Informe N°{i.numero}</p>
                         <p className="text-[11px] text-gray-400 truncate">
                           {new Date(i.fechaAprobacion).toLocaleDateString('es-CL')} · {i.aprobadoPor}
                         </p>
@@ -164,7 +164,7 @@ export default function InformeSelector({ esAdmin = true, esDirector = false }: 
             <button
               onClick={handleAprobar}
               disabled={aprobando}
-              className="w-full flex items-center gap-2 px-4 py-3 border-t-2 border-navy/10 bg-navy text-white text-xs font-medium hover:bg-navy-light transition-colors disabled:opacity-50"
+              className="w-full flex items-center gap-2 px-4 py-3 border-t-2 border-cabecera/10 bg-cabecera text-white text-xs font-medium hover:bg-cabecera-alt transition-colors disabled:opacity-50"
             >
               <Plus className="h-3.5 w-3.5" />
               {aprobando ? 'Aprobando...' : `Aprobar como Informe N°${proximoNumero}`}

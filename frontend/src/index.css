@@ -1,6 +1,30 @@
 @import "tailwindcss";
 
+/*
+  Sistema de temas
+  ════════════════
+
+  Los utilitarios de Tailwind v4 referencian las variables por `var()`, así que
+  redefinirlas bajo un selector más específico cambia el tema en caliente, sin
+  recompilar y sin duplicar clases. El tema vive en `data-tema` sobre <html>.
+
+  Dos tokens tenían DOS roles en el código y hubo que separarlos, porque un
+  solo valor no puede servir a los dos al invertir el tema:
+
+    · `white` era fondo de panel Y texto sobre cabecera oscura.
+      → el fondo de panel pasó a `panel`; `text-white` se quedó como está.
+
+    · `navy` era tinta Y fondo de cabecera.
+      → la tinta pasó a `tinta`; el fondo de cabecera a `cabecera`.
+
+  La rampa `gray-*` de Tailwind se redefine completa. No es un atajo: su uso en
+  este código ya era semántico (300/400 tenue, 500/600 secundario, 700 texto,
+  100/200 bordes, 50 fondo sutil), así que invertirla conserva el significado
+  de los ~460 usos que ya existían sin tocar un solo componente.
+*/
+
 @theme {
+  /* ── Marca ─────────────────────────────────────────────────────────── */
   --color-navy: #101820;
   --color-navy-light: #1e2d35;
   --color-teal: #233032;
@@ -8,17 +32,117 @@
   --color-teal-light: #DBE8E8;
   --color-sage: #9DA39B;
   --color-accent: #E00544;
+
+  /* ── Semánticos ────────────────────────────────────────────────────── */
+  /** Fondo de la página. */
   --color-surface: #F7F8FA;
+  /** Fondo de tarjetas y tablas. Antes era `white`. */
+  --color-panel: #FFFFFF;
+  /** Fila alterna / zona levemente elevada dentro de un panel. */
+  --color-panel-alt: #FBFCFC;
+  /** Fondo de cabeceras de tabla y barras oscuras. Antes era `navy`. */
+  --color-cabecera: #101820;
+  /** Variante de cabecera para un segundo nivel (familias). Antes `navy-light`. */
+  --color-cabecera-alt: #1e2d35;
+  /** Texto principal. Antes era `navy`. */
+  --color-tinta: #101820;
+
+  /* ── Rampa gris, redefinida por tema ───────────────────────────────── */
+  --color-gray-50: #F9FAFB;
+  --color-gray-100: #F3F4F6;
+  --color-gray-200: #E5E7EB;
+  --color-gray-300: #D1D5DB;
+  --color-gray-400: #9CA3AF;
+  --color-gray-500: #6B7280;
+  --color-gray-600: #4B5563;
+  --color-gray-700: #374151;
+  --color-gray-800: #1F2937;
+  --color-gray-900: #111827;
+}
+
+/*
+  Tema oscuro. Solo se redefinen los valores; ninguna clase cambia.
+
+  Los colores de estado se aclaran a propósito: #E00544 sobre #0B1116 vibra y
+  cansa la vista. Mismo rol, misma lectura, sin el zumbido.
+*/
+[data-tema="oscuro"] {
+  --color-navy: #E8EEF0;
+  --color-navy-light: #24343D;
+  --color-teal: #C6D2D2;
+  --color-teal-muted: #8FA3A3;
+  --color-teal-light: #1E2C33;
+  --color-sage: #7C8A84;
+  --color-accent: #FF3D6E;
+
+  --color-surface: #0B1116;
+  --color-panel: #121C23;
+  --color-panel-alt: #16222A;
+  --color-cabecera: #1C2B34;
+  --color-cabecera-alt: #24343D;
+  --color-tinta: #FFFFFF;
+
+  /* Rampa invertida: 50 es el fondo sutil, 700 el texto fuerte. */
+  --color-gray-50: #16222A;
+  --color-gray-100: #1C272D;
+  --color-gray-200: #263440;
+  --color-gray-300: #46565E;
+  --color-gray-400: #7C8E92;
+  --color-gray-500: #9BABAD;
+  --color-gray-600: #B4C2C2;
+  --color-gray-700: #D3DDDD;
+  --color-gray-800: #E6EDED;
+  --color-gray-900: #F5F8F8;
+
+  /* Estados: mismos roles, aclarados para fondo oscuro. */
+  --color-emerald-50: #10261D;
+  --color-emerald-100: #16342A;
+  --color-emerald-200: #1F4A3A;
+  --color-emerald-500: #5CC79B;
+  --color-emerald-600: #6FD3A8;
+  --color-emerald-700: #86DDB7;
+
+  --color-amber-50: #241D0E;
+  --color-amber-100: #2F2612;
+  --color-amber-200: #3B300F;
+  --color-amber-500: #D9B45F;
+  --color-amber-600: #E0C078;
+  --color-amber-700: #E8CE96;
+
+  --color-red-50: #24101A;
+  --color-red-100: #2E1420;
+  --color-red-200: #45202F;
+  --color-red-500: #FF5C85;
+  --color-red-600: #FF3D6E;
+  --color-red-700: #FF8DAB;
+
+  --color-blue-50: #101F28;
+  --color-blue-200: #234050;
+  --color-blue-500: #6BB8DE;
+  --color-blue-700: #8FCCEA;
+
+  --color-violet-300: #B9A5E8;
+  --color-violet-600: #A78BFA;
+  --color-violet-700: #B9A5E8;
+  --color-purple-50: #1B1426;
+  --color-purple-200: #33234A;
+  --color-purple-700: #C4A9F0;
+  --color-purple-900: #D8C6F5;
 }
 
 body {
   font-family: 'Roboto', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: #F7F8FA;
+  background: var(--color-surface);
+  color: var(--color-tinta);
 }
 
 /* Slab headings utility */
 .font-slab {
   font-family: 'Roboto Slab', Georgia, serif;
 }
+
+/* Que los controles nativos (checkbox, range) sigan el tema. */
+:root { color-scheme: light; }
+[data-tema="oscuro"] { color-scheme: dark; }

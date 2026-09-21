@@ -176,13 +176,13 @@ export default function UploadPanel({ proyecto, onClose }: Props) {
   const erpLoaded = proyecto.slots.gasto_real_erp
 
   return (
-    <div className="fixed inset-0 bg-navy/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full flex flex-col border border-gray-100" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 bg-cabecera/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div className="bg-panel rounded-2xl shadow-2xl max-w-2xl w-full flex flex-col border border-gray-100" onClick={e => e.stopPropagation()}>
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
           <div>
             <p className="text-[11px] text-teal-muted font-medium uppercase tracking-wider">Carga de archivos</p>
-            <h3 className="text-lg font-bold text-navy font-slab">{proyecto.nombre}</h3>
+            <h3 className="text-lg font-bold text-tinta font-slab">{proyecto.nombre}</h3>
           </div>
           <button onClick={onClose} className="text-gray-300 hover:text-gray-500 text-2xl leading-none transition-colors">&times;</button>
         </div>
@@ -225,7 +225,7 @@ export default function UploadPanel({ proyecto, onClose }: Props) {
 
         {/* Footer */}
         <div className="flex justify-end px-6 py-4 border-t border-gray-100">
-          <button onClick={onClose} className="px-5 py-2 bg-navy text-white text-sm font-medium rounded-lg hover:bg-navy-light transition-colors">
+          <button onClick={onClose} className="px-5 py-2 bg-cabecera text-white text-sm font-medium rounded-lg hover:bg-cabecera-alt transition-colors">
             Cerrar
           </button>
         </div>
@@ -301,13 +301,13 @@ function SlotDropZone({ label, description, loaded, isParsing, onFile, onClear }
             <Check className="h-5 w-5 text-emerald-600" />
           </div>
           <div>
-            <p className="text-sm font-medium text-navy">{label}</p>
+            <p className="text-sm font-medium text-tinta">{label}</p>
             <p className="text-[11px] text-gray-400">{loaded.nombreArchivo} · {loaded.detalle}</p>
             <p className="text-[10px] text-gray-300">{new Date(loaded.fechaCarga).toLocaleString('es-CL')}</p>
           </div>
         </div>
         <div className="flex gap-2">
-          <button onClick={() => inputRef.current?.click()} className="text-[11px] px-3 py-1.5 text-teal-muted hover:text-navy font-medium border border-gray-200 rounded-lg hover:bg-surface transition-colors">
+          <button onClick={() => inputRef.current?.click()} className="text-[11px] px-3 py-1.5 text-teal-muted hover:text-tinta font-medium border border-gray-200 rounded-lg hover:bg-surface transition-colors">
             Reemplazar
           </button>
           <button onClick={onClear} className="text-[11px] px-3 py-1.5 text-gray-400 hover:text-accent font-medium border border-gray-200 rounded-lg hover:bg-red-50 transition-colors">
@@ -326,7 +326,7 @@ function SlotDropZone({ label, description, loaded, isParsing, onFile, onClear }
       onDrop={handleDrop}
       onClick={() => !isParsing && inputRef.current?.click()}
       className={`flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-xl cursor-pointer transition-all
-        ${dragOver ? 'border-navy bg-teal-light/20' : 'border-gray-200 hover:border-teal-muted hover:bg-surface'}
+        ${dragOver ? 'border-cabecera bg-teal-light/20' : 'border-gray-200 hover:border-teal-muted hover:bg-surface'}
         ${isParsing ? 'pointer-events-none opacity-60' : ''}`}
     >
       {isParsing ? (
@@ -339,7 +339,7 @@ function SlotDropZone({ label, description, loaded, isParsing, onFile, onClear }
           <div className="p-3 bg-surface rounded-xl mb-3">
             <FileSpreadsheet className="h-6 w-6 text-teal-muted" />
           </div>
-          <p className="text-sm font-medium text-navy">{label}</p>
+          <p className="text-sm font-medium text-tinta">{label}</p>
           <p className="text-[11px] text-gray-400 mt-0.5">{description}</p>
           <p className="text-[10px] text-gray-300 mt-2">Arrastra un .xls o .xlsx aquí, o haz clic para seleccionar</p>
         </>
@@ -380,7 +380,7 @@ function ERPSlotZone({ loaded, isParsing, onFile, onClear }: {
             <Database className="h-5 w-5 text-blue-600" />
           </div>
           <div>
-            <p className="text-sm font-medium text-navy">Gasto Real (ERP)</p>
+            <p className="text-sm font-medium text-tinta">Gasto Real (ERP)</p>
             <p className="text-[11px] text-gray-400">
               {loaded.nombreArchivo} · {loaded.unidadNegocioDescripcion} · {loaded.numTransacciones.toLocaleString('es-CL')} tx · UF {uf2(loaded.totalUF)}
             </p>
@@ -388,7 +388,7 @@ function ERPSlotZone({ loaded, isParsing, onFile, onClear }: {
           </div>
         </div>
         <div className="flex gap-2">
-          <button onClick={() => inputRef.current?.click()} className="text-[11px] px-3 py-1.5 text-teal-muted hover:text-navy font-medium border border-gray-200 rounded-lg hover:bg-surface transition-colors">
+          <button onClick={() => inputRef.current?.click()} className="text-[11px] px-3 py-1.5 text-teal-muted hover:text-tinta font-medium border border-gray-200 rounded-lg hover:bg-surface transition-colors">
             Reemplazar
           </button>
           <button onClick={onClear} className="text-[11px] px-3 py-1.5 text-gray-400 hover:text-accent font-medium border border-gray-200 rounded-lg hover:bg-red-50 transition-colors">
@@ -420,7 +420,7 @@ function ERPSlotZone({ loaded, isParsing, onFile, onClear }: {
           <div className="p-3 bg-blue-50 rounded-xl mb-3">
             <Database className="h-6 w-6 text-blue-500" />
           </div>
-          <p className="text-sm font-medium text-navy">Gasto Real (ERP)</p>
+          <p className="text-sm font-medium text-tinta">Gasto Real (ERP)</p>
           <p className="text-[11px] text-gray-400 mt-0.5">Export SQL del sistema contable</p>
           <p className="text-[10px] text-gray-300 mt-2">Arrastra un .xls o .xlsx aquí, o haz clic para seleccionar</p>
         </>
@@ -442,11 +442,11 @@ function UnidadSelectionModal({ unidades, projectName, selected, onSelect, onCon
   onCancel: () => void
 }) {
   return (
-    <div className="fixed inset-0 bg-navy/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4" onClick={onCancel}>
-      <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full flex flex-col border border-gray-100" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 bg-cabecera/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4" onClick={onCancel}>
+      <div className="bg-panel rounded-2xl shadow-2xl max-w-lg w-full flex flex-col border border-gray-100" onClick={e => e.stopPropagation()}>
         <div className="px-6 py-4 border-b border-gray-100">
           <p className="text-[11px] text-blue-500 font-medium uppercase tracking-wider">Gasto Real (ERP)</p>
-          <h3 className="text-lg font-bold text-navy font-slab">Seleccionar Unidad de Negocio</h3>
+          <h3 className="text-lg font-bold text-tinta font-slab">Seleccionar Unidad de Negocio</h3>
           <p className="text-xs text-gray-400 mt-1">
             El archivo contiene {unidades.length} unidades de negocio. ¿Cuál corresponde al proyecto "{projectName}"?
           </p>
@@ -467,7 +467,7 @@ function UnidadSelectionModal({ unidades, projectName, selected, onSelect, onCon
                 {selected === u.codigo && <div className="w-2.5 h-2.5 rounded-full bg-blue-500" />}
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-navy">
+                <p className="text-sm font-medium text-tinta">
                   {String(u.codigo).padStart(2, '0')} — {u.descripcion}
                 </p>
                 <p className="text-[11px] text-gray-400">
@@ -511,12 +511,12 @@ function ERPPreviewModal({ data, warnings, onConfirm, onCancel }: {
     .filter(c => c.monto_uf === 0).length
 
   return (
-    <div className="fixed inset-0 bg-navy/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4" onClick={onCancel}>
-      <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[85vh] flex flex-col border border-gray-100" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 bg-cabecera/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4" onClick={onCancel}>
+      <div className="bg-panel rounded-2xl shadow-2xl max-w-3xl w-full max-h-[85vh] flex flex-col border border-gray-100" onClick={e => e.stopPropagation()}>
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-100">
           <p className="text-[11px] text-blue-500 font-medium uppercase tracking-wider">Gasto Real (ERP)</p>
-          <h3 className="text-lg font-bold text-navy font-slab">Preview de carga</h3>
+          <h3 className="text-lg font-bold text-tinta font-slab">Preview de carga</h3>
           <p className="text-xs text-gray-400 mt-0.5">
             {data.unidadNegocio.descripcion} (Unidad {String(data.unidadNegocio.codigo).padStart(2, '0')})
           </p>
@@ -527,15 +527,15 @@ function ERPPreviewModal({ data, warnings, onConfirm, onCancel }: {
           <div className="grid grid-cols-3 gap-3">
             <div className="bg-blue-50 rounded-lg p-3 border border-blue-100 text-center">
               <p className="text-[10px] text-gray-400 uppercase tracking-wide">Total Gasto Real</p>
-              <p className="text-lg font-bold text-navy">UF {uf2(data.total_uf)}</p>
+              <p className="text-lg font-bold text-tinta">UF {uf2(data.total_uf)}</p>
             </div>
             <div className="bg-blue-50 rounded-lg p-3 border border-blue-100 text-center">
               <p className="text-[10px] text-gray-400 uppercase tracking-wide">Transacciones</p>
-              <p className="text-xl font-bold text-navy">{data.unidadNegocio.num_filas.toLocaleString('es-CL')}</p>
+              <p className="text-xl font-bold text-tinta">{data.unidadNegocio.num_filas.toLocaleString('es-CL')}</p>
             </div>
             <div className="bg-blue-50 rounded-lg p-3 border border-blue-100 text-center">
               <p className="text-[10px] text-gray-400 uppercase tracking-wide">Conceptos únicos</p>
-              <p className="text-xl font-bold text-navy">{conceptos.length}</p>
+              <p className="text-xl font-bold text-tinta">{conceptos.length}</p>
             </div>
           </div>
 
@@ -551,19 +551,19 @@ function ERPPreviewModal({ data, warnings, onConfirm, onCancel }: {
             <div className="rounded-lg border border-gray-200 overflow-hidden">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-navy">
+                  <tr className="bg-cabecera">
                     <th className="px-3 py-2 text-left text-[11px] font-medium text-white/80 uppercase tracking-wider">Concepto</th>
                     <th className="px-3 py-2 text-right text-[11px] font-medium text-white/80 uppercase tracking-wider">Transacciones</th>
                     <th className="px-3 py-2 text-right text-[11px] font-medium text-white/80 uppercase tracking-wider">Monto UF</th>
                     <th className="px-3 py-2 text-left text-[11px] font-medium text-white/80 uppercase tracking-wider">Top Proveedor</th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-50">
+                <tbody className="bg-panel divide-y divide-gray-50">
                   {conceptos.slice(0, 10).map((c, i) => (
                     <tr key={c.concepto_codigo} className={i % 2 === 1 ? 'bg-gray-50/50' : ''}>
-                      <td className="px-3 py-2 font-mono font-semibold text-navy">{c.concepto_codigo}</td>
+                      <td className="px-3 py-2 font-mono font-semibold text-tinta">{c.concepto_codigo}</td>
                       <td className="px-3 py-2 text-gray-500 tabular-nums text-right">{c.num_transacciones}</td>
-                      <td className="px-3 py-2 text-navy font-medium tabular-nums text-right">{uf2(c.monto_uf)}</td>
+                      <td className="px-3 py-2 text-tinta font-medium tabular-nums text-right">{uf2(c.monto_uf)}</td>
                       <td className="px-3 py-2 text-gray-400 text-xs truncate max-w-40">
                         {c.proveedores_top[0]?.razon_social ?? '—'}
                       </td>
@@ -573,7 +573,7 @@ function ERPPreviewModal({ data, warnings, onConfirm, onCancel }: {
                 <tfoot className="bg-gray-50 border-t border-gray-200">
                   <tr>
                     <td colSpan={2} className="px-3 py-2 text-right text-[11px] font-bold text-gray-500 uppercase">Total</td>
-                    <td className="px-3 py-2 text-right font-bold text-navy tabular-nums">{uf2(data.total_uf)}</td>
+                    <td className="px-3 py-2 text-right font-bold text-tinta tabular-nums">{uf2(data.total_uf)}</td>
                     <td />
                   </tr>
                 </tfoot>

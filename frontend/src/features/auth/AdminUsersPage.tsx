@@ -63,22 +63,22 @@ export default function AdminUsersPage({ onBack }: Props) {
 
   return (
     <div className="min-h-screen bg-surface">
-      <div className="h-1 bg-gradient-to-r from-navy via-teal to-accent" />
+      <div className="h-1 bg-gradient-to-r from-cabecera via-teal to-accent" />
 
-      <header className="bg-white border-b border-gray-200 shadow-sm">
+      <header className="bg-panel border-b border-gray-200 shadow-sm">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <div>
-            <button onClick={onBack} className="text-xs text-teal-muted hover:text-navy transition-colors mb-1">
+            <button onClick={onBack} className="text-xs text-teal-muted hover:text-tinta transition-colors mb-1">
               &larr; Volver al dashboard
             </button>
-            <h1 className="text-lg font-bold text-navy font-slab flex items-center gap-2">
+            <h1 className="text-lg font-bold text-tinta font-slab flex items-center gap-2">
               <Users className="h-5 w-5" /> Administración de Usuarios
             </h1>
             <p className="text-[11px] text-gray-400">{users.length} usuario{users.length !== 1 ? 's' : ''} registrado{users.length !== 1 ? 's' : ''}</p>
           </div>
           <button
             onClick={() => setCreating(true)}
-            className="flex items-center gap-1.5 px-4 py-2 bg-navy text-white text-xs font-medium rounded-lg hover:bg-navy-light transition-colors"
+            className="flex items-center gap-1.5 px-4 py-2 bg-cabecera text-white text-xs font-medium rounded-lg hover:bg-cabecera-alt transition-colors"
           >
             <UserPlus className="h-3.5 w-3.5" /> Crear usuario
           </button>
@@ -93,7 +93,7 @@ export default function AdminUsersPage({ onBack }: Props) {
           </div>
         )}
 
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div className="bg-panel rounded-xl border border-gray-200 overflow-hidden">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
@@ -105,19 +105,19 @@ export default function AdminUsersPage({ onBack }: Props) {
                 <th className="px-4 py-2.5 text-right text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Acciones</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-50">
+            <tbody className="bg-panel divide-y divide-gray-50">
               {loading ? (
                 <tr><td colSpan={6} className="px-4 py-8 text-center text-gray-400 text-sm">Cargando...</td></tr>
               ) : users.length === 0 ? (
                 <tr><td colSpan={6} className="px-4 py-8 text-center text-gray-400 text-sm">No hay usuarios. Crear el primero.</td></tr>
               ) : users.map(u => (
                 <tr key={u.id} className={`hover:bg-surface ${!u.activo ? 'opacity-50' : ''}`}>
-                  <td className="px-4 py-3 font-medium text-navy">{u.nombre}</td>
+                  <td className="px-4 py-3 font-medium text-tinta">{u.nombre}</td>
                   <td className="px-4 py-3 text-gray-600 text-xs">{u.email}</td>
                   <td className="px-4 py-3">
                     <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
-                      u.rol === 'admin' ? 'bg-navy text-white' :
-                      u.rol === 'editor' ? 'bg-teal-light text-navy' :
+                      u.rol === 'admin' ? 'bg-cabecera text-white' :
+                      u.rol === 'editor' ? 'bg-teal-light text-tinta' :
                       u.rol === 'director' ? 'bg-emerald-100 text-emerald-700' :
                       'bg-gray-100 text-gray-500'
                     }`}>{u.rol}</span>
@@ -139,7 +139,7 @@ export default function AdminUsersPage({ onBack }: Props) {
                     <div className="flex justify-end gap-1">
                       <button
                         onClick={() => setEditing(u)}
-                        className="p-1.5 text-gray-400 hover:text-navy rounded hover:bg-surface transition-colors"
+                        className="p-1.5 text-gray-400 hover:text-tinta rounded hover:bg-surface transition-colors"
                         title="Editar"
                       >
                         <Pencil className="h-3.5 w-3.5" />
@@ -250,14 +250,14 @@ function UserFormModal({ mode, user, onClose, onSaved }: FormProps) {
   }
 
   return (
-    <div className="fixed inset-0 bg-navy/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
+    <div className="fixed inset-0 bg-cabecera/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
       <form
         onSubmit={handleSubmit}
         onClick={e => e.stopPropagation()}
-        className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-4 border border-gray-100"
+        className="bg-panel rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-4 border border-gray-100"
       >
         <div className="flex items-center justify-between">
-          <h3 className="text-base font-bold text-navy font-slab">
+          <h3 className="text-base font-bold text-tinta font-slab">
             {mode === 'create' ? 'Crear nuevo usuario' : `Editar ${user?.nombre}`}
           </h3>
           <button type="button" onClick={onClose} className="text-gray-300 hover:text-gray-500">
@@ -313,7 +313,7 @@ function UserFormModal({ mode, user, onClose, onSaved }: FormProps) {
             <select
               value={rol}
               onChange={e => setRol(e.target.value as any)}
-              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-muted/30 bg-white"
+              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-muted/30 bg-panel"
             >
               <option value="admin">Admin — control total</option>
               <option value="editor">Editor — carga archivos y edita</option>
@@ -343,7 +343,7 @@ function UserFormModal({ mode, user, onClose, onSaved }: FormProps) {
               ) : (
                 <div className="max-h-40 overflow-y-auto border border-gray-200 rounded-lg p-2 space-y-1 bg-gray-50/50">
                   {allProjects.map(p => (
-                    <label key={p.id} className="flex items-center gap-2 px-2 py-1 text-sm text-gray-700 hover:bg-white cursor-pointer rounded">
+                    <label key={p.id} className="flex items-center gap-2 px-2 py-1 text-sm text-gray-700 hover:bg-panel cursor-pointer rounded">
                       <input
                         type="checkbox"
                         checked={assignedIds.has(p.id)}
@@ -378,7 +378,7 @@ function UserFormModal({ mode, user, onClose, onSaved }: FormProps) {
           <button
             type="submit"
             disabled={saving}
-            className="flex items-center gap-1.5 px-4 py-2 bg-navy text-white text-sm font-medium rounded-lg hover:bg-navy-light transition-colors disabled:opacity-50"
+            className="flex items-center gap-1.5 px-4 py-2 bg-cabecera text-white text-sm font-medium rounded-lg hover:bg-cabecera-alt transition-colors disabled:opacity-50"
           >
             <Check className="h-3.5 w-3.5" /> {saving ? 'Guardando...' : 'Guardar'}
           </button>

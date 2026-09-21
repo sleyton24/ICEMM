@@ -119,11 +119,11 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
   if (state.status === 'error') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-surface p-4">
-        <div className="bg-white border border-red-200 rounded-2xl shadow-lg max-w-md p-6 text-center">
+        <div className="bg-panel border border-red-200 rounded-2xl shadow-lg max-w-md p-6 text-center">
           <AlertTriangle className="h-8 w-8 text-red-500 mx-auto mb-3" />
-          <h2 className="text-lg font-bold text-navy font-slab mb-1">Error de conexión</h2>
+          <h2 className="text-lg font-bold text-tinta font-slab mb-1">Error de conexión</h2>
           <p className="text-sm text-gray-500 mb-4">{state.message}</p>
-          <button onClick={checkAuth} className="px-4 py-2 bg-navy text-white text-sm font-medium rounded-lg hover:bg-navy-light">
+          <button onClick={checkAuth} className="px-4 py-2 bg-cabecera text-white text-sm font-medium rounded-lg hover:bg-cabecera-alt">
             Reintentar
           </button>
         </div>
@@ -172,13 +172,13 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-surface p-4">
-      <div className="h-1 bg-gradient-to-r from-navy via-teal to-accent absolute top-0 left-0 right-0" />
-      <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-lg border border-gray-100 max-w-sm w-full p-7 space-y-5">
+      <div className="h-1 bg-gradient-to-r from-cabecera via-teal to-accent absolute top-0 left-0 right-0" />
+      <form onSubmit={handleSubmit} className="bg-panel rounded-2xl shadow-lg border border-gray-100 max-w-sm w-full p-7 space-y-5">
         <div className="text-center space-y-2">
-          <div className="inline-flex p-3 bg-navy rounded-xl">
+          <div className="inline-flex p-3 bg-cabecera rounded-xl">
             <Lock className="h-5 w-5 text-white" />
           </div>
-          <h2 className="text-lg font-bold text-navy font-slab">ICEMM</h2>
+          <h2 className="text-lg font-bold text-tinta font-slab">ICEMM</h2>
           <p className="text-[11px] text-teal-muted uppercase tracking-widest">Informe de Resultado de Obra</p>
         </div>
 
@@ -216,7 +216,7 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
         <button
           type="submit"
           disabled={loading || !email || !password}
-          className="w-full px-4 py-2.5 bg-navy text-white text-sm font-medium rounded-lg hover:bg-navy-light transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          className="w-full px-4 py-2.5 bg-cabecera text-white text-sm font-medium rounded-lg hover:bg-cabecera-alt transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {loading ? 'Ingresando...' : 'Ingresar'}
         </button>
@@ -224,9 +224,9 @@ function LoginForm({ onSuccess }: { onSuccess: () => void }) {
         {FORCE_LOGIN_UI && (
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 space-y-1 text-[11px] text-amber-700">
             <p className="font-semibold uppercase tracking-wider text-[10px]">Modo Demo — cuentas de prueba</p>
-            <p>· <code className="bg-white px-1 rounded">admin</code> / admin</p>
-            <p>· <code className="bg-white px-1 rounded">editor</code> / editor</p>
-            <p>· <code className="bg-white px-1 rounded">viewer</code> / viewer</p>
+            <p>· <code className="bg-panel px-1 rounded">admin</code> / admin</p>
+            <p>· <code className="bg-panel px-1 rounded">editor</code> / editor</p>
+            <p>· <code className="bg-panel px-1 rounded">viewer</code> / viewer</p>
           </div>
         )}
       </form>
