@@ -2,7 +2,26 @@
 
 **Servidor:** `187.127.29.98` · Ubuntu 24.04 LTS · deploy manual via rsync
 
-App final accesible en: **http://187.127.29.98**
+App final accesible en: **https://icemm.187.127.29.98.nip.io/**
+
+> ### La IP cruda no responde, y es a propósito
+>
+> `http://187.127.29.98` devuelve **`return 444`** (nginx cierra la conexión sin
+> contestar). Es el hardening de **Fase B**, no una caída: obliga a entrar por el
+> nombre, que es el único para el que hay certificado.
+>
+> Antes de declarar que producción está caída, probar el host correcto:
+>
+> ```bash
+> curl -sI https://icemm.187.127.29.98.nip.io/          # → 200
+> curl -s  https://icemm.187.127.29.98.nip.io/health    # → {"ok":true,"db":"up"}
+> ```
+>
+> **La config de nginx que sirve el sitio vive solo en el servidor**, en
+> `/etc/nginx/sites-available/icemm-nipio.conf` (con su symlink en `sites-enabled/`,
+> desde el 9 sep). El `nginx-icemm.conf` de este repo es todavía la plantilla sin
+> editar y **no** refleja lo que está corriendo. Por eso `release.sh` ya no copia
+> nada sobre el edge: solo avisa si difieren.
 
 ---
 
@@ -46,11 +65,11 @@ El script `first-deploy.sh` hace todo automáticamente:
 Al final verás:
 
 ```
-▸ ICEMM desplegado en http://187.127.29.98
+▸ ICEMM desplegado en https://icemm.187.127.29.98.nip.io/
 ▸ Modo BETA activo (sin login).
 ```
 
-Abrí http://187.127.29.98 en el browser y listo.
+Abrí https://icemm.187.127.29.98.nip.io/ en el browser y listo (la IP cruda no contesta: ver el recuadro de arriba).
 
 ---
 
@@ -167,6 +186,7 @@ certbot --nginx -d icemm.bnv.cl
 
 | Síntoma | Diagnóstico |
 |---|---|
+| **La IP no contesta / `curl` devuelve vacío o 000** | **No es una caída.** `187.127.29.98` tiene `return 444` a propósito (Fase B). Usar `https://icemm.187.127.29.98.nip.io/`. Antes de tocar nginx, confirmar con ese host. |
 | `502 Bad Gateway` | `pm2 logs icemm-api` — backend caído. Probar `pm2 restart icemm-api`. |
 | `connection refused` (curl al :3001) | Backend no arrancó. `pm2 status` y revisar logs. |
 | `ERR_CONNECTION_REFUSED` desde browser | Firewall. `sudo ufw status` y permitir 80/443. |

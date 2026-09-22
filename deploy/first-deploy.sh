@@ -144,7 +144,7 @@ fi
 
 echo
 log "════════════════════════════════════════════════════════"
-log "  ICEMM desplegado en http://187.127.29.98"
+log "  ICEMM desplegado en https://icemm.187.127.29.98.nip.io/"
 log "  Modo BETA activo (sin login)."
 log "  Logs: pm2 logs icemm-api"
 log "════════════════════════════════════════════════════════"
