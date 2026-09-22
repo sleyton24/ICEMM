@@ -33,6 +33,12 @@ export interface SerieRealResultado {
    * que es como el re-pronóstico indexa.
    */
   porFamilia: Record<string, SerieRealMensual[]>
+  /**
+   * Y otra vez, un nivel más abajo: por código de cuenta, sobre el mismo rango
+   * de meses. Solo las cuentas dentro del perímetro —las 900, las
+   * contrapartidas de rollup y la familia 600 ya quedaron afuera.
+   */
+  porCuenta: Record<string, SerieRealMensual[]>
   /** Primer mes con costo dentro del perímetro. Es el `inicio` del modelo. */
   inicio: string | null
   /** Último mes incluido. */
@@ -70,6 +76,7 @@ export function serieRealDesdeERP(
 
   const porMes = new Map<string, number>()
   const porMesFamilia = new Map<string, Map<string, number>>()
+  const porMesCuenta = new Map<string, Map<string, number>>()
   for (const f of FAMILIAS_MODELO) porMesFamilia.set(f.clave, new Map())
 
   for (const [ccStr, mesMap] of Object.entries(porCcMes)) {
@@ -88,13 +95,17 @@ export function serieRealDesdeERP(
         const m = porMesFamilia.get(fam.clave)!
         m.set(mes, (m.get(mes) ?? 0) + vals.monto_uf)
       }
+
+      let mc = porMesCuenta.get(ccStr)
+      if (!mc) { mc = new Map(); porMesCuenta.set(ccStr, mc) }
+      mc.set(mes, (mc.get(mes) ?? 0) + vals.monto_uf)
     }
   }
 
   if (porMes.size === 0) {
     const vacio: Record<string, SerieRealMensual[]> = {}
     for (const f of FAMILIAS_MODELO) vacio[f.clave] = []
-    return { serie: [], porFamilia: vacio, inicio: null, corte: null, excluido, advertencias }
+    return { serie: [], porFamilia: vacio, porCuenta: {}, inicio: null, corte: null, excluido, advertencias }
   }
 
   const conMovimiento = [...porMes.keys()].sort()
@@ -125,6 +136,18 @@ export function serieRealDesdeERP(
     })
   }
 
+  // Cada cuenta, sobre el mismo eje. El re-pronóstico indexa por posición, así
+  // que todas las series tienen que compartir el rango o se desalinean.
+  const porCuenta: Record<string, SerieRealMensual[]> = {}
+  for (const [cod, m] of porMesCuenta) {
+    let acumC = 0
+    porCuenta[cod] = serie.map(({ ym }) => {
+      const mes = m.get(ym) ?? 0
+      acumC += mes
+      return { ym, mes, acum: acumC }
+    })
+  }
+
   if (huecos > 0) {
     advertencias.push(
       `${huecos} mes(es) entre ${inicio} y ${corte} no tienen movimiento; se rellenaron con 0 ` +
@@ -145,5 +168,5 @@ export function serieRealDesdeERP(
     )
   }
 
-  return { serie, porFamilia, inicio, corte, excluido, advertencias }
+  return { serie, porFamilia, porCuenta, inicio, corte, excluido, advertencias }
 }

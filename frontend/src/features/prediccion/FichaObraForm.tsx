@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { AlertTriangle } from 'lucide-react'
+import { AlertTriangle, FileDown } from 'lucide-react'
 import { useProjectsStore, type FichaObra } from '../projects/ProjectsStore'
 import { TIPOS_OBRA, type Proyecto, type TipoObra } from '../projects/types'
+import { fichaConocida, tipoValido } from './datos/fichasConocidas'
 
 interface Props {
   proyecto: Proyecto
@@ -20,6 +21,24 @@ export default function FichaObraForm({ proyecto, onListo }: Props) {
   const [contrato, setContrato] = useState(proyecto.montoContratoUF?.toString() ?? '')
   const [guardando, setGuardando] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // Ficha que EMM ya entregó en el consolidado, si esta obra es una de las 9.
+  const emm = fichaConocida(proyecto.nombre)
+  const aplicarEmm = () => {
+    if (!emm) return
+    if (tipoValido(emm.tipo)) setTipoObra(emm.tipo)
+    setM2(emm.m2.toString())
+    setPlazo(emm.plazoMeses.toString())
+    setContrato(emm.montoContratoUF.toString())
+    setError(null)
+  }
+  // Solo se ofrece si aporta algo: si los cuatro campos ya coinciden, no.
+  const emmAportaAlgo =
+    !!emm &&
+    (tipoObra !== emm.tipo ||
+      parseFloat(m2) !== emm.m2 ||
+      parseInt(plazo, 10) !== emm.plazoMeses ||
+      parseFloat(contrato) !== emm.montoContratoUF)
 
   const totalItemizado = proyecto.slots.presupuesto_original?.totalGeneral ?? null
   const contratoNum = parseFloat(contrato)
@@ -56,9 +75,59 @@ export default function FichaObraForm({ proyecto, onListo }: Props) {
       <div>
         <h3 className="text-sm font-bold text-tinta font-slab">Ficha de obra</h3>
         <p className="text-xs text-gray-500 mt-0.5">
-          El predictor necesita estos cuatro datos y no están en ningún archivo cargado.
+          {emm
+            ? 'El predictor necesita estos cuatro datos. EMM ya los entregó para esta obra en el consolidado.'
+            : 'El predictor necesita estos cuatro datos y no están en ningún archivo cargado.'}
         </p>
       </div>
+
+      {emm && (
+        <div className="bg-teal-muted/5 border border-teal-muted/25 rounded-lg px-3 py-2.5 space-y-2">
+          <div className="flex items-start gap-2">
+            <FileDown className="h-3.5 w-3.5 text-teal-muted flex-shrink-0 mt-0.5" />
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-medium text-tinta">
+                Ficha de EMM · {emm.nombre}
+              </p>
+              <p className="text-[11px] text-gray-500 mt-0.5">
+                {emm.comuna} · {emm.anios} · {emm.unidades} unidades
+                {emm.enModelo
+                  ? ' · aporta curva al modelo'
+                  : ' · es la obra proyectada, no aporta curva'}
+              </p>
+            </div>
+            {emmAportaAlgo && (
+              <button
+                type="button"
+                onClick={aplicarEmm}
+                className="flex-shrink-0 px-2.5 py-1 text-[11px] font-medium text-tinta border border-gray-300 rounded-md hover:bg-gray-100 transition-colors"
+              >
+                Usar estos datos
+              </button>
+            )}
+          </div>
+
+          <dl className="grid grid-cols-2 sm:grid-cols-4 gap-x-3 gap-y-1 text-[11px]">
+            {([
+              ['Tipo', emm.tipo],
+              ['m²', emm.m2.toLocaleString('es-CL', { maximumFractionDigits: 2 })],
+              ['Plazo', `${emm.plazoMeses} meses`],
+              ['Contrato', `UF ${emm.montoContratoUF.toLocaleString('es-CL', { maximumFractionDigits: 2 })}`],
+            ] as const).map(([k, v]) => (
+              <div key={k} className="min-w-0">
+                <dt className="text-gray-400 uppercase tracking-wider text-[9px]">{k}</dt>
+                <dd className="text-tinta tabular-nums truncate" title={v}>{v}</dd>
+              </div>
+            ))}
+          </dl>
+
+          {emm.obs && (
+            <p className="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1">
+              Nota de EMM sobre el contrato: <strong>{emm.obs}</strong>
+            </p>
+          )}
+        </div>
+      )}
 
       {error && (
         <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2 text-xs text-red-700">

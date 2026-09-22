@@ -22,13 +22,46 @@ export interface ObraBase {
   fam: Record<string, { share: number; curva: number[] }>
 }
 
+/**
+ * Ficha de la obra proyectada, tal como vino del consolidado de EMM.
+ *
+ * Estuvo tipada como `Record<string, unknown>` desde el principio, y por eso
+ * pasó inadvertido que los cuatro datos que el formulario pedía a mano ya
+ * estaban acá. Tipada de verdad, el editor los muestra.
+ */
+export interface FichaQuebrada {
+  comuna: string
+  tipo: string
+  m2: number
+  edificios: number | string
+  subterraneos: number | string
+  pisos: number | string
+  unidades: number | string
+  monto_contrato: number
+  plazo: number
+  anios: string
+  obs?: string
+}
+
 export interface CurvasBase {
   grid: number[]
   familias: string[]
   obras: ObraBase[]
-  quebrada: Record<string, unknown>
+  quebrada: FichaQuebrada
   backtest: Record<string, unknown>
-  real: Record<string, unknown>
+  /**
+   * Real de La Quebrada al corte. `fam_mes` está aplanado con clave
+   * `"YYYY-MM|familia"` — sí, hay detalle por familia además del total.
+   */
+  real: {
+    obra: string
+    inicio: string
+    corte: string
+    serie: SerieRealMensual[]
+    fam_mes: Record<string, number>
+    total: number
+    [k: string]: unknown
+  }
 }
 
 /** Lo que hay que saber de la obra a proyectar. */
@@ -68,6 +101,16 @@ export interface OpcionesProyeccion {
    * Subcontratos tarde. Sin esto se proyecta la obra entera.
    */
   familia?: string
+  /**
+   * Proyectar una sola cuenta ('206', '313', …) en vez de la obra o la
+   * familia. Un nivel más abajo que `familia`, con la misma lógica: la cuenta
+   * tiene su propio calendario dentro del ciclo.
+   *
+   * No todas las cuentas están: solo las 125 que aparecen en 3 o más obras con
+   * 4 o más meses de gasto. Ver `curvasCuenta.criterio`. Si se pasa junto con
+   * `familia`, manda la cuenta.
+   */
+  cuenta?: string
 }
 
 export interface PuntoMensual {
@@ -124,6 +167,14 @@ export interface Proyeccion {
   mix: Record<string, number>
   /** Clave de la familia proyectada, o null si es la obra completa. */
   familia: string | null
+  /** Código de la cuenta proyectada, o null si no es modo cuenta. */
+  cuenta: string | null
+  /**
+   * En modo cuenta: sobre cuántas de las 8 obras se construyó la mezcla. Menos
+   * de 8 significa que la cuenta no existe en todas y los pesos se
+   * renormalizaron sobre las presentes.
+   */
+  obrasDeLaCuenta: number | null
   meses: PuntoMensual[]
   comparables: Comparable[]
   /**

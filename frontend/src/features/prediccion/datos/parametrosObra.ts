@@ -11,6 +11,8 @@ export interface ParametrosObra {
   serieReal: SerieRealMensual[]
   /** La misma serie por familia del modelo, sobre el mismo rango de meses. */
   serieRealPorFamilia: Record<string, SerieRealMensual[]>
+  /** Y por código de cuenta, sobre ese mismo rango. */
+  serieRealPorCuenta: Record<string, SerieRealMensual[]>
   /** Primer mes con costo dentro del perímetro. */
   inicio: string | null
   excluido: { oficinaCentral: number; rollup: number; otros: number }
@@ -52,7 +54,7 @@ export function parametrosObra(
   const real = erp
     ? serieRealDesdeERP(erp, plan, { cutoffMes: proyecto.cutoffMesReal ?? null })
     : {
-        serie: [], porFamilia: {}, inicio: null, corte: null,
+        serie: [], porFamilia: {}, porCuenta: {}, inicio: null, corte: null,
         excluido: { oficinaCentral: 0, rollup: 0, otros: 0 }, advertencias: [],
       }
 
@@ -89,6 +91,7 @@ export function parametrosObra(
     faltantes,
     serieReal: real.serie,
     serieRealPorFamilia: real.porFamilia,
+    serieRealPorCuenta: real.porCuenta,
     inicio,
     excluido: real.excluido,
     advertencias,

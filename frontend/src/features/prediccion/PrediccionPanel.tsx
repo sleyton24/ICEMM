@@ -12,6 +12,7 @@ import { proyectar } from './modelo/proyectar'
 import { repronosticar } from './modelo/repronostico'
 import type { Escenario } from './modelo/tipos'
 import { FAMILIAS_MODELO, familiaPorClave } from './modelo/familias'
+import { cuentaBase, cuentasDeFamilia, CRITERIO_CUENTAS } from './modelo/curvasCuenta'
 import FichaObraForm from './FichaObraForm'
 
 const uf0 = (n: number) => n.toLocaleString('es-CL', { maximumFractionDigits: 0 })
@@ -35,22 +36,44 @@ export default function PrediccionPanel() {
   const [usarEjecObra, setUsarEjecObra] = useState(false)
   // null = la obra completa; si no, la clave de la familia del modelo.
   const [familia, setFamilia] = useState<string | null>(null)
+  // Un nivel más abajo: código de cuenta dentro de la familia elegida.
+  const [cuenta, setCuenta] = useState<string | null>(null)
   const [editandoFicha, setEditandoFicha] = useState(false)
+
+  /** Cambiar de familia invalida la cuenta: son cuentas de otra familia. */
+  const elegirFamilia = (f: string | null) => { setFamilia(f); setCuenta(null) }
+
+  /** Las cuentas con curva histórica de la familia abierta, de mayor a menor. */
+  const cuentasDisponibles = useMemo(
+    () => (familia ? cuentasDeFamilia(familia) : []),
+    [familia],
+  )
+
+  /** Descripción de una cuenta según el plan cargado. */
+  const nombreCuenta = (codigo: string) =>
+    plan.cuentas.find(c => c.codigo === Number(codigo))?.descripcion ?? `Cuenta ${codigo}`
+
+  const cuentaActual = cuenta ? cuentaBase(cuenta) : null
 
   const totalProyectadoObra = useMemo(
     () => data.partidas.reduce((s, p) => s + p.proyeccion, 0),
     [data.partidas],
   )
 
-  /** Lo que la obra proyecta para la familia elegida, para contrastar. */
+  /** Lo que la obra proyecta para el ámbito elegido, para contrastar. */
   const proyectadoObraSeleccion = useMemo(() => {
+    if (cuenta) {
+      return data.partidas
+        .filter(p => String(p.codigo2) === cuenta)
+        .reduce((s, p) => s + p.proyeccion, 0)
+    }
     if (!familia) return totalProyectadoObra
     const codigo = familiaPorClave(familia)?.codigo
     if (!codigo) return 0
     return data.partidas
       .filter(p => Math.floor(Number(p.codigo2) / 100) * 100 === codigo)
       .reduce((s, p) => s + p.proyeccion, 0)
-  }, [familia, data.partidas, totalProyectadoObra])
+  }, [familia, cuenta, data.partidas, totalProyectadoObra])
 
   const params = useMemo(
     () => proyecto ? parametrosObra(proyecto, plan, totalProyectadoObra) : null,
@@ -61,15 +84,23 @@ export default function PrediccionPanel() {
     if (!params?.obra) return null
     try {
       const ejec = usarEjecObra && params.ejecSegunObra ? params.ejecSegunObra : undefined
-      const p = proyectar(params.obra, { lead, skew, ejec, familia: familia ?? undefined })
-      const real = familia ? (params.serieRealPorFamilia[familia] ?? []) : params.serieReal
+      const p = proyectar(params.obra, {
+        lead, skew, ejec,
+        familia: familia ?? undefined,
+        cuenta: cuenta ?? undefined,
+      })
+      const real = cuenta
+        ? (params.serieRealPorCuenta[cuenta] ?? [])
+        : familia
+          ? (params.serieRealPorFamilia[familia] ?? [])
+          : params.serieReal
       if (real.length === 0) return { proy: p, repro: null, error: null }
       const r = repronosticar(p, real, { mesCorte: real.length, escenario })
       return { proy: p, repro: r, error: null }
     } catch (e) {
       return { proy: null, repro: null, error: e instanceof Error ? e.message : String(e) }
     }
-  }, [params, lead, skew, escenario, usarEjecObra, familia])
+  }, [params, lead, skew, escenario, usarEjecObra, familia, cuenta])
 
   if (!proyecto) {
     return <p className="text-center text-sm text-gray-400 py-12">Seleccioná una obra para proyectar.</p>
@@ -110,7 +141,11 @@ export default function PrediccionPanel() {
 
   const proy = resultado!.proy!
   const repro = resultado!.repro
-  const serieReal = familia ? (params.serieRealPorFamilia[familia] ?? []) : params.serieReal
+  const serieReal = cuenta
+    ? (params.serieRealPorCuenta[cuenta] ?? [])
+    : familia
+      ? (params.serieRealPorFamilia[familia] ?? [])
+      : params.serieReal
   const advertencias = [...(repro?.advertencias ?? proy.advertencias), ...params.advertencias]
 
   const chartData = proy.meses.map((m, i) => ({
@@ -128,10 +163,19 @@ export default function PrediccionPanel() {
   const proyObra = proyectadoObraSeleccion
   const brechaObra = proyObra > 0 ? cierreModelo - proyObra : null
   const famActual = familia ? familiaPorClave(familia) : null
-  const ambito = famActual ? famActual.etiqueta.toLowerCase() : 'la obra completa'
-  // En modo familia el contrato no es el divisor correcto: lo que corresponde
-  // es la parte del contrato que le toca a esa familia según el mix histórico.
-  const baseContrato = familia ? proy.obra.contrato * proy.mix[familia] : proy.obra.contrato
+  const ambito = cuentaActual
+    ? `la cuenta ${cuentaActual.codigo} — ${nombreCuenta(cuentaActual.codigo).toLowerCase()}`
+    : famActual ? famActual.etiqueta.toLowerCase() : 'la obra completa'
+  // Etiqueta corta del ámbito, para KPIs y cabecera del gráfico.
+  const rotulo = cuentaActual
+    ? `Cuenta ${cuentaActual.codigo}`
+    : famActual ? famActual.etiqueta : null
+  // En modo familia o cuenta el contrato no es el divisor correcto: lo que
+  // corresponde es la parte que le toca según el mix histórico.
+  const claveParcial = cuenta ?? familia
+  const baseContrato = claveParcial
+    ? proy.obra.contrato * proy.mix[claveParcial]
+    : proy.obra.contrato
 
   return (
     <div className="space-y-5">
@@ -151,7 +195,7 @@ export default function PrediccionPanel() {
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-[11px] font-medium text-gray-400 uppercase tracking-wider mr-1">Proyectar</span>
         <button
-          onClick={() => setFamilia(null)}
+          onClick={() => elegirFamilia(null)}
           className={`text-[11px] px-3 py-1.5 rounded-full font-medium transition-all ${
             familia === null
               ? 'bg-cabecera text-white shadow-sm'
@@ -163,7 +207,7 @@ export default function PrediccionPanel() {
           return (
             <button
               key={f.clave}
-              onClick={() => setFamilia(f.clave)}
+              onClick={() => elegirFamilia(f.clave)}
               title={`Cuentas ${f.codigo}–${f.codigo + 99}`}
               className={`flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-full font-medium transition-all ${
                 activa
@@ -176,15 +220,40 @@ export default function PrediccionPanel() {
         })}
       </div>
 
+      {/* ── Selector de cuenta, dentro de la familia abierta ─────────── */}
+      {familia && (
+        <div className="flex flex-wrap items-center gap-2 -mt-1">
+          <span className="text-[11px] font-medium text-gray-400 uppercase tracking-wider mr-1">Cuenta</span>
+          <select
+            value={cuenta ?? ''}
+            onChange={e => setCuenta(e.target.value || null)}
+            className="text-[11px] px-3 py-1.5 rounded-full border border-gray-200 bg-panel text-tinta focus:outline-none focus:ring-2 focus:ring-teal-muted/30 max-w-[30rem]"
+          >
+            <option value="">Toda la familia ({cuentasDisponibles.length} cuentas con curva)</option>
+            {cuentasDisponibles.map(c => (
+              <option key={c.codigo} value={c.codigo}>
+                {c.codigo} · {nombreCuenta(c.codigo)} — {pct1(c.shareMedio)} del costo de obra
+              </option>
+            ))}
+          </select>
+          {cuentaActual && (
+            <span className="text-[10px] text-gray-400">
+              {cuentaActual.nObras} de 8 obras
+              {cuentaActual.caidaMax > 0.01 && ' · la curva histórica retrocede'}
+            </span>
+          )}
+        </div>
+      )}
+
       {/* ── KPIs ─────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <Kpi label={famActual ? `Cierre ${famActual.etiqueta} — modelo` : 'Cierre proyectado — modelo'}
+        <Kpi label={rotulo ? `Cierre ${rotulo} — modelo` : 'Cierre proyectado — modelo'}
              valor={`UF ${uf0(cierreModelo)}`}
-             sub={famActual
-               ? `${pct1(proy.mix[familia!])} del contrato × ${proy.ejec.toFixed(3)}`
+             sub={claveParcial
+               ? `${pct1(proy.mix[claveParcial])} del contrato × ${proy.ejec.toFixed(3)}`
                : `contrato × ${proy.ejec.toFixed(3)}`}
              acento="#233032" />
-        <Kpi label={famActual ? `Cierre ${famActual.etiqueta} — obra` : 'Cierre proyectado — obra'}
+        <Kpi label={rotulo ? `Cierre ${rotulo} — obra` : 'Cierre proyectado — obra'}
              valor={proyObra > 0 ? `UF ${uf0(proyObra)}` : '—'}
              sub={proyObra > 0 ? `× ${(proyObra / baseContrato).toFixed(3)} sobre esa base` : 'sin slot proyectado'}
              acento="#809494" />
@@ -199,11 +268,12 @@ export default function PrediccionPanel() {
       <div className="rounded-lg border border-gray-200 overflow-hidden">
         <div className="px-5 py-3 bg-cabecera">
           <h2 className="text-sm font-semibold text-white font-slab">
-            CURVA DE COSTO ACUMULADO{famActual ? ` — ${famActual.etiqueta.toUpperCase()}` : ''}
+            CURVA DE COSTO ACUMULADO{rotulo ? ` — ${rotulo.toUpperCase()}` : ''}
           </h2>
           <p className="text-[11px] text-white/50">
             {proy.obra.nombre} · {serieReal.length} meses observados de {proy.NT} · proyectando {ambito}
-            {famActual && ` (cuentas ${famActual.codigo}–${famActual.codigo + 99})`}
+            {famActual && !cuentaActual && ` (cuentas ${famActual.codigo}–${famActual.codigo + 99})`}
+            {cuentaActual && ` · ${cuentaActual.nObras} de 8 obras históricas la tienen`}
           </p>
         </div>
         <div className="p-4">
@@ -231,15 +301,28 @@ export default function PrediccionPanel() {
             </ComposedChart>
           </ResponsiveContainer>
 
-          {famActual && (
+          {famActual && !cuentaActual && (
             <div className="flex items-start gap-2 mt-2 text-[11px] text-gray-500 bg-surface border border-gray-200 rounded-lg px-3 py-2">
               <Info className="h-3.5 w-3.5 flex-shrink-0 mt-0.5 text-teal-muted" />
               <span>
                 Esta es la curva propia de {famActual.etiqueta.toLowerCase()}, no la de la obra
-                reescalada: cada familia tiene su calendario. El modelo llega hasta este nivel —
-                bajar a la cuenta individual ({famActual.codigo + 1}, {famActual.codigo + 2}…)
-                necesita el costo por cuenta de las siete obras históricas que faltan en el
-                consolidado.
+                reescalada: cada familia tiene su calendario. Con el selector de arriba se baja a
+                la cuenta individual, que tiene el suyo.
+              </span>
+            </div>
+          )}
+
+          {cuentaActual && (
+            <div className="flex items-start gap-2 mt-2 text-[11px] text-gray-500 bg-surface border border-gray-200 rounded-lg px-3 py-2">
+              <Info className="h-3.5 w-3.5 flex-shrink-0 mt-0.5 text-teal-muted" />
+              <span>
+                Curva propia de la cuenta {cuentaActual.codigo}, construida con las{' '}
+                {cuentaActual.nObras} obras históricas que la tienen —de las 8—, con la misma
+                receta que las curvas de familia. Quedan fuera del catálogo las cuentas con menos
+                de {CRITERIO_CUENTAS.minMesesActivos} meses de gasto o presentes en menos de{' '}
+                {CRITERIO_CUENTAS.minObras} obras. A este nivel la curva sirve para leer{' '}
+                <strong>cuándo</strong> se gasta; el monto lo sigue mandando la proyección de la
+                familia.
               </span>
             </div>
           )}

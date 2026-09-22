@@ -1,0 +1,110 @@
+{
+ "Raices del Taihuen": {
+  "nombre": "Raices del Taihuen",
+  "comuna": "Lo Barnechea",
+  "tipo": "Edificio Habitacional",
+  "m2": 19043.1,
+  "plazoMeses": 25,
+  "montoContratoUF": 360611.42,
+  "unidades": 56,
+  "anios": "2017 - 2018 - 2019",
+  "obs": "Monto Contrato, No Incluye Post Venta",
+  "enModelo": true
+ },
+ "Vicente Valdes": {
+  "nombre": "Vicente Valdes",
+  "comuna": "La Florida",
+  "tipo": "Edificio Habitacional",
+  "m2": 10354.58,
+  "plazoMeses": 20,
+  "montoContratoUF": 174047.1,
+  "unidades": 102,
+  "anios": "2018 - 2019",
+  "obs": "Monto Contrato no indica si la Post Venta esta implicita",
+  "enModelo": true
+ },
+ "Hotel UGO": {
+  "nombre": "Hotel UGO",
+  "comuna": "Providencia",
+  "tipo": "Hotel",
+  "m2": 12076.62,
+  "plazoMeses": 28,
+  "montoContratoUF": 318238.1,
+  "unidades": 196,
+  "anios": "2018 - 2019",
+  "obs": "Monto Contrato, No Incluye Post Venta",
+  "enModelo": true
+ },
+ "Oasis Plaza": {
+  "nombre": "Oasis Plaza",
+  "comuna": "La Florida",
+  "tipo": "Edificio Habitacional + Locales Comerciales",
+  "m2": 19013.879999999997,
+  "plazoMeses": 22,
+  "montoContratoUF": 329187.6,
+  "unidades": 232,
+  "anios": "2020 - 2022",
+  "obs": "Monto Contrato, Incluye Post Venta",
+  "enModelo": true
+ },
+ "Rojas Magallanes": {
+  "nombre": "Rojas Magallanes",
+  "comuna": "La Florida",
+  "tipo": "Edificio Habitacional + Locales Comerciales",
+  "m2": 11436.91,
+  "plazoMeses": 21,
+  "montoContratoUF": 213673.75999999998,
+  "unidades": 125,
+  "anios": "2021 - 2022",
+  "obs": "Monto Contrato, Incluye Post Venta",
+  "enModelo": true
+ },
+ "Europa": {
+  "nombre": "Europa",
+  "comuna": "Providencia",
+  "tipo": "Edificio Habitacional",
+  "m2": 7154.08,
+  "plazoMeses": 22,
+  "montoContratoUF": 202580.59,
+  "unidades": 56,
+  "anios": "2024 - 2025",
+  "obs": "Monto Contrato, Incluye Post Venta",
+  "enModelo": true
+ },
+ "Afluente": {
+  "nombre": "Afluente",
+  "comuna": "Lo Barnechea",
+  "tipo": "Casas Habitacionales",
+  "m2": 5576.5,
+  "plazoMeses": 20,
+  "montoContratoUF": 209111.16,
+  "unidades": 38,
+  "anios": "2024 - 2025",
+  "obs": "Monto Contrato, Incluye Post Venta",
+  "enModelo": true
+ },
+ "Manantial": {
+  "nombre": "Manantial",
+  "comuna": "Lo Barnechea",
+  "tipo": "Edificio Habitacional",
+  "m2": 8210,
+  "plazoMeses": 21,
+  "montoContratoUF": 241520.49,
+  "unidades": 48,
+  "anios": "2024 - 2025",
+  "obs": "Monto Contrato, Incluye Post Venta",
+  "enModelo": true
+ },
+ "La Quebrada": {
+  "nombre": "La Quebrada",
+  "comuna": "Lo Barnechea",
+  "tipo": "Edificio Habitacional",
+  "m2": 9576.96,
+  "plazoMeses": 22,
+  "montoContratoUF": 282990.89,
+  "unidades": 48,
+  "anios": "2026 - 2026",
+  "obs": "Monto Contrato, Incluye Post Venta",
+  "enModelo": false
+ }
+}
