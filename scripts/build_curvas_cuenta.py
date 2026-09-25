@@ -43,6 +43,10 @@ FAMILIA_POR_DIGITO = {
     '3': 'subcontratos',
     '4': 'gastos_generales',
     '5': 'equipos',
+    # La 600 no está en curvas-base (las cinco familias de costo ya cierran 1).
+    # Si el consolidado trae meses suficientes, la cuenta entra al artefacto;
+    # si no, el selector igual la muestra, con aviso.
+    '6': 'otros',
 }
 
 # Una curva con 3 puntos es una escalera, no una curva. Y una cuenta que

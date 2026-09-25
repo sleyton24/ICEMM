@@ -80,6 +80,35 @@ model Project {
   informes            Informe[]
   usuarios            UserProject[]
   comentarios         Comentario[]
+  eleccionesProyeccion EleccionProyeccion[]
+}
+
+/// Elección, por obra y cuenta, de qué proyección usa el informe de costos.
+/// Aditiva: no modifica Informe, partidas ni archivos. Sin fila, el informe
+/// sigue con el proyectado Presto. `fuente = modelo` reemplaza el cierre de
+/// esa cuenta por la curva típica o la re-anclada al real.
+model EleccionProyeccion {
+  id                String    @id @default(uuid())
+  projectId         String
+  codigoCuenta      String
+  /// "presto" | "modelo"
+  fuente            String    @default("presto")
+  /// "tipica" | "reanclada". Solo aplica cuando fuente = modelo.
+  curva             String?
+  /// Cierres sugeridos por el modelo al pasar la curva desde Proyección, en UF.
+  cierreTipica      Float?
+  cierreReanclada   Float?
+  /// Serie mensual de auditoría: [{ ym, acumTipica, acumReanclada }].
+  serie             Json?
+  obrasReferencia   String[]  @default([])
+  pasadoPor         String?
+  pasadoEn          DateTime?
+  elegidoPor        String?
+  elegidoEn         DateTime?
+  project           Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, codigoCuenta])
+  @@index([projectId])
 }
 
 /// Comentarios libres asociados a una partida (codigo) de un proyecto.

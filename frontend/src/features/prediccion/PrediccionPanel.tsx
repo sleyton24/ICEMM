@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import {
   ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Legend,
@@ -12,7 +12,11 @@ import { proyectar } from './modelo/proyectar'
 import { repronosticar } from './modelo/repronostico'
 import type { Escenario } from './modelo/tipos'
 import { FAMILIAS_MODELO, familiaPorClave } from './modelo/familias'
-import { cuentaBase, cuentasDeFamilia, CRITERIO_CUENTAS } from './modelo/curvasCuenta'
+import { cuentaBase, CRITERIO_CUENTAS } from './modelo/curvasCuenta'
+import { cuentasVisibles, familiaTieneCurva } from './modelo/catalogoCuentas'
+import { curvasBase } from './modelo/curvasBase'
+import { guardarObrasReferencia, leerObrasReferencia, olvidarObrasReferencia } from './obrasReferencia'
+import { useEleccionesStore } from '../informes/EleccionesStore'
 import FichaObraForm from './FichaObraForm'
 
 const uf0 = (n: number) => n.toLocaleString('es-CL', { maximumFractionDigits: 0 })
@@ -39,15 +43,37 @@ export default function PrediccionPanel() {
   // Un nivel más abajo: código de cuenta dentro de la familia elegida.
   const [cuenta, setCuenta] = useState<string | null>(null)
   const [editandoFicha, setEditandoFicha] = useState(false)
+  // null = todas las obras, que es la mezcla por similitud de hoy.
+  const [obrasOverride, setObrasOverride] = useState<string[] | null>(null)
+  const [avisoInforme, setAvisoInforme] = useState<string | null>(null)
+  const [errorInforme, setErrorInforme] = useState<string | null>(null)
+  const [pasando, setPasando] = useState(false)
+  const sugerir = useEleccionesStore(s => s.sugerir)
+
+  const projectId = proyecto?.id ?? null
+  const nombresObras = useMemo(() => curvasBase.obras.map(o => o.nombre), [])
+
+  useEffect(() => {
+    if (!projectId || !cuenta) {
+      setObrasOverride(null)
+      return
+    }
+    setObrasOverride(leerObrasReferencia(projectId, cuenta))
+    setAvisoInforme(null)
+    setErrorInforme(null)
+  }, [projectId, cuenta])
 
   /** Cambiar de familia invalida la cuenta: son cuentas de otra familia. */
   const elegirFamilia = (f: string | null) => { setFamilia(f); setCuenta(null) }
 
-  /** Las cuentas con curva histórica de la familia abierta, de mayor a menor. */
+  /** Cuentas de la familia, incluidas las que no tienen curva propia. */
   const cuentasDisponibles = useMemo(
-    () => (familia ? cuentasDeFamilia(familia) : []),
-    [familia],
+    () => (familia ? cuentasVisibles(familia, plan) : []),
+    [familia, plan],
   )
+
+  const seleccionObras = obrasOverride ?? nombresObras
+  const metaCuenta = cuenta ? cuentasDisponibles.find(c => c.codigo === cuenta) ?? null : null
 
   /** Descripción de una cuenta según el plan cargado. */
   const nombreCuenta = (codigo: string) =>
@@ -82,25 +108,50 @@ export default function PrediccionPanel() {
 
   const resultado = useMemo(() => {
     if (!params?.obra) return null
+    const sinCurvaPropia = Boolean(metaCuenta && !metaCuenta.tieneCurva)
+    if (familia && !familiaTieneCurva(familia) && !metaCuenta?.tieneCurva) {
+      return {
+        proy: null, repro: null, error: null,
+        motivo: metaCuenta ? 'cuenta-sin-historia' as const : 'familia-sin-historia' as const,
+      }
+    }
+    if (cuenta && seleccionObras.length === 0) {
+      return { proy: null, repro: null, error: null, motivo: 'sin-obras' as const }
+    }
     try {
       const ejec = usarEjecObra && params.ejecSegunObra ? params.ejecSegunObra : undefined
+      const usarCuenta = Boolean(metaCuenta?.tieneCurva)
       const p = proyectar(params.obra, {
         lead, skew, ejec,
         familia: familia ?? undefined,
-        cuenta: cuenta ?? undefined,
+        cuenta: usarCuenta ? cuenta ?? undefined : undefined,
+        obrasActivas: cuenta ? seleccionObras : undefined,
       })
-      const real = cuenta
+      if (sinCurvaPropia && metaCuenta?.respaldoFamilia && familia) {
+        const etiqueta = familiaPorClave(familia)?.etiqueta ?? familia
+        p.advertencias.unshift(
+          `La cuenta ${metaCuenta.codigo} no tiene historia suficiente para estimar su curva ` +
+          `(hace falta aparecer en ${CRITERIO_CUENTAS.minObras} o más obras, con ` +
+          `${CRITERIO_CUENTAS.minMesesActivos} o más meses de gasto). Se muestra la curva de ` +
+          `${etiqueta.toLowerCase()} como respaldo: el monto es el de la familia, no el de esta cuenta.`,
+        )
+      }
+      const real = usarCuenta && cuenta
         ? (params.serieRealPorCuenta[cuenta] ?? [])
         : familia
           ? (params.serieRealPorFamilia[familia] ?? [])
           : params.serieReal
-      if (real.length === 0) return { proy: p, repro: null, error: null }
+      if (real.length === 0) return { proy: p, repro: null, error: null, motivo: null }
       const r = repronosticar(p, real, { mesCorte: real.length, escenario })
-      return { proy: p, repro: r, error: null }
+      return { proy: p, repro: r, error: null, motivo: null }
     } catch (e) {
-      return { proy: null, repro: null, error: e instanceof Error ? e.message : String(e) }
+      return {
+        proy: null, repro: null,
+        error: e instanceof Error ? e.message : String(e),
+        motivo: 'error' as const,
+      }
     }
-  }, [params, lead, skew, escenario, usarEjecObra, familia, cuenta])
+  }, [params, lead, skew, escenario, usarEjecObra, familia, cuenta, metaCuenta, seleccionObras])
 
   if (!proyecto) {
     return <p className="text-center text-sm text-gray-400 py-12">Seleccioná una obra para proyectar.</p>
@@ -127,55 +178,90 @@ export default function PrediccionPanel() {
     )
   }
 
-  if (resultado?.error) {
-    return (
-      <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-sm text-red-700">
-        <AlertTriangle className="h-4 w-4 flex-shrink-0 mt-0.5" />
-        <div>
-          <p className="font-semibold">No se pudo construir la proyección</p>
-          <p className="text-xs mt-0.5">{resultado.error}</p>
-        </div>
-      </div>
-    )
-  }
-
-  const proy = resultado!.proy!
-  const repro = resultado!.repro
-  const serieReal = cuenta
+  const proy = resultado?.proy ?? null
+  const repro = resultado?.repro ?? null
+  const motivo = resultado?.motivo ?? null
+  const usarCuentaPropia = Boolean(metaCuenta?.tieneCurva)
+  const serieReal = usarCuentaPropia && cuenta
     ? (params.serieRealPorCuenta[cuenta] ?? [])
     : familia
       ? (params.serieRealPorFamilia[familia] ?? [])
       : params.serieReal
-  const advertencias = [...(repro?.advertencias ?? proy.advertencias), ...params.advertencias]
+  const advertencias = [
+    ...(proy ? (repro?.advertencias ?? proy.advertencias) : []),
+    ...params.advertencias,
+  ]
 
-  const chartData = proy.meses.map((m, i) => ({
-    ym: m.ym,
-    etiqueta: m.ym.slice(2).replace('-', '/'),
-    proyeccion: m.acum,
-    // La banda se dibuja como base + alto, que es como Recharts apila áreas.
-    bandaBase: m.p10 * proy.total,
-    bandaAlto: Math.max(0, (m.p90 - m.p10) * proy.total),
-    real: i < serieReal.length ? serieReal[i].acum : null,
-    reancla: repro ? repro.reproyeccion.serie[i].acum : null,
-  }))
+  const chartData = proy
+    ? proy.meses.map((m, i) => ({
+        ym: m.ym,
+        etiqueta: m.ym.slice(2).replace('-', '/'),
+        proyeccion: m.acum,
+        // La banda se dibuja como base + alto, que es como Recharts apila áreas.
+        bandaBase: m.p10 * proy.total,
+        bandaAlto: Math.max(0, (m.p90 - m.p10) * proy.total),
+        real: i < serieReal.length ? serieReal[i].acum : null,
+        reancla: repro ? repro.reproyeccion.serie[i].acum : null,
+      }))
+    : []
 
-  const cierreModelo = repro ? repro.reproyeccion.totalNuevo : proy.total
+  const cierreTipica = proy?.total ?? 0
+  const cierreReanclada = repro ? repro.reproyeccion.totalNuevo : null
+  const cierreModelo = cierreReanclada ?? cierreTipica
   const proyObra = proyectadoObraSeleccion
-  const brechaObra = proyObra > 0 ? cierreModelo - proyObra : null
+  const brechaObra = proy && proyObra > 0 ? cierreModelo - proyObra : null
   const famActual = familia ? familiaPorClave(familia) : null
-  const ambito = cuentaActual
-    ? `la cuenta ${cuentaActual.codigo} — ${nombreCuenta(cuentaActual.codigo).toLowerCase()}`
+  const ambito = cuenta
+    ? `la cuenta ${cuenta} — ${nombreCuenta(cuenta).toLowerCase()}`
     : famActual ? famActual.etiqueta.toLowerCase() : 'la obra completa'
-  // Etiqueta corta del ámbito, para KPIs y cabecera del gráfico.
-  const rotulo = cuentaActual
-    ? `Cuenta ${cuentaActual.codigo}`
+  const rotulo = cuenta
+    ? `Cuenta ${cuenta}${metaCuenta && !metaCuenta.tieneCurva && metaCuenta.respaldoFamilia ? ' · respaldo de familia' : ''}`
     : famActual ? famActual.etiqueta : null
   // En modo familia o cuenta el contrato no es el divisor correcto: lo que
   // corresponde es la parte que le toca según el mix histórico.
-  const claveParcial = cuenta ?? familia
-  const baseContrato = claveParcial
-    ? proy.obra.contrato * proy.mix[claveParcial]
-    : proy.obra.contrato
+  const claveParcial = usarCuentaPropia ? cuenta : familia
+  const baseContrato = proy
+    ? (claveParcial ? proy.obra.contrato * (proy.mix[claveParcial] ?? 0) : proy.obra.contrato)
+    : 0
+
+  const toggleObra = (nombre: string) => {
+    if (!projectId || !cuenta) return
+    const base = obrasOverride ?? nombresObras
+    const next = base.includes(nombre) ? base.filter(n => n !== nombre) : [...base, nombre]
+    setObrasOverride(next)
+    guardarObrasReferencia(projectId, cuenta, next)
+  }
+
+  const restaurarSimilitud = () => {
+    if (!projectId || !cuenta) return
+    setObrasOverride(null)
+    olvidarObrasReferencia(projectId, cuenta)
+  }
+
+  const llevarAlInforme = async () => {
+    if (!projectId || !cuenta || !proy || !usarCuentaPropia) return
+    setPasando(true)
+    setErrorInforme(null)
+    try {
+      await sugerir(projectId, cuenta, {
+        cierreTipica,
+        cierreReanclada,
+        obrasReferencia: seleccionObras,
+        serie: proy.meses.map((m, i) => ({
+          ym: m.ym,
+          acumTipica: m.acum,
+          acumReanclada: repro ? repro.reproyeccion.serie[i]?.acum ?? null : null,
+        })),
+      })
+      setAvisoInforme(
+        `La curva de la cuenta ${cuenta} quedó en el informe de costos. Ahí se elige entre Presto, la curva típica y la re-anclada al real.`,
+      )
+    } catch (e) {
+      setErrorInforme(e instanceof Error ? e.message : 'No se pudo llevar la curva al informe')
+    } finally {
+      setPasando(false)
+    }
+  }
 
   return (
     <div className="space-y-5">
@@ -229,10 +315,21 @@ export default function PrediccionPanel() {
             onChange={e => setCuenta(e.target.value || null)}
             className="text-[11px] px-3 py-1.5 rounded-full border border-gray-200 bg-panel text-tinta focus:outline-none focus:ring-2 focus:ring-teal-muted/30 max-w-[30rem]"
           >
-            <option value="">Toda la familia ({cuentasDisponibles.length} cuentas con curva)</option>
+            <option value="">
+              {(() => {
+                const con = cuentasDisponibles.filter(c => c.tieneCurva).length
+                const sin = cuentasDisponibles.length - con
+                return sin === 0
+                  ? `Toda la familia (${con} cuentas con curva)`
+                  : `Toda la familia (${con} con curva, ${sin} sin historia)`
+              })()}
+            </option>
             {cuentasDisponibles.map(c => (
               <option key={c.codigo} value={c.codigo}>
-                {c.codigo} · {nombreCuenta(c.codigo)} — {pct1(c.shareMedio)} del costo de obra
+                {c.codigo} · {nombreCuenta(c.codigo)}
+                {c.tieneCurva
+                  ? ` — ${pct1(c.shareMedio)} del costo de obra`
+                  : ' — sin historia suficiente'}
               </option>
             ))}
           </select>
@@ -245,7 +342,85 @@ export default function PrediccionPanel() {
         </div>
       )}
 
+      {motivo === 'familia-sin-historia' && famActual && (
+        <Aviso>
+          La familia {famActual.codigo} ({famActual.etiqueta}) no tiene curva histórica en las 8 obras
+          de referencia: el consolidado con el que se armó el modelo no trae ese bloque, y las cinco
+          familias de costo de construcción ya cierran el total de la obra. Elegí una cuenta: se muestra
+          igual, con este aviso, en vez de ocultarla.
+        </Aviso>
+      )}
+      {motivo === 'cuenta-sin-historia' && cuenta && (
+        <Aviso>
+          La cuenta {cuenta} — {nombreCuenta(cuenta)} no tiene historia suficiente para estimar su curva
+          (hace falta aparecer en {CRITERIO_CUENTAS.minObras} o más obras, con {CRITERIO_CUENTAS.minMesesActivos} o
+          más meses de gasto) y la familia {famActual?.codigo} tampoco tiene curva de respaldo. No se inventa
+          una proyección. La cuenta queda visible igual.
+        </Aviso>
+      )}
+      {motivo === 'sin-obras' && (
+        <Aviso>
+          No hay obras de referencia seleccionadas. Marcá al menos una para estimar la curva.
+        </Aviso>
+      )}
+      {motivo === 'error' && resultado?.error && (
+        <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-sm text-red-700">
+          <AlertTriangle className="h-4 w-4 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="font-semibold">No se pudo construir la proyección</p>
+            <p className="text-xs mt-0.5">{resultado.error}</p>
+          </div>
+        </div>
+      )}
+      {avisoInforme && (
+        <div className="flex items-start gap-2 bg-emerald-50 border border-emerald-200 rounded-lg px-4 py-3 text-xs text-emerald-700">
+          <Info className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" />
+          <span>{avisoInforme}</span>
+        </div>
+      )}
+      {errorInforme && (
+        <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-xs text-red-700">
+          <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" />
+          <span>{errorInforme}</span>
+        </div>
+      )}
+
+      {cuenta && (
+        <SelectorObras
+          seleccion={seleccionObras}
+          pesosPorNombre={new Map((proy?.comparables ?? []).map(c => [c.nombre, c.peso]))}
+          tieneCuenta={cuentaActual
+            ? curvasBase.obras.map((_, i) => cuentaActual.curvas[i] !== null)
+            : null}
+          personalizada={obrasOverride !== null}
+          onToggle={toggleObra}
+          onRestaurar={restaurarSimilitud}
+          masa={proy?.masaSimilitud ?? null}
+        />
+      )}
+
+      {proy && usarCuentaPropia && cuenta && (
+        <div className="flex flex-wrap items-center gap-3 rounded-lg border border-gray-200 bg-panel px-4 py-3">
+          <button
+            type="button"
+            onClick={() => { void llevarAlInforme() }}
+            disabled={pasando}
+            className="text-[11px] px-3 py-1.5 rounded-full font-medium bg-cabecera text-white shadow-sm hover:opacity-90 disabled:opacity-40"
+          >
+            {pasando ? 'Llevando…' : 'Llevar curva al informe'}
+          </button>
+          <p className="text-[11px] text-gray-500">
+            Cierre típico <strong className="text-tinta tabular-nums">UF {uf0(cierreTipica)}</strong>
+            {cierreReanclada != null && (
+              <> · re-anclada al real <strong className="text-tinta tabular-nums">UF {uf0(cierreReanclada)}</strong></>
+            )}
+            . En Costos se elige cuál usar, o se deja el proyectado Presto.
+          </p>
+        </div>
+      )}
+
       {/* ── KPIs ─────────────────────────────────────────────────────── */}
+      {proy && (<>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <Kpi label={rotulo ? `Cierre ${rotulo} — modelo` : 'Cierre proyectado — modelo'}
              valor={`UF ${uf0(cierreModelo)}`}
@@ -301,7 +476,7 @@ export default function PrediccionPanel() {
             </ComposedChart>
           </ResponsiveContainer>
 
-          {famActual && !cuentaActual && (
+          {famActual && !cuenta && (
             <div className="flex items-start gap-2 mt-2 text-[11px] text-gray-500 bg-surface border border-gray-200 rounded-lg px-3 py-2">
               <Info className="h-3.5 w-3.5 flex-shrink-0 mt-0.5 text-teal-muted" />
               <span>
@@ -318,9 +493,10 @@ export default function PrediccionPanel() {
               <span>
                 Curva propia de la cuenta {cuentaActual.codigo}, construida con las{' '}
                 {cuentaActual.nObras} obras históricas que la tienen —de las 8—, con la misma
-                receta que las curvas de familia. Quedan fuera del catálogo las cuentas con menos
-                de {CRITERIO_CUENTAS.minMesesActivos} meses de gasto o presentes en menos de{' '}
-                {CRITERIO_CUENTAS.minObras} obras. A este nivel la curva sirve para leer{' '}
+                receta que las curvas de familia. Las que no alcanzan{' '}
+                {CRITERIO_CUENTAS.minMesesActivos} meses de gasto o {CRITERIO_CUENTAS.minObras} obras
+                se listan igual: con la curva de la familia como respaldo, o con un aviso si la
+                familia tampoco tiene historia. A este nivel la curva sirve para leer{' '}
                 <strong>cuándo</strong> se gasta; el monto lo sigue mandando la proyección de la
                 familia.
               </span>
@@ -406,8 +582,10 @@ export default function PrediccionPanel() {
           </label>
         )}
       </div>
+      </>)}
 
-      {/* ── Comparables ──────────────────────────────────────────────── */}
+      {/* ── Comparables, cuando no hay selector por cuenta ───────────── */}
+      {proy && !cuenta && (
       <div className="rounded-lg border border-gray-200 overflow-hidden">
         <div className="px-5 py-3 bg-cabecera flex items-center gap-2">
           <TrendingUp className="h-4 w-4 text-white/60" />
@@ -448,6 +626,101 @@ export default function PrediccionPanel() {
             </tbody>
           </table>
         </div>
+      </div>
+      )}
+    </div>
+  )
+}
+
+function Aviso({ children }: { children: ReactNode }) {
+  return (
+    <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 text-xs text-amber-700">
+      <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" />
+      <span>{children}</span>
+    </div>
+  )
+}
+
+function SelectorObras({ seleccion, pesosPorNombre, tieneCuenta, personalizada, onToggle, onRestaurar, masa }: {
+  seleccion: string[]
+  pesosPorNombre: Map<string, number>
+  /** null si la cuenta no tiene curva propia: todas las obras pueden entrar al respaldo. */
+  tieneCuenta: boolean[] | null
+  personalizada: boolean
+  onToggle: (nombre: string) => void
+  onRestaurar: () => void
+  masa: number | null
+}) {
+  return (
+    <div className="rounded-lg border border-gray-200 overflow-hidden">
+      <div className="px-5 py-3 bg-cabecera flex items-center gap-2">
+        <TrendingUp className="h-4 w-4 text-white/60" />
+        <div className="flex-1">
+          <h2 className="text-sm font-semibold text-white font-slab">OBRAS DE REFERENCIA</h2>
+          <p className="text-[11px] text-white/50">
+            {masa != null
+              ? `Masa de similitud ${masa.toFixed(2)} — marcá las obras históricas que entran a esta cuenta`
+              : 'Marcá las obras históricas que entran a esta cuenta'}
+          </p>
+        </div>
+        {personalizada && (
+          <button
+            type="button"
+            onClick={onRestaurar}
+            className="text-[11px] text-white/70 hover:text-white underline"
+          >
+            Volver a la similitud
+          </button>
+        )}
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead className="bg-gray-50 border-b border-gray-200">
+            <tr>
+              {['', 'Obra', 'Peso', 'Tipo', 'm²', 'Contrato (UF)', 'Año'].map((h, i) => (
+                <th key={h || 'marca'} className={`px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase tracking-wider ${i > 2 ? 'text-right' : 'text-left'}`}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="bg-panel divide-y divide-gray-50">
+            {curvasBase.obras.map((o, i) => {
+              const marcada = seleccion.includes(o.nombre)
+              const sinCuenta = tieneCuenta ? !tieneCuenta[i] : false
+              const peso = marcada ? (pesosPorNombre.get(o.nombre) ?? 0) : 0
+              return (
+                <tr key={o.nombre} className={i % 2 === 1 ? 'bg-gray-50/50' : ''}>
+                  <td className="px-3 py-2">
+                    <input
+                      type="checkbox"
+                      checked={marcada}
+                      onChange={() => onToggle(o.nombre)}
+                      aria-label={`Usar ${o.nombre}`}
+                      className="accent-tinta"
+                    />
+                  </td>
+                  <td className="px-3 py-2 font-medium text-gray-700">
+                    {o.nombre}
+                    {sinCuenta && <span className="ml-2 text-[10px] font-normal text-gray-400">sin esta cuenta</span>}
+                  </td>
+                  <td className="px-3 py-2">
+                    <div className="flex items-center gap-2">
+                      <div className="h-1.5 bg-gray-100 rounded-full flex-1 min-w-16 overflow-hidden">
+                        <div className="h-full bg-teal-muted rounded-full" style={{ width: `${peso * 100}%` }} />
+                      </div>
+                      <span className="tabular-nums text-xs text-tinta font-semibold w-11 text-right">
+                        {marcada ? pct1(peso) : '—'}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-3 py-2 text-right text-xs text-gray-500">{o.tipo}</td>
+                  <td className="px-3 py-2 tabular-nums text-right text-gray-600">{uf0(o.m2)}</td>
+                  <td className="px-3 py-2 tabular-nums text-right text-gray-600">{uf0(o.contrato)}</td>
+                  <td className="px-3 py-2 tabular-nums text-right text-gray-500">{o.anio_fin}</td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
       </div>
     </div>
   )

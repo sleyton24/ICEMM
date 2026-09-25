@@ -22,6 +22,8 @@ export interface PartidaMerged {
   ppto_vigente: number        // redistribuido + ppto_horas_extra
   gasto_real: number
   proyeccion: number
+  /** Presente solo si el informe reemplazó este proyectado por el cierre del modelo. */
+  proyeccionPresto?: number
   variacion_uf: number
   variacion_pct: number | null
   ytg: number

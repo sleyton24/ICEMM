@@ -110,12 +110,34 @@ router.post('/aprobar', requireRole('admin'), async (req, res) => {
     }
   }
 
+  const elecciones = await prisma.eleccionProyeccion.findMany({
+    where: { projectId },
+    orderBy: { codigoCuenta: 'asc' },
+  })
+
   const snapshot = {
     nombre: project.nombre,
     unidadNegocioCodigo: project.unidadNegocioCodigo,
     cutoffMesReal: project.cutoffMesReal,
     fechaCorte: new Date().toISOString().slice(0, 10),
     slots,
+    // Congela la elección Presto/modelo. Los informes viejos no traen el campo
+    // y se leen como Presto, que es lo que eran.
+    eleccionesProyeccion: elecciones.map(e => ({
+      id: e.id,
+      projectId: e.projectId,
+      codigoCuenta: e.codigoCuenta,
+      fuente: e.fuente,
+      curva: e.curva,
+      cierreTipica: e.cierreTipica,
+      cierreReanclada: e.cierreReanclada,
+      serie: e.serie,
+      obrasReferencia: e.obrasReferencia,
+      pasadoPor: e.pasadoPor,
+      pasadoEn: e.pasadoEn?.toISOString() ?? null,
+      elegidoPor: e.elegidoPor,
+      elegidoEn: e.elegidoEn?.toISOString() ?? null,
+    })),
   }
 
   const informe = await prisma.informe.create({
