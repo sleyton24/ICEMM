@@ -12,6 +12,8 @@ export interface Partida {
   ppto_vigente: number
   gasto_real: number
   proyeccion: number      // no disponible aún → igual a ppto_original
+  /** Proyectado del archivo Presto, cuando el informe lo reemplazó por el modelo. */
+  proyeccionPresto?: number
   variacion_uf: number
   variacion_pct: number | null
   ytg: number

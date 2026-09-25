@@ -12,6 +12,9 @@ import { usePlanCuentasStore } from '../features/plan-cuentas/PlanCuentasStore'
 import { useProjectsStore } from '../features/projects/ProjectsStore'
 import CuentaDetalleModal from './CuentaDetalleModal'
 import ComentariosSection from './ComentariosSection'
+import EleccionProyeccionInforme from '../features/informes/EleccionProyeccionInforme'
+import type { EleccionProyeccionDTO } from '../features/informes/aplicarEleccionProyeccion'
+import { useCurrentUser } from '../features/auth/useCurrentUser'
 
 const uf2 = (n: number) => n.toLocaleString('es-CL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 const signed = (n: number) => `${n >= 0 ? '+' : ''}${uf2(n)}`
@@ -50,11 +53,13 @@ interface Props {
   partidasAnteriorMeta?: Record<string, { codigo2: string; familia: string; variacion_uf: number }>
   esVistaAprobada?: boolean
   numeroInforme?: number | null
+  eleccionesProyeccion?: EleccionProyeccionDTO[]
 }
 
-export default function TablaControl({ partidas, movimientos, detallePartidas, familias: FAMILIAS, proyeccionAnteriorPorCodigo: _proyeccionAnt = {}, variacionAnteriorPorCodigo = {}, partidasAnteriorMeta = {}, esVistaAprobada = false, numeroInforme = null }: Props) {
+export default function TablaControl({ partidas, movimientos, detallePartidas, familias: FAMILIAS, proyeccionAnteriorPorCodigo: _proyeccionAnt = {}, variacionAnteriorPorCodigo = {}, partidasAnteriorMeta = {}, esVistaAprobada = false, numeroInforme = null, eleccionesProyeccion = [] }: Props) {
   void _proyeccionAnt
   const paleta = usePaleta()
+  const { esAdmin } = useCurrentUser()
   const planCuentas = usePlanCuentasStore(s => s.plan)
   const activeProject = useProjectsStore(s => s.projects.find(p => p.id === s.activeProjectId) ?? null)
   const [cuentaDetalle, setCuentaDetalle] = useState<{ cc: number; nombre: string } | null>(null)
@@ -179,8 +184,8 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
       cell: ({ getValue }) => <span className="tabular-nums">{uf2(getValue() as number)}</span>,
     },
     {
-      accessorKey: 'ytg', header: 'Saldo',
-      cell: ({ getValue }) => <span className="tabular-nums text-gray-500">{uf2(getValue() as number)}</span>,
+      accessorKey: 'ytg', header: 'Saldo por gastar',
+      cell: ({ getValue }) => <span className="tabular-nums font-semibold text-tinta">{uf2(getValue() as number)}</span>,
     },
     {
       accessorKey: 'variacion_uf', header: 'Var EERR',
@@ -238,7 +243,7 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
   })
 
   const estados = ['TODOS', 'CRITICO', 'ALERTA', 'EN CONTROL', 'FAVORABLE', 'SIN EJECUCION', 'SOLO REAL']
-  const headers = ['Cuenta', 'Recurso', 'PPTO Inic', 'Redistrib.', 'OO.EE.', 'Vigente', 'Proyectado', 'Gastado', 'Saldo', 'Var EERR', 'Var %', 'Var EERR Anterior', '', '']
+  const headers = ['Cuenta', 'Recurso', 'PPTO Inic', 'Redistrib.', 'OO.EE.', 'Vigente', 'Proyectado', 'Gastado', 'Saldo por gastar', 'Var EERR', 'Var %', 'Var EERR Anterior', '', '']
 
   return (
     <div className="space-y-4">
@@ -249,6 +254,13 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
           <span className="text-emerald-600">— modo solo lectura. No se puede editar este informe.</span>
         </div>
       )}
+
+      <EleccionProyeccionInforme
+        partidas={partidas}
+        elecciones={eleccionesProyeccion}
+        projectId={activeProject?.id ?? null}
+        editable={esAdmin && !esVistaAprobada}
+      />
 
       {/* Filters */}
       <div className="flex flex-wrap gap-3 items-center justify-between">
@@ -424,7 +436,7 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
                     <col className="w-[85px]" />
                     <col className="w-[85px]" />
                     <col className="w-[85px]" />
-                    <col className="w-[85px]" />
+                    <col className="w-[118px]" />
                     <col className="w-[80px]" />
                     <col className="w-[60px]" />
                     <col className="w-[90px]" />
@@ -448,7 +460,7 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
                       <th className="px-3 py-2.5 tabular-nums font-bold text-white text-right">{uf2(tot.ppto_vigente)}</th>
                       <th className="px-3 py-2.5 tabular-nums font-medium text-white/80 text-right">{uf2(tot.proyeccion)}</th>
                       <th className="px-3 py-2.5 tabular-nums font-medium text-white/80 text-right">{uf2(tot.gasto_real)}</th>
-                      <th className="px-3 py-2.5 tabular-nums font-medium text-white/50 text-right">{uf2(tot.ytg)}</th>
+                      <th className="px-3 py-2.5 tabular-nums font-semibold text-white text-right">{uf2(tot.ytg)}</th>
                       <th className="px-3 py-2.5 tabular-nums font-bold text-right">
                         <span className={tot.variacion_uf > 0 ? 'text-emerald-400' : tot.variacion_uf < 0 ? 'text-red-400' : 'text-white/40'}>{signed(tot.variacion_uf)}</span>
                       </th>
@@ -537,7 +549,7 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
                               <td className="px-3 py-2 tabular-nums font-bold text-tinta text-right">{uf2(ccTot.ppto_vigente)}</td>
                               <td className="px-3 py-2 tabular-nums font-semibold text-tinta text-right">{uf2(ccTot.proyeccion)}</td>
                               <td className="px-3 py-2 tabular-nums font-semibold text-tinta text-right">{uf2(ccTot.gasto_real)}</td>
-                              <td className="px-3 py-2 tabular-nums text-gray-500 font-semibold text-right">{uf2(ccTot.ytg)}</td>
+                              <td className="px-3 py-2 tabular-nums text-tinta font-bold text-right">{uf2(ccTot.ytg)}</td>
                               <td className="px-3 py-2 tabular-nums font-semibold text-right">
                                 <span className={varColor(ccTot.variacion_uf)}>{signed(ccTot.variacion_uf)}</span>
                               </td>
@@ -616,7 +628,7 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
                                     <span className={varColor(p.proyeccion - p.redistribuido)}>{uf2(p.proyeccion)}</span>
                                   </td>
                                   <td className="px-3 py-1.5 tabular-nums text-gray-600 text-xs text-right">{uf2(p.gasto_real)}</td>
-                                  <td className="px-3 py-1.5 tabular-nums text-gray-400 text-xs text-right">{uf2(p.ytg)}</td>
+                                  <td className="px-3 py-1.5 tabular-nums text-tinta text-xs text-right">{uf2(p.ytg)}</td>
                                   <td className="px-3 py-1.5 tabular-nums text-xs text-right">
                                     <span className={`font-medium ${varColor(p.variacion_uf)}`}>{signed(p.variacion_uf)}</span>
                                   </td>
@@ -710,7 +722,7 @@ export default function TablaControl({ partidas, movimientos, detallePartidas, f
                   { label: 'PPTO Inic',   val: uf2(drilldown.ppto_original),  color: paleta.kpi.presupuesto },
                   { label: 'Redistrib.',   val: uf2(drilldown.redistribuido),  color: paleta.kpi.vigente },
                   { label: 'Gastado',      val: uf2(drilldown.gasto_real),     color: paleta.kpi.real },
-                  { label: 'Saldo',        val: uf2(drilldown.ytg),            color: paleta.ejeTenue },
+                  { label: 'Saldo por gastar', val: uf2(drilldown.ytg),       color: paleta.ejeTenue },
                   { label: 'Var (R-P)',    val: signed(drilldown.variacion_uf), color: drilldown.variacion_uf >= 0 ? paleta.positivo : paleta.negativo },
                 ].map(k => (
                   <div key={k.label} className="bg-surface rounded-lg p-3 border border-gray-100 relative overflow-hidden">

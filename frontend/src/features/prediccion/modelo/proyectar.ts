@@ -42,6 +42,12 @@ export function proyectar(obra: ObraInput, opciones: OpcionesProyeccion = {}): P
   }
 
   // La cuenta manda sobre la familia: es el nivel más específico que se pidió.
+  if (opciones.obrasActivas && opciones.obrasActivas.length === 0) {
+    throw new Error(
+      'No hay obras de referencia seleccionadas. Marcá al menos una para estimar la curva.',
+    )
+  }
+
   const cuenta = opciones.cuenta ?? null
   const cb = cuenta ? cuentaBase(cuenta) : null
   if (cuenta && !cb) {

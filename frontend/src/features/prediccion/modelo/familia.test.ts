@@ -3,6 +3,9 @@ import { proyectar } from './proyectar'
 import { repronosticar } from './repronostico'
 import { curvasBase } from './curvasBase'
 import { FAMILIAS_MODELO, familiaDeCuenta, familiaPorClave } from './familias'
+
+/** Las que de verdad tienen curva en el artefacto. La 600 está en el selector, no acá. */
+const CON_CURVA = FAMILIAS_MODELO.filter(f => curvasBase.familias.includes(f.clave))
 import { planCuentasBundled } from '../../plan-cuentas/bundled/seed'
 import type { SerieRealMensual } from './tipos'
 
@@ -22,9 +25,9 @@ describe('familiaDeCuenta', () => {
     expect(familiaDeCuenta(505, planCuentasBundled)?.clave).toBe('equipos')
   })
 
-  it('deja fuera lo que el modelo no proyecta', () => {
-    expect(familiaDeCuenta(605, planCuentasBundled)).toBeUndefined()  // Utilidad
-    expect(familiaDeCuenta(604, planCuentasBundled)).toBeUndefined()  // Postventa
+  it('reconoce la familia 600 y deja fuera lo que el selector no proyecta', () => {
+    expect(familiaDeCuenta(605, planCuentasBundled)?.clave).toBe('otros')
+    expect(familiaDeCuenta(604, planCuentasBundled)?.clave).toBe('otros')
     expect(familiaDeCuenta(901, planCuentasBundled)).toBeUndefined()  // Oficina central
     expect(familiaDeCuenta(701, planCuentasBundled)).toBeUndefined()  // Edif. comerciales
   })
@@ -33,8 +36,9 @@ describe('familiaDeCuenta', () => {
 describe('proyectar por familia', () => {
   const obra = proyectar(OBRA, OPTS)
 
-  it('las cinco familias suman el total de la obra', () => {
-    const suma = FAMILIAS_MODELO
+  it('las cinco familias con curva suman el total de la obra', () => {
+    expect(CON_CURVA).toHaveLength(5)
+    const suma = CON_CURVA
       .map(f => proyectar(OBRA, { ...OPTS, familia: f.clave }).total)
       .reduce((s, t) => s + t, 0)
     // Los shares no suman exactamente 1: el total de la obra se reescala.
@@ -42,7 +46,7 @@ describe('proyectar por familia', () => {
   })
 
   it('cada familia cierra en su parte del total', () => {
-    for (const f of FAMILIAS_MODELO) {
+    for (const f of CON_CURVA) {
       const p = proyectar(OBRA, { ...OPTS, familia: f.clave })
       expect(p.familia).toBe(f.clave)
       expect(p.total).toBeCloseTo(obra.total * obra.mix[f.clave], 6)
@@ -114,6 +118,7 @@ describe('familiaPorClave', () => {
   it('devuelve el código de plan de cuentas de cada familia', () => {
     expect(familiaPorClave('materiales')?.codigo).toBe(100)
     expect(familiaPorClave('equipos')?.codigo).toBe(500)
+    expect(familiaPorClave('otros')?.codigo).toBe(600)
     expect(familiaPorClave('inexistente')).toBeUndefined()
   })
 })

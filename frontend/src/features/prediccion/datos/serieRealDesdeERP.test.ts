@@ -49,7 +49,7 @@ describe('serieRealDesdeERP', () => {
     expect(r.excluido.oficinaCentral).toBe(500)
   })
 
-  it('deja fuera la familia OTROS y lo declara', () => {
+  it('deja fuera la familia OTROS del total de obra y lo declara', () => {
     const r = serieRealDesdeERP(erp({
       101: { '2026-01': 1000 },
       605: { '2026-01': 12400 },  // Utilidad
@@ -58,6 +58,17 @@ describe('serieRealDesdeERP', () => {
     expect(r.serie[0].mes).toBe(1000)
     expect(r.excluido.otros).toBe(13340)
     expect(r.advertencias.some(a => a.includes('OTROS'))).toBe(true)
+  })
+
+  it('conserva el real de las cuentas 600 para el selector, fuera del total', () => {
+    const r = serieRealDesdeERP(erp({
+      101: { '2026-01': 1000 },
+      604: { '2026-01': 940 },
+    }), plan)
+    expect(r.serie[0].mes).toBe(1000)
+    expect(r.porCuenta['604'][0].mes).toBe(940)
+    expect(r.porFamilia.otros[0].mes).toBe(940)
+    expect(r.porFamilia.otros[0].acum).toBe(940)
   })
 
   it('respeta el corte de mes', () => {

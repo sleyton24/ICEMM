@@ -7,18 +7,17 @@ import { esRollupFamilia } from '../../plan-cuentas/rollupFamilia'
 import { familiaDeCuenta, FAMILIAS_MODELO } from '../modelo/familias'
 
 /**
- * Familia 600 (OTROS). Queda FUERA del perímetro del predictor: 605 es
- * Utilidad y 604 Provisión de Postventa, que no son costo de construcción, y
- * las 8 obras base no tienen bloque 600 — sus cinco curvas de familia suman 1.
+ * Familia 600 (OTROS). No entra a la curva de la obra completa: 605 es
+ * Utilidad y 604 Provisión de Postventa, y las cinco curvas de costo ya
+ * suman 1. Sí se conserva por cuenta y por familia, para que el selector de
+ * Proyección pueda mostrar el real de esas cuentas.
  *
- * Consecuencia visible: el total de esta serie no coincide con el KPI
- * "Gasto Real Total" del dashboard. La diferencia va en `excluido` para que la
- * pantalla pueda declararla en vez de dejar al usuario descuadrando solo.
+ * Consecuencia visible: el total de `serie` no coincide con el KPI
+ * "Gasto Real Total" del dashboard. La diferencia va en `excluido`.
  */
 const FAMILIA_OTROS = 600
 
-function esFueraDePerimetro(cc: number, plan: PlanCuentas): boolean {
-  if (esOficinaCentral(cc, plan) || esRollupFamilia(cc)) return true
+function esFamiliaOtros(cc: number, plan: PlanCuentas): boolean {
   const cuenta = plan.cuentas.find(c => c.codigo === cc)
   const familia = cuenta ? cuenta.familiaCodigo : Math.floor(cc / 100) * 100
   return familia === FAMILIA_OTROS
@@ -35,8 +34,8 @@ export interface SerieRealResultado {
   porFamilia: Record<string, SerieRealMensual[]>
   /**
    * Y otra vez, un nivel más abajo: por código de cuenta, sobre el mismo rango
-   * de meses. Solo las cuentas dentro del perímetro —las 900, las
-   * contrapartidas de rollup y la familia 600 ya quedaron afuera.
+   * de meses. Las 900 y las contrapartidas de rollup quedan afuera. La familia
+   * 600 no entra al total de la obra, pero sí queda en esta serie por cuenta.
    */
   porCuenta: Record<string, SerieRealMensual[]>
   /** Primer mes con costo dentro del perímetro. Es el `inicio` del modelo. */
@@ -86,7 +85,15 @@ export function serieRealDesdeERP(
 
       if (esOficinaCentral(cc, plan)) { excluido.oficinaCentral += vals.monto_uf; continue }
       if (esRollupFamilia(cc)) { excluido.rollup += vals.monto_uf; continue }
-      if (esFueraDePerimetro(cc, plan)) { excluido.otros += vals.monto_uf; continue }
+      if (esFamiliaOtros(cc, plan)) {
+        excluido.otros += vals.monto_uf
+        const mf = porMesFamilia.get('otros')
+        if (mf) mf.set(mes, (mf.get(mes) ?? 0) + vals.monto_uf)
+        let mc = porMesCuenta.get(ccStr)
+        if (!mc) { mc = new Map(); porMesCuenta.set(ccStr, mc) }
+        mc.set(mes, (mc.get(mes) ?? 0) + vals.monto_uf)
+        continue
+      }
 
       porMes.set(mes, (porMes.get(mes) ?? 0) + vals.monto_uf)
 
@@ -162,9 +169,9 @@ export function serieRealDesdeERP(
   }
   if (excluido.otros !== 0) {
     advertencias.push(
-      `La familia OTROS (${excluido.otros.toFixed(2)} UF) queda fuera del perímetro del predictor: ` +
+      `La familia OTROS (${excluido.otros.toFixed(2)} UF) no entra a la curva de la obra completa: ` +
       'incluye Utilidad y Provisión de Postventa, que no son costo de construcción. Por eso este ' +
-      'total no coincide con el KPI "Gasto Real Total".'
+      'total no coincide con el KPI "Gasto Real Total". Las cuentas 600 se ven igual en Proyección.'
     )
   }
 

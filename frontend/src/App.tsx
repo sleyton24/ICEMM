@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Upload } from 'lucide-react'
 import { useDashboardData } from './data/dataAdapter'
 import KpiCards from './components/KpiCards'
@@ -18,6 +18,7 @@ import InformeSelector from './features/informes/InformeSelector'
 import UploadPanel from './features/data-upload/UploadPanel'
 import { useCurrentUser } from './features/auth/useCurrentUser'
 import { useProjectsStore } from './features/projects/ProjectsStore'
+import { useEleccionesStore } from './features/informes/EleccionesStore'
 import { esDemoMode, salirDemo } from './features/demo/demoMode'
 import TemaToggle from './features/tema/TemaToggle'
 import { useTemaStore } from './features/tema/TemaStore'
@@ -56,6 +57,11 @@ export default function App() {
   const data = useDashboardData()
   const { user, esAdmin, esDirector, puedeEditar } = useCurrentUser()
   const proyectoActivo = useProjectsStore(s => s.projects.find(p => p.id === s.activeProjectId) ?? null)
+  const activeProjectId = useProjectsStore(s => s.activeProjectId)
+  const fetchElecciones = useEleccionesStore(s => s.fetch)
+  useEffect(() => {
+    if (activeProjectId) void fetchElecciones(activeProjectId)
+  }, [activeProjectId, fetchElecciones])
   const demo = esDemoMode()
   // El logo es tinta oscura + magenta sobre transparente: sobre fondo oscuro
   // desaparece. La variante clara conserva el magenta de marca.
@@ -190,7 +196,7 @@ export default function App() {
         {/* El contenido va directo sobre la superficie: cada sección trae sus
             propios paneles y la tarjeta que los envolvía sumaba un borde de más. */}
         {activa === 'resumen'    && <ResumenObra partidas={data.partidas} fechaCorte={data.fechaCorte} conProyeccion={esAdmin} onIrACostos={() => setSeccion('costos')} />}
-        {activa === 'costos'     && <TablaControl partidas={data.partidas} movimientos={data.movimientos} detallePartidas={data.detallePartidas} familias={data.familias} proyeccionAnteriorPorCodigo={data.proyeccionAnteriorPorCodigo} variacionAnteriorPorCodigo={data.variacionAnteriorPorCodigo} partidasAnteriorMeta={data.partidasAnteriorMeta} esVistaAprobada={data.esVistaAprobada} numeroInforme={data.numeroInforme} />}
+        {activa === 'costos'     && <TablaControl partidas={data.partidas} movimientos={data.movimientos} detallePartidas={data.detallePartidas} familias={data.familias} proyeccionAnteriorPorCodigo={data.proyeccionAnteriorPorCodigo} variacionAnteriorPorCodigo={data.variacionAnteriorPorCodigo} partidasAnteriorMeta={data.partidasAnteriorMeta} esVistaAprobada={data.esVistaAprobada} numeroInforme={data.numeroInforme} eleccionesProyeccion={data.eleccionesProyeccion} />}
         {activa === 'familias'   && <div className="bg-panel rounded-xl border border-gray-200 p-5"><FamiliaCharts partidas={data.partidas} sinPartida={data.sinPartida} familias={data.familias} /></div>}
         {activa === 'top5'       && <div className="bg-panel rounded-xl border border-gray-200 p-5"><Top5Chart partidas={data.partidas} /></div>}
         {activa === 'prediccion' && <PrediccionPanel />}
