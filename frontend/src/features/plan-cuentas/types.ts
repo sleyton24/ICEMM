@@ -14,6 +14,7 @@ export type CuentaCosto = {
 }
 
 export type PlanCuentas = {
+  id?: string                         // id en DB (ausente en la versión bundleada)
   version: string                     // ISO date del archivo origen
   cargadoEn: string                   // ISO date de carga
   origen: 'bundled' | 'uploaded'

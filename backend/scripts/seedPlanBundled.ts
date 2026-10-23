@@ -4,7 +4,8 @@
  *
  * Uso:
  *   cd backend
- *   npx tsx scripts/seedPlanBundled.ts
+ *   npx tsx scripts/seedPlanBundled.ts              # plan + maestro de productos
+ *   npx tsx scripts/seedPlanBundled.ts --solo-plan  # solo plan de cuentas
  */
 import 'dotenv/config'
 import { readFileSync } from 'node:fs'
@@ -34,19 +35,23 @@ if (!existingPlan) {
   console.log('• Plan de cuentas ya cargado, saltando.')
 }
 
-const existingMaestro = await prisma.maestroProductos.findFirst({ where: { activo: true } })
-if (!existingMaestro) {
-  await prisma.maestroProductos.create({
-    data: {
-      version: maestro.version,
-      origen: 'bundled',
-      productos: maestro.productos,
-      activo: true,
-    },
-  })
-  console.log(`✓ Maestro de productos: ${maestro.productos.length} productos`)
+if (process.argv.includes('--solo-plan')) {
+  console.log('• --solo-plan: maestro de productos no se toca.')
 } else {
-  console.log('• Maestro ya cargado, saltando.')
+  const existingMaestro = await prisma.maestroProductos.findFirst({ where: { activo: true } })
+  if (!existingMaestro) {
+    await prisma.maestroProductos.create({
+      data: {
+        version: maestro.version,
+        origen: 'bundled',
+        productos: maestro.productos,
+        activo: true,
+      },
+    })
+    console.log(`✓ Maestro de productos: ${maestro.productos.length} productos`)
+  } else {
+    console.log('• Maestro ya cargado, saltando.')
+  }
 }
 
 process.exit(0)
