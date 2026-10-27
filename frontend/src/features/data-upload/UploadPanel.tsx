@@ -3,7 +3,9 @@ import { FileSpreadsheet, X, Check, AlertTriangle, Database } from 'lucide-react
 import * as XLSX from 'xlsx'
 import { useProjectsStore } from '../projects/ProjectsStore'
 import { parseItemizado } from './parser/parseItemizado'
-import { inspeccionarERP, parsearERP, type UnidadNegocio, type GastoRealAgregado } from './parser/parseRealERP'
+import { inspeccionarERP, parsearERP, construirCargaERP, type UnidadNegocio, type GastoRealAgregado } from './parser/parseRealERP'
+import { registrarConciliacion } from './parser/conciliacionErp'
+import { esRollupFamilia } from '../plan-cuentas/rollupFamilia'
 import UploadPreviewModal from './UploadPreviewModal'
 import type { Proyecto, ParseResult, ArchivoCargado, CargaERP } from '../projects/types'
 
@@ -117,34 +119,11 @@ export default function UploadPanel({ proyecto, onClose }: Props) {
   const confirmERP = useCallback(() => {
     if (!erpPreview || !erpWorkbook) return
 
-    // Build aggregated data for storage (without the full workbook)
-    const agregadoPorCcosto: Record<number, { monto_uf: number; num_tx: number }> = {}
-    const agregadoPorCcostoPorMes: Record<number, Record<string, { monto_uf: number; num_tx: number }>> = {}
-    const transaccionesPorCcosto: Record<number, any[]> = {}
-    for (const [cc, data] of Object.entries(erpPreview.porCentroCosto)) {
-      agregadoPorCcosto[Number(cc)] = { monto_uf: data.monto_uf, num_tx: data.num_transacciones }
-      agregadoPorCcostoPorMes[Number(cc)] = data.porMes
-      transaccionesPorCcosto[Number(cc)] = data.transacciones
-    }
+    // Registro a guardar (sin el workbook) + conciliacion contra el total del Excel (solo log).
+    const data = construirCargaERP(erpPreview, erpWorkbook.fileName)
+    registrarConciliacion(erpPreview.conciliacion, erpWorkbook.fileName)
 
-    const data: CargaERP = {
-      fechaCarga: new Date().toISOString(),
-      nombreArchivo: erpWorkbook.fileName,
-      unidadNegocioCodigo: erpPreview.unidadNegocio.codigo,
-      unidadNegocioDescripcion: erpPreview.unidadNegocio.descripcion,
-      totalUF: erpPreview.total_uf,
-      numTransacciones: erpPreview.unidadNegocio.num_filas,
-      rangoFechas: {
-        desde: erpPreview.rango_fechas.desde.toISOString(),
-        hasta: erpPreview.rango_fechas.hasta.toISOString(),
-      },
-      agregadoPorCcosto,
-      agregadoPorCcostoPorMes,
-      mesesDisponibles: erpPreview.mesesDisponibles,
-      transaccionesPorCcosto,
-    }
-
-    uploadERPSlot(proyecto.id, data)
+    uploadERPSlot(proyecto.id, data, erpPreview.conciliacion)
     setErpPreview(null)
     setErpWorkbook(null)
   }, [erpPreview, erpWorkbook, proyecto.id, uploadERPSlot])
@@ -160,7 +139,8 @@ export default function UploadPanel({ proyecto, onClose }: Props) {
     const sinMatch: { cc: number; uf: number }[] = []
     for (const [ccStr, data] of Object.entries(erpPreview?.porCentroCosto ?? {})) {
       const cc = Number(ccStr)
-      if (!budgetCodes.has(cc)) {
+      // 100-500 (traspaso a costo de venta) no son cuentas: no tienen partida ni van a "Sin partida".
+      if (!budgetCodes.has(cc) && !esRollupFamilia(cc)) {
         sinMatch.push({ cc, uf: data.monto_uf })
       }
     }

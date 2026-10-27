@@ -171,7 +171,42 @@ const uploadERPSchema = z.object({
   agregadoPorCcostoPorMes: z.record(z.any()),
   mesesDisponibles: z.array(z.string()),
   transaccionesPorCcosto: z.record(z.any()),
+  // Conciliacion del archivo contra el Excel (solo para el log; no se guarda ni bloquea la carga).
+  conciliacion: z.any().optional().catch(undefined),
 })
+
+/**
+ * Deja en el log del backend si la carga cuadra con el archivo original. No bloquea
+ * ni cambia nada de lo que se guarda: solo avisa para que un descuadre no pase en silencio.
+ */
+function registrarConciliacionErp(projectId: string, d: z.infer<typeof uploadERPSchema>) {
+  try {
+    const sumaAgregado = Object.values(d.agregadoPorCcosto as Record<string, any>)
+      .reduce((s: number, v: any) => s + (Number(v?.monto_uf) || 0), 0)
+    const difInterna = d.totalUF - sumaAgregado
+    const c = d.conciliacion as any
+    const etiqueta = `[erp-conciliacion] proyecto=${projectId} archivo="${d.nombreArchivo}" unidad=${d.unidadNegocioCodigo} totalUF=${d.totalUF.toFixed(2)}`
+    const avisos: string[] = []
+    if (Math.abs(difInterna) > 0.5) {
+      avisos.push(`totalUF no coincide con la suma por cuenta (dif ${difInterna.toFixed(2)} UF)`)
+    }
+    if (c && typeof c === 'object') {
+      if (Array.isArray(c.avisos)) avisos.push(...c.avisos.map(String))
+      const descartes = Array.isArray(c.descartes)
+        ? c.descartes.map((x: any) => `${x.motivo}:${x.filas}f/${x.uf}UF`).join(',') || 'ninguno'
+        : 'n/d'
+      const detalle = `${etiqueta} archivo=${c.totalArchivoUF}UF cargado=${c.totalCargadoUF}UF descartado=${c.totalDescartadoUF}UF (${descartes}) traspasoCostoVenta=${c.traspasoCostoVenta?.filas ?? 0}f/${c.traspasoCostoVenta?.uf ?? 0}UF dif=${c.diferenciaUF}`
+      if (avisos.length) console.warn(`${detalle} AVISO: ${avisos.join(' | ')}`)
+      else console.log(detalle)
+    } else if (avisos.length) {
+      console.warn(`${etiqueta} sin conciliacion del cliente AVISO: ${avisos.join(' | ')}`)
+    } else {
+      console.log(`${etiqueta} sin conciliacion del cliente`)
+    }
+  } catch (err) {
+    console.warn('[erp-conciliacion] no se pudo registrar', err)
+  }
+}
 
 router.post('/:id/erp', requireRole('admin', 'editor'), assertProjectAccess, async (req, res) => {
   const projectId = req.params.id
@@ -179,6 +214,7 @@ router.post('/:id/erp', requireRole('admin', 'editor'), assertProjectAccess, asy
   if (!parsed.success) return res.status(400).json({ error: 'Payload inválido', issues: parsed.error.issues })
 
   const d = parsed.data
+  registrarConciliacionErp(projectId, d)
   await prisma.cargaERP.upsert({
     where: { projectId },
     create: {

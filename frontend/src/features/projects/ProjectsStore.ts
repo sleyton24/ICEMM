@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { api } from '../../api/client'
 import type { Proyecto, ArchivoCargado, CargaERP, SlotTipo } from './types'
+import type { Conciliacion } from '../data-upload/parser/conciliacionErp'
 
 /** Campos de la ficha de obra que alimentan el predictor. */
 export type FichaObra = Pick<Proyecto, 'tipoObra' | 'm2' | 'plazoMeses' | 'montoContratoUF'>
@@ -35,7 +36,7 @@ interface ProjectsState {
   /** Carga proyectos de demo en memoria, sin tocar el backend (ver features/demo). */
   seedDemo: (proyectos: Proyecto[]) => void
   uploadSlot: (projectId: string, slot: ItemizadoSlot, data: ArchivoCargado) => Promise<void>
-  uploadERPSlot: (projectId: string, data: CargaERP) => Promise<void>
+  uploadERPSlot: (projectId: string, data: CargaERP, conciliacion?: Conciliacion) => Promise<void>
   clearSlot: (projectId: string, slot: SlotTipo) => Promise<void>
   setCutoffMesReal: (projectId: string, cutoff: string | null) => Promise<void>
 }
@@ -109,7 +110,7 @@ export const useProjectsStore = create<ProjectsState>((set, get) => ({
     }))
   },
 
-  uploadERPSlot: async (projectId: string, data: CargaERP) => {
+  uploadERPSlot: async (projectId: string, data: CargaERP, conciliacion?: Conciliacion) => {
     const updated = await api.post<Proyecto>(`/projects/${projectId}/erp`, {
       nombreArchivo: data.nombreArchivo,
       unidadNegocioCodigo: data.unidadNegocioCodigo,
@@ -121,6 +122,8 @@ export const useProjectsStore = create<ProjectsState>((set, get) => ({
       agregadoPorCcostoPorMes: data.agregadoPorCcostoPorMes,
       mesesDisponibles: data.mesesDisponibles,
       transaccionesPorCcosto: data.transaccionesPorCcosto,
+      // Solo para el log del backend; no se guarda ni se muestra.
+      conciliacion,
     })
     set(state => ({
       projects: state.projects.map(p => p.id === projectId ? updated : p),
