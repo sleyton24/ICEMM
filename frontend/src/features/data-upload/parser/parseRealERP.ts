@@ -1,7 +1,7 @@
 import type { WorkBook } from 'xlsx'
 import * as XLSX from 'xlsx'
 import { esOficinaCentral } from '../../plan-cuentas/oficinaCentral'
-import { esRollupFamilia, CODIGOS_ROLLUP_FAMILIA } from '../../plan-cuentas/rollupFamilia'
+import { esRollupFamilia, esTraspasoCostoVenta, CODIGOS_ROLLUP_FAMILIA } from '../../plan-cuentas/rollupFamilia'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -264,7 +264,12 @@ export function parsearERP(workbook: WorkBook, unidadNegocioCodigo: number): Gas
 
     // Rollup por familia: contrapartida agrupada con signo contrario que duplica
     // el detalle ya desglosado. Sumarla descuadra el gasto real de la obra.
-    if (esRollupFamilia(concepto)) {
+    // Excepcion: el traspaso mensual a costo de venta ("COSTO DE VENTA <OBRA>
+    // <MES>") es parte del reporte contable y el Excel lo suma; se carga.
+    if (esRollupFamilia(concepto) && !esTraspasoCostoVenta(
+      colIdx.glosa_detalle !== undefined ? safeString(row[colIdx.glosa_detalle]) : '',
+      colIdx.glosa_encabezado !== undefined ? safeString(row[colIdx.glosa_encabezado]) : '',
+    )) {
       rollupTx++
       rollupUF += safeFloat(row[colIdx.afecto_detalle_uf]) + safeFloat(row[colIdx.exento_detalle_uf])
       continue
