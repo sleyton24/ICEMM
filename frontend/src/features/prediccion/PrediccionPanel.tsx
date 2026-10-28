@@ -3,7 +3,7 @@ import {
   ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Legend,
 } from 'recharts'
-import { AlertTriangle, Info, TrendingUp } from 'lucide-react'
+import { AlertTriangle, Download, Info, TrendingUp } from 'lucide-react'
 import { useProjectsStore } from '../projects/ProjectsStore'
 import { usePlanCuentasStore } from '../plan-cuentas/PlanCuentasStore'
 import { useDashboardData } from '../../data/dataAdapter'
@@ -14,6 +14,7 @@ import type { Escenario } from './modelo/tipos'
 import { FAMILIAS_MODELO, familiaPorClave } from './modelo/familias'
 import { cuentaBase, cuentasDeFamilia, CRITERIO_CUENTAS } from './modelo/curvasCuenta'
 import FichaObraForm from './FichaObraForm'
+import { descargarCurva } from './exportarCurva'
 
 const uf0 = (n: number) => n.toLocaleString('es-CL', { maximumFractionDigits: 0 })
 const uf2 = (n: number) => n.toLocaleString('es-CL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -177,6 +178,60 @@ export default function PrediccionPanel() {
     ? proy.obra.contrato * proy.mix[claveParcial]
     : proy.obra.contrato
 
+  // KPIs: se definen una vez y los usan la pantalla y la descarga a Excel.
+  const kpis = [
+    {
+      label: rotulo ? `Cierre ${rotulo} — modelo` : 'Cierre proyectado — modelo',
+      valor: `UF ${uf0(cierreModelo)}`,
+      sub: claveParcial
+        ? `${pct1(proy.mix[claveParcial])} del contrato × ${proy.ejec.toFixed(3)}`
+        : `contrato × ${proy.ejec.toFixed(3)}`,
+      acento: '#233032',
+    },
+    {
+      label: rotulo ? `Cierre ${rotulo} — obra` : 'Cierre proyectado — obra',
+      valor: proyObra > 0 ? `UF ${uf0(proyObra)}` : '—',
+      sub: proyObra > 0 ? `× ${(proyObra / baseContrato).toFixed(3)} sobre esa base` : 'sin slot proyectado',
+      acento: '#809494',
+    },
+    {
+      label: 'Brecha entre ambos',
+      valor: brechaObra !== null ? `UF ${uf0(Math.abs(brechaObra))}` : '—',
+      sub: brechaObra !== null ? (brechaObra < 0 ? 'el modelo proyecta menos' : 'el modelo proyecta más') : '',
+      acento: brechaObra !== null && Math.abs(brechaObra) > proy.sdE * baseContrato * 1.2816 ? '#E00544' : '#253136',
+    },
+    {
+      label: 'Duración estimada',
+      valor: `${proy.NT} meses`,
+      sub: `${proy.N} efectivos + ${proy.opciones.lead} de arranque`,
+      acento: '#101820',
+    },
+  ]
+
+  // Texto de la cabecera del gráfico (también va en el Excel).
+  const subtituloCurva =
+    `${proy.obra.nombre} · ${serieReal.length} meses observados de ${proy.NT} · proyectando ${ambito}` +
+    `${famActual && !cuentaActual ? ` (cuentas ${famActual.codigo}–${famActual.codigo + 99})` : ''}` +
+    `${cuentaActual ? ` · ${cuentaActual.nObras} de 8 obras históricas la tienen` : ''}`
+
+  const descargarExcel = () => descargarCurva({
+    obra: proy.obra.nombre,
+    ambito: cuentaActual
+      ? `Cuenta ${cuentaActual.codigo} — ${nombreCuenta(cuentaActual.codigo)}`
+      : famActual ? `${famActual.codigo} ${famActual.etiqueta}` : 'Toda la obra',
+    subtitulo: subtituloCurva,
+    corteReal: serieReal.length > 0 ? serieReal[serieReal.length - 1].ym : null,
+    cutoffMesReal: proyecto.cutoffMesReal ?? null,
+    kpis: kpis.map(({ label, valor, sub }) => ({ label, valor, sub })),
+    cierreModeloUF: cierreModelo,
+    cierreObraUF: proyObra > 0 ? proyObra : null,
+    brechaUF: brechaObra,
+    duracionMeses: proy.NT,
+    parametros: { mesesArranque: lead, sesgo: skew, escenario: ESCENARIOS.find(e => e.id === escenario)!.label },
+    filas: chartData,
+    fechaDescarga: new Date(),
+  })
+
   return (
     <div className="space-y-5">
       {/* ── Advertencias ─────────────────────────────────────────────── */}
@@ -247,34 +302,22 @@ export default function PrediccionPanel() {
 
       {/* ── KPIs ─────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <Kpi label={rotulo ? `Cierre ${rotulo} — modelo` : 'Cierre proyectado — modelo'}
-             valor={`UF ${uf0(cierreModelo)}`}
-             sub={claveParcial
-               ? `${pct1(proy.mix[claveParcial])} del contrato × ${proy.ejec.toFixed(3)}`
-               : `contrato × ${proy.ejec.toFixed(3)}`}
-             acento="#233032" />
-        <Kpi label={rotulo ? `Cierre ${rotulo} — obra` : 'Cierre proyectado — obra'}
-             valor={proyObra > 0 ? `UF ${uf0(proyObra)}` : '—'}
-             sub={proyObra > 0 ? `× ${(proyObra / baseContrato).toFixed(3)} sobre esa base` : 'sin slot proyectado'}
-             acento="#809494" />
-        <Kpi label="Brecha entre ambos" valor={brechaObra !== null ? `UF ${uf0(Math.abs(brechaObra))}` : '—'}
-             sub={brechaObra !== null ? (brechaObra < 0 ? 'el modelo proyecta menos' : 'el modelo proyecta más') : ''}
-             acento={brechaObra !== null && Math.abs(brechaObra) > proy.sdE * baseContrato * 1.2816 ? '#E00544' : '#253136'} />
-        <Kpi label="Duración estimada" valor={`${proy.NT} meses`}
-             sub={`${proy.N} efectivos + ${proy.opciones.lead} de arranque`} acento="#101820" />
+        {kpis.map(k => <Kpi key={k.label} label={k.label} valor={k.valor} sub={k.sub} acento={k.acento} />)}
       </div>
 
       {/* ── Gráfico ──────────────────────────────────────────────────── */}
       <div className="rounded-lg border border-gray-200 overflow-hidden">
-        <div className="px-5 py-3 bg-cabecera">
-          <h2 className="text-sm font-semibold text-white font-slab">
-            CURVA DE COSTO ACUMULADO{rotulo ? ` — ${rotulo.toUpperCase()}` : ''}
-          </h2>
-          <p className="text-[11px] text-white/50">
-            {proy.obra.nombre} · {serieReal.length} meses observados de {proy.NT} · proyectando {ambito}
-            {famActual && !cuentaActual && ` (cuentas ${famActual.codigo}–${famActual.codigo + 99})`}
-            {cuentaActual && ` · ${cuentaActual.nObras} de 8 obras históricas la tienen`}
-          </p>
+        <div className="px-5 py-3 bg-cabecera flex items-center justify-between gap-3">
+          <div>
+            <h2 className="text-sm font-semibold text-white font-slab">
+              CURVA DE COSTO ACUMULADO{rotulo ? ` — ${rotulo.toUpperCase()}` : ''}
+            </h2>
+            <p className="text-[11px] text-white/50">{subtituloCurva}</p>
+          </div>
+          <button onClick={descargarExcel} title="Descargar los datos de esta curva en Excel"
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium text-tinta bg-panel border border-gray-200 rounded-lg hover:bg-surface flex-shrink-0">
+            <Download className="h-3.5 w-3.5" /> Descargar Excel
+          </button>
         </div>
         <div className="p-4">
           <ResponsiveContainer width="100%" height={380}>
