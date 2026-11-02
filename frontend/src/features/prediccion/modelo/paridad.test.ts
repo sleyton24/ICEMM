@@ -27,7 +27,7 @@ const OBRA = {
   plazo: q.plazo,
   inicio: '2025-11',
 }
-const OPTS = { lead: 3, skew: 0 }
+const OPTS = { lead: 3, skew: 0, modoModelo: 'similitud' as const }
 
 describe('paridad con el prototipo — La Quebrada, lead=3, parámetros automáticos', () => {
   const p = proyectar(OBRA, OPTS)
@@ -134,7 +134,7 @@ describe('defensas que el prototipo no tiene', () => {
   })
 
   it('advierte cuando no se fijó el arranque', () => {
-    const sinLead = proyectar(OBRA, { lead: 0 })
+    const sinLead = proyectar(OBRA, { lead: 0, modoModelo: 'similitud' })
     expect(sinLead.advertencias.some(a => a.includes('Sin meses de arranque'))).toBe(true)
   })
 

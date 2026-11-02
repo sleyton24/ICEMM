@@ -2,6 +2,7 @@ import type { Proyecto } from '../../projects/types'
 import type { PlanCuentas } from '../../plan-cuentas/types'
 import type { ObraInput, SerieRealMensual } from '../modelo/tipos'
 import { serieRealDesdeERP } from './serieRealDesdeERP'
+import { fichaConocida } from './fichasConocidas'
 
 export interface ParametrosObra {
   /** Listo para proyectar, o null si falta algo. */
@@ -39,8 +40,10 @@ const ETIQUETAS: Record<string, string> = {
  * Tres de los cinco parámetros obligatorios son captura manual (tipo, m²,
  * plazo) y un cuarto —el monto de contrato— también, porque NO es el total del
  * itemizado: en La Quebrada difieren en 2.399,52 UF (+0,85%), y como el modelo
- * hace total = contrato × factor_ejecución, usarlos indistintamente corre todo
- * el nivel de la proyección.
+ * hace total = contrato × factor_ejecución en la mezcla por similitud.
+ * La curva característica usa el Costo Construcción de la ficha conocida
+ * (columna Q): total = CC × real/CC. Si el nombre no está en la ficha, el
+ * contrato queda como ancla y el modelo lo declara.
  *
  * El quinto, `inicio`, sí se deriva: es el primer mes con costo dentro del
  * perímetro, que sale del ERP ya cargado.
@@ -70,12 +73,15 @@ export function parametrosObra(
     inicio = null
   }
 
+  const conocida = fichaConocida(proyecto.nombre)
+  const costoConstruccion = conocida?.costoConstruccionUF
   const obra: ObraInput | null = faltantes.length === 0 && inicio
     ? {
         nombre: proyecto.nombre,
         tipo: proyecto.tipoObra!,
         m2: proyecto.m2!,
         contrato: proyecto.montoContratoUF!,
+        costoConstruccion: costoConstruccion && costoConstruccion > 0 ? costoConstruccion : undefined,
         plazo: proyecto.plazoMeses!,
         inicio,
       }

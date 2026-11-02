@@ -9,7 +9,8 @@
   "unidades": 56,
   "anios": "2017 - 2018 - 2019",
   "obs": "Monto Contrato, No Incluye Post Venta",
-  "enModelo": true
+  "enModelo": true,
+  "costoConstruccionUF": 320077.67482336
  },
  "Vicente Valdes": {
   "nombre": "Vicente Valdes",
@@ -21,7 +22,8 @@
   "unidades": 102,
   "anios": "2018 - 2019",
   "obs": "Monto Contrato no indica si la Post Venta esta implicita",
-  "enModelo": true
+  "enModelo": true,
+  "costoConstruccionUF": 164984.59518
  },
  "Hotel UGO": {
   "nombre": "Hotel UGO",
@@ -33,7 +35,8 @@
   "unidades": 196,
   "anios": "2018 - 2019",
   "obs": "Monto Contrato, No Incluye Post Venta",
-  "enModelo": true
+  "enModelo": true,
+  "costoConstruccionUF": 273602.8500532589
  },
  "Oasis Plaza": {
   "nombre": "Oasis Plaza",
@@ -45,7 +48,8 @@
   "unidades": 232,
   "anios": "2020 - 2022",
   "obs": "Monto Contrato, Incluye Post Venta",
-  "enModelo": true
+  "enModelo": true,
+  "costoConstruccionUF": 284677.6143459035
  },
  "Rojas Magallanes": {
   "nombre": "Rojas Magallanes",
@@ -57,7 +61,8 @@
   "unidades": 125,
   "anios": "2021 - 2022",
   "obs": "Monto Contrato, Incluye Post Venta",
-  "enModelo": true
+  "enModelo": true,
+  "costoConstruccionUF": 183859.20102598084
  },
  "Europa": {
   "nombre": "Europa",
@@ -69,7 +74,8 @@
   "unidades": 56,
   "anios": "2024 - 2025",
   "obs": "Monto Contrato, Incluye Post Venta",
-  "enModelo": true
+  "enModelo": true,
+  "costoConstruccionUF": 175934.15399999998
  },
  "Afluente": {
   "nombre": "Afluente",
@@ -81,7 +87,8 @@
   "unidades": 38,
   "anios": "2024 - 2025",
   "obs": "Monto Contrato, Incluye Post Venta",
-  "enModelo": true
+  "enModelo": true,
+  "costoConstruccionUF": 185028.46
  },
  "Manantial": {
   "nombre": "Manantial",
@@ -93,7 +100,8 @@
   "unidades": 48,
   "anios": "2024 - 2025",
   "obs": "Monto Contrato, Incluye Post Venta",
-  "enModelo": true
+  "enModelo": true,
+  "costoConstruccionUF": 211851.99
  },
  "La Quebrada": {
   "nombre": "La Quebrada",
@@ -105,6 +113,7 @@
   "unidades": 48,
   "anios": "2026 - 2026",
   "obs": "Monto Contrato, Incluye Post Venta",
-  "enModelo": false
+  "enModelo": false,
+  "costoConstruccionUF": 244825.81104912888
  }
 }

@@ -9,6 +9,28 @@ import { curvasBase, GRID, FAMILIAS_MODELO } from './curvasBase'
 import { cuentaBase, CRITERIO_CUENTAS } from './curvasCuenta'
 import { pesos } from './similitud'
 import { interp, interpA, skewT, sumarMeses } from './curva'
+import { proyectarCaracteristica } from './proyectarCaracteristica'
+
+/**
+ * La obra completa sale por la curva característica. Familia y cuenta no
+ * tienen esa curva: siguen con la mezcla por similitud del prototipo.
+ */
+function usaSimilitud(opciones: OpcionesProyeccion): boolean {
+  if (opciones.familia || opciones.cuenta) return true
+  return (opciones.modoModelo ?? 'caracteristica') === 'similitud'
+}
+
+/**
+ * Proyecta la curva de costo mes a mes.
+ *
+ * Por defecto usa la curva característica (Beta, duración por m², total =
+ * Costo Construcción × real/CC). `modoModelo: 'similitud'` conserva la mezcla
+ * del prototipo, que es la que reproduce `patron-prototipo.json`.
+ */
+export function proyectar(obra: ObraInput, opciones: OpcionesProyeccion = {}): Proyeccion {
+  if (usaSimilitud(opciones)) return proyectarSimilitud(obra, opciones)
+  return proyectarCaracteristica(obra, opciones)
+}
 
 /** Percentil 90 de la normal estándar. Ver la nota sobre la banda, más abajo. */
 const Z90 = 1.2816
@@ -17,13 +39,14 @@ const Z90 = 1.2816
 const MASA_MINIMA = 0.6
 
 /**
- * Proyecta la curva de costo mes a mes (pasos 2 a 5 de docs/MODELO.md).
+ * Mezcla por similitud (pasos 2 a 5 del prototipo).
  *
- * Es un port fiel del prototipo: reproduce su serie mensual dentro de 1 UF,
- * verificado en paridad.test.ts contra un patrón generado ejecutando el núcleo
- * original. Las únicas diferencias deliberadas están comentadas donde ocurren.
+ * Port fiel: reproduce la serie mensual dentro de 1 UF, verificado en
+ * paridad.test.ts contra `patron-prototipo.json`. El total sigue siendo
+ * contrato × ejec. Es el modo alternativo; la obra completa ya no entra por acá
+ * salvo que se pida `modoModelo: 'similitud'`.
  */
-export function proyectar(obra: ObraInput, opciones: OpcionesProyeccion = {}): Proyeccion {
+function proyectarSimilitud(obra: ObraInput, opciones: OpcionesProyeccion = {}): Proyeccion {
   if (!(obra.m2 > 0)) throw new Error('m2 debe ser mayor que 0')
   if (!(obra.contrato > 0)) throw new Error('El monto de contrato debe ser mayor que 0')
   if (!(obra.plazo > 0)) throw new Error('El plazo debe ser mayor que 0')
@@ -251,10 +274,20 @@ export function proyectar(obra: ObraInput, opciones: OpcionesProyeccion = {}): P
       'proyección un 39%: conviene fijarlo antes de leer el resultado.'
     )
   }
+  if (opciones.modoModelo === 'caracteristica' && (familia || cuenta)) {
+    advertencias.unshift(
+      'La curva característica es de la obra completa. Para una familia o una cuenta se usa la mezcla por similitud.',
+    )
+  }
 
   return {
     obra,
-    opciones: { lead, skew, modoPesos, kRecencia },
+    opciones: { lead, skew, modoPesos, kRecencia, modoModelo: 'similitud', lectura: 'A' },
+    modoModelo: 'similitud',
+    lectura: 'A',
+    ancla: obra.contrato,
+    anclaOrigen: 'contrato',
+    duracionError: null,
     total: totalCurva, ejec, ejecAuto, rdur, rdurAuto, N, NT, sdE, mix,
     familia: cb ? cb.familia : familia,
     cuenta: cb ? cb.codigo : null,

@@ -14,7 +14,7 @@ const OBRA = {
   nombre: 'La Quebrada', tipo: q.tipo, m2: q.m2,
   contrato: q.monto_contrato, plazo: q.plazo, inicio: '2025-11',
 }
-const OPTS = { lead: 3, skew: 0 }
+const OPTS = { lead: 3, skew: 0, modoModelo: 'similitud' as const }
 
 describe('familiaDeCuenta', () => {
   it('mapea las cuentas a su familia del modelo', () => {

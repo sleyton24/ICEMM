@@ -426,7 +426,9 @@ export default function PrediccionPanel() {
              valor={`UF ${uf0(cierreModelo)}`}
              sub={claveParcial
                ? `${pct1(proy.mix[claveParcial])} del contrato × ${proy.ejec.toFixed(3)}`
-               : `contrato × ${proy.ejec.toFixed(3)}`}
+               : proy.modoModelo === 'caracteristica'
+                 ? `${proy.anclaOrigen === 'costo_construccion' ? 'costo construcción' : 'contrato (sin col. Q)'} × ${proy.ejec.toFixed(3)}`
+                 : `contrato × ${proy.ejec.toFixed(3)}`}
              acento="#233032" />
         <Kpi label={rotulo ? `Cierre ${rotulo} — obra` : 'Cierre proyectado — obra'}
              valor={proyObra > 0 ? `UF ${uf0(proyObra)}` : '—'}
@@ -436,7 +438,10 @@ export default function PrediccionPanel() {
              sub={brechaObra !== null ? (brechaObra < 0 ? 'el modelo proyecta menos' : 'el modelo proyecta más') : ''}
              acento={brechaObra !== null && Math.abs(brechaObra) > proy.sdE * baseContrato * 1.2816 ? '#E00544' : '#253136'} />
         <Kpi label="Duración estimada" valor={`${proy.NT} meses`}
-             sub={`${proy.N} efectivos + ${proy.opciones.lead} de arranque`} acento="#101820" />
+             sub={proy.modoModelo === 'caracteristica'
+               ? `${proy.N} meses por m²${proy.duracionError ? ` · ±${proy.duracionError.toFixed(1)}` : ''}`
+               : `${proy.N} efectivos + ${proy.opciones.lead} de arranque`}
+             acento="#101820" />
       </div>
 
       {/* ── Gráfico ──────────────────────────────────────────────────── */}
@@ -533,7 +538,9 @@ export default function PrediccionPanel() {
             <input type="range" min={0} max={18} value={lead} onChange={e => setLead(+e.target.value)}
                    className="w-full mt-1 accent-tinta" />
             <span className="text-[10px] text-gray-400">
-              Meses previos al cruce del 1% de avance. Sin esto el modelo se desvía hasta 39%.
+              {familia || cuenta
+                ? 'Meses previos al cruce del 1% de avance. Sin esto el modelo se desvía hasta 39%.'
+                : 'En la curva característica el arranque ya va dentro de la duración. El deslizador aplica al proyectar una familia o una cuenta.'}
             </span>
           </label>
 
@@ -592,7 +599,9 @@ export default function PrediccionPanel() {
           <div>
             <h2 className="text-sm font-semibold text-white font-slab">DE QUÉ OBRAS SALE ESTA PROYECCIÓN</h2>
             <p className="text-[11px] text-white/50">
-              Masa de similitud {proy.masaSimilitud.toFixed(2)} — cuánto se parece esta obra a la base histórica
+              {proy.modoModelo === 'caracteristica'
+                ? 'Promedio simple de las 8 obras. La mezcla por similitud queda para familia y cuenta.'
+                : `Masa de similitud ${proy.masaSimilitud.toFixed(2)} — cuánto se parece esta obra a la base histórica`}
             </p>
           </div>
         </div>

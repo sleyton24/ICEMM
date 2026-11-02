@@ -13,8 +13,15 @@ export interface ObraBase {
   m2: number
   contrato: number
   anio_fin: number
-  /** Costo real ejecutado / monto de contrato. */
+  /** Costo real ejecutado / monto de contrato. Lo usa la mezcla por similitud. */
   ejec: number
+  /**
+   * Costo de construcción estudiado (columna Q, fuente roja). Ancla del total
+   * de la curva característica: total = costo_construccion × ejec_cc.
+   */
+  costo_construccion?: number
+  /** Costo real (cuentas 101–516 sin 421) / costo de construcción. */
+  ejec_cc?: number
   /** Duración efectiva / plazo contractual. */
   ratio_dur: number
   /** Curva S normalizada sobre la grilla de 21 puntos. */
@@ -38,6 +45,8 @@ export interface FichaQuebrada {
   pisos: number | string
   unidades: number | string
   monto_contrato: number
+  /** Costo de construcción estudiado (columna Q). */
+  costo_construccion?: number
   plazo: number
   anios: string
   obs?: string
@@ -72,6 +81,11 @@ export interface ObraInput {
   m2: number
   /** Monto de contrato en UF. Ojo: NO es el presupuesto del itemizado. */
   contrato: number
+  /**
+   * Costo de construcción estudiado, columna Q. Si falta, la curva
+   * característica usa el contrato como ancla y lo declara.
+   */
+  costoConstruccion?: number
   /** Plazo contractual en meses. */
   plazo: number
   /** Primer mes con registro de costo, "YYYY-MM". */
@@ -79,6 +93,18 @@ export interface ObraInput {
 }
 
 export type ModoPesos = 'simil' | 'recientes' | 'igual'
+
+/**
+ * `caracteristica` es la curva Beta de Esteban (por defecto).
+ * `similitud` es la mezcla del prototipo, conservada como modo alternativo.
+ */
+export type ModoModelo = 'caracteristica' | 'similitud'
+
+/**
+ * A: la forma es el costo real normalizado a 100%, y el total es CC × real/CC.
+ * B: el acumulado se expresa sobre el Costo Construcción y termina en real/CC.
+ */
+export type LecturaCurva = 'A' | 'B'
 
 export interface OpcionesProyeccion {
   /** Meses de arranque previos al cruce del 1% de avance. */
@@ -90,8 +116,24 @@ export interface OpcionesProyeccion {
   kRecencia?: number
   /** Override del factor de ejecución. Sin esto se usa el ponderado histórico. */
   ejec?: number
-  /** Override de duración efectiva / plazo. */
+  /** Override de duración efectiva / plazo. Solo lo usa la mezcla por similitud. */
   rdur?: number
+  /**
+   * Curva característica (Beta, duración por m²) o mezcla por similitud.
+   * Sin esto, la obra completa usa la característica. Una familia o una cuenta
+   * siguen por similitud: la característica no tiene curva a ese nivel.
+   */
+  modoModelo?: ModoModelo
+  /** Cómo se normaliza el acumulado. Por defecto, la de la configuración (A). */
+  lectura?: LecturaCurva
+  /**
+   * Detención prevista de la obra que se proyecta. Esos meses se agregan al
+   * calendario, con gasto cero, y el resto de la curva se corre. No modifica
+   * la duración estimada por m².
+   */
+  detencion?: { desde: string; meses: number }
+  /** Duración en meses, si se quiere pisar la regresión por m². */
+  duracionMeses?: number
   /** Nombres de las obras base a considerar. Por defecto, todas. */
   obrasActivas?: string[]
   /**
@@ -148,10 +190,24 @@ export interface Comparable {
 
 export interface Proyeccion {
   obra: ObraInput
-  opciones: Required<Pick<OpcionesProyeccion, 'lead' | 'skew' | 'modoPesos' | 'kRecencia'>>
+  opciones: Required<Pick<OpcionesProyeccion, 'lead' | 'skew' | 'modoPesos' | 'kRecencia'>> & {
+    modoModelo: ModoModelo
+    lectura: LecturaCurva
+  }
+  modoModelo: ModoModelo
+  lectura: LecturaCurva
   /**
-   * Costo total proyectado. Para la obra completa es contrato × ejec; en modo
-   * familia es la parte que le toca a esa familia (× su participación).
+   * Monto contra el que se mide el factor de ejecución. En la curva
+   * característica es el Costo Construcción; en la mezcla por similitud, el contrato.
+   */
+  ancla: number
+  anclaOrigen: 'costo_construccion' | 'contrato'
+  /** Error estándar de la duración por m², en meses. Null en la mezcla por similitud. */
+  duracionError: number | null
+  /**
+   * Costo total proyectado. En la curva característica es ancla × real/CC;
+   * en la mezcla por similitud es contrato × ejec. En modo familia es la
+   * parte que le toca a esa familia.
    */
   total: number
   ejec: number

@@ -1,0 +1,9 @@
+{
+  "lectura": "A",
+  "umbralInicio": 0.02,
+  "umbralTermino": 0.98,
+  "cuentas": { "desde": 101, "hasta": 516, "excluir": [421] },
+  "detenciones": [
+    { "obra": "Oasis Plaza", "desde": "2020-06", "meses": 4 }
+  ]
+}
