@@ -331,6 +331,52 @@ describe('parsearERP — contrapartidas de rollup por familia', () => {
   })
 })
 
+describe('parsearERP — traspaso a costo de venta (100..500)', () => {
+  /**
+   * El comprobante "COSTO DE VENTA <OBRA> <MES>" va contra los codigos de familia
+   * pero es parte del reporte contable: el Excel lo suma y la app debe cuadrar.
+   * No es una contrapartida de rollup y no se descarta (se reconoce por la glosa).
+   */
+  function conTraspaso(glosaRollup: string): XLSX.WorkBook {
+    const wb = buildMockWorkbook()
+    const rows: any[][] = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, defval: null })
+    for (const [cc, uf] of [[100, -2471.03], [200, -1860.97], [300, -2254.11], [400, -354.1], [500, -504.32]]) {
+      rows.push([
+        'T-2906', 2, 'LA QUEBRADA', null, null, 9, 2026,
+        '30/09/2026', 40000, null, null, null,
+        null, uf, null, 0, null, null,
+        cc, cc, null, null, glosaRollup, glosaRollup, '1-2-01-001',
+      ])
+    }
+    const wb2 = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb2, XLSX.utils.aoa_to_sheet(rows), 'Sheet1')
+    return wb2
+  }
+
+  const base = parsearERP(buildMockWorkbook(), 2)
+  const conTras = parsearERP(conTraspaso('COSTO DE VENTA LA QUEBRADA AGOSTO 2026'), 2)
+
+  it('carga las 5 filas del traspaso y el total baja en -7.444,53 como el Excel', () => {
+    for (const cc of [100, 200, 300, 400, 500]) {
+      expect(conTras.porCentroCosto[cc]).toBeDefined()
+      expect(conTras.porCentroCosto[cc].porMes['2026-09'].num_tx).toBe(1)
+    }
+    expect(conTras.total_uf).toBeCloseTo(base.total_uf - 7444.53, 2)
+    expect(conTras.unidadNegocio.num_filas).toBe(base.unidadNegocio.num_filas + 5)
+  })
+
+  it('funciona con cualquier mes en la glosa', () => {
+    const r = parsearERP(conTraspaso('Costo de Venta La Quebrada Octubre 2026'), 2)
+    expect(r.porCentroCosto[100]).toBeDefined()
+  })
+
+  it('una contrapartida sin esa glosa se sigue descartando', () => {
+    const r = parsearERP(conTraspaso('Rollup familia'), 2)
+    expect(r.porCentroCosto[100]).toBeUndefined()
+    expect(r.total_uf).toBeCloseTo(base.total_uf, 2)
+  })
+})
+
 describe('parsearERP — single unit auto-selection', () => {
   it('single-unit file skips selection (tested via inspeccionarERP)', () => {
     // Build a workbook with only one unidad

@@ -278,9 +278,10 @@ export function mergeProyecto(proyecto: Proyecto, plan?: PlanCuentas, cutoffMes?
       const cc = Number(ccStr)
       if (ccConsumed.has(cc)) continue
       if (esOficinaCentral(cc, planActivo)) continue
-      // Contrapartidas de rollup: hoy el parser ya no las carga, pero los
-      // proyectos cargados antes del filtro las tienen guardadas en sus slots.
-      if (esRollupFamilia(cc)) continue
+      // Codigos de familia (100..500): el parser solo los carga cuando son el
+      // traspaso a costo de venta (las contrapartidas de rollup se descartan al
+      // leer el archivo). Se muestran como fila propia para que el total cuadre.
+      const esTraspaso = esRollupFamilia(cc)
 
       // Use the cutoff-filtered amount (gastoRealPorCc), not the raw total.
       const gasto_real = gastoRealPorCc[cc] ?? 0
@@ -289,7 +290,7 @@ export function mergeProyecto(proyecto: Proyecto, plan?: PlanCuentas, cutoffMes?
 
       const cuenta = planActivo.cuentas.find(c => c.codigo === cc)
 
-      if (cuenta) {
+      if (cuenta || esTraspaso) {
         // Known cost center — add to main table with ppto=0
         const familia = resolverFamilia(cc, 'OTROS', planActivo)
         familiasSet.add(familia)
@@ -298,7 +299,7 @@ export function mergeProyecto(proyecto: Proyecto, plan?: PlanCuentas, cutoffMes?
           codigo: `CC${cc}`,
           codigo2: String(cc),
           familia,
-          partida: cuenta.descripcion,
+          partida: cuenta ? cuenta.descripcion : 'Traspaso a costo de venta',
           ud: 'gl',
           ppto_original: 0,
           redistribuido: 0,

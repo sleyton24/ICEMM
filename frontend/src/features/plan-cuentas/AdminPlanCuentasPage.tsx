@@ -5,6 +5,7 @@ import { usePlanCuentasStore } from './PlanCuentasStore'
 import { parsePlanCuentas, validarPlanCuentas } from './parser/parsePlanCuentas'
 import { parseMaestroProductos } from './parser/parseMaestroProductos'
 import type { PlanCuentas, MaestroProductos } from './types'
+import MaestroCuentasPanel from './MaestroCuentasPanel'
 
 const uf2 = (n: number) => n.toLocaleString('es-CL')
 
@@ -105,14 +106,16 @@ export default function AdminPlanCuentasPage({ onBack }: { onBack: () => void })
                 <RotateCcw className="h-3.5 w-3.5" /> Restaurar bundleada
               </button>
             )}
-            <button onClick={() => setShowUpload(true)} className="flex items-center gap-1.5 px-4 py-2 text-xs font-medium text-white bg-cabecera rounded-lg hover:bg-cabecera-alt transition-colors">
+            {false && <button onClick={() => setShowUpload(true)} className="flex items-center gap-1.5 px-4 py-2 text-xs font-medium text-white bg-cabecera rounded-lg hover:bg-cabecera-alt transition-colors">
               <Upload className="h-3.5 w-3.5" /> Subir nueva versión
-            </button>
+            </button>}
           </div>
         </div>
       </header>
 
       <div className="max-w-5xl mx-auto px-6 py-6 space-y-6">
+
+        <MaestroCuentasPanel />
 
         {/* Plan de cuentas */}
         <div className="bg-panel rounded-xl border border-gray-200 shadow-sm">

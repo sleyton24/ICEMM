@@ -20,3 +20,14 @@ export function esRollupFamilia(cc: number): boolean {
   if (!Number.isFinite(cc)) return false
   return (CODIGOS_ROLLUP_FAMILIA as readonly number[]).includes(cc)
 }
+
+/**
+ * Traspaso mensual a costo de venta ("COSTO DE VENTA <OBRA> <MES>"): asiento
+ * que el ERP contabiliza contra los codigos de familia 100..500. A diferencia de
+ * una contrapartida de rollup, es parte del reporte contable y el Excel del ERP
+ * lo suma: la app debe cuadrar con ese total. Se reconoce por la glosa del
+ * comprobante (detalle o encabezado), asi que funciona para cualquier mes.
+ */
+export function esTraspasoCostoVenta(...glosas: Array<string | null | undefined>): boolean {
+  return glosas.some(g => typeof g === 'string' && /costo\s+de\s+venta/i.test(g))
+}
