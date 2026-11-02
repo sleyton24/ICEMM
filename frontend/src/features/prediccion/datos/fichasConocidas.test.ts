@@ -46,6 +46,18 @@ describe('fichas de obra entregadas por EMM', () => {
     expect(q.montoContratoUF).toBe(yaBundleada.monto_contrato)
   })
 
+  it('trae el Costo Construcción de la columna Q (12:06) en las nueve obras', () => {
+    for (const f of fichasConocidas()) {
+      expect(f.costoConstruccionUF, f.nombre).toBeGreaterThan(0)
+    }
+    const q = fichaConocida('La Quebrada')!
+    expect(q.costoConstruccionUF).toBeCloseTo(244825.81, 0)
+    expect(q.costoConstruccionUF).toBeLessThan(q.montoContratoUF)
+    for (const o of curvasBase.obras) {
+      expect(fichaConocida(o.nombre)!.costoConstruccionUF).toBeCloseTo(o.costo_construccion!, 4)
+    }
+  })
+
   it('La Quebrada trae la nota de que el contrato incluye Post Venta', () => {
     const q = fichaConocida('La Quebrada')
     expect(q).not.toBeNull()

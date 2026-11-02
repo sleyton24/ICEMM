@@ -18,6 +18,8 @@ export interface FichaConocida {
   m2: number
   plazoMeses: number
   montoContratoUF: number
+  /** Costo de construcción estudiado, columna Q del consolidado 12:06. */
+  costoConstruccionUF: number
   unidades: number | string
   anios: string
   /** Nota de EMM sobre el monto; en La Quebrada aclara que incluye Post Venta. */

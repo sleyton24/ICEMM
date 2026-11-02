@@ -105,7 +105,7 @@ describe('proyección por cuenta', () => {
     // Solo la curva y la participación son de la cuenta. Si proyectar una
     // cuenta moviera la duración de la obra, dos cuentas de la misma obra
     // terminarían en meses distintos.
-    const obra = proyectar(QUEBRADA, { lead: 3 })
+    const obra = proyectar(QUEBRADA, { lead: 3, modoModelo: 'similitud' })
     for (const cod of ['206', '313', '105']) {
       const p = proyectar(QUEBRADA, { cuenta: cod, lead: 3 })
       expect(p.N, cod).toBe(obra.N)
@@ -134,7 +134,7 @@ describe('proyección por cuenta', () => {
   })
 
   it('las 125 cuentas suman la cobertura declarada del artefacto, no más', () => {
-    const obra = proyectar(QUEBRADA, { lead: 3 })
+    const obra = proyectar(QUEBRADA, { lead: 3, modoModelo: 'similitud' })
     const suma = cuentasConCurva()
       .reduce((a, c) => a + proyectar(QUEBRADA, { cuenta: c.codigo, lead: 3 }).total, 0)
     const ratio = suma / obra.total
@@ -149,7 +149,7 @@ describe('proyección por cuenta', () => {
     // en 1/masa y una cuenta de 3 obras sale ×4.
     const parcial = cuentasConCurva().find(c => c.nObras <= 4)!
     const p = proyectar(QUEBRADA, { cuenta: parcial.codigo, lead: 3 })
-    const esperado = proyectar(QUEBRADA, { lead: 3 }).total * parcial.shareMedio
+    const esperado = proyectar(QUEBRADA, { lead: 3, modoModelo: 'similitud' }).total * parcial.shareMedio
     // shareMedio promedia solo sobre las obras presentes, así que el monto
     // correcto tiene que ser MENOR: nunca puede superarlo.
     expect(p.total).toBeLessThan(esperado * 1.0005)
