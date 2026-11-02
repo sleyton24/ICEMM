@@ -1,6 +1,8 @@
 import { useProjectsStore } from '../features/projects/ProjectsStore'
 import { usePlanCuentasStore } from '../features/plan-cuentas/PlanCuentasStore'
 import { useInformesStore } from '../features/informes/InformesStore'
+import { SIN_ELECCIONES, useEleccionesStore } from '../features/informes/EleccionesStore'
+import { aplicarEleccionProyeccion, type EleccionProyeccionDTO } from '../features/informes/aplicarEleccionProyeccion'
 import type { MovimientoSinPartida, Proyecto } from '../features/projects/types'
 import { mergeProyecto, type PartidaMerged } from '../features/data-upload/parser/mergeProyecto'
 import { esDemoMode } from '../features/demo/demoMode'
@@ -33,6 +35,11 @@ export interface DashboardData {
   /** Indica si estamos viendo un snapshot aprobado (read-only) */
   esVistaAprobada: boolean
   numeroInforme: number | null
+  /**
+   * Elección Presto/modelo por cuenta. En el borrador sale de la base (o del
+   * navegador, en demo). En un informe aprobado, del snapshot de ese informe.
+   */
+  eleccionesProyeccion: EleccionProyeccionDTO[]
 }
 
 function toPartida(p: PartidaMerged): Partida {
@@ -48,6 +55,7 @@ function toPartida(p: PartidaMerged): Partida {
     ppto_vigente: p.ppto_vigente,
     gasto_real: p.gasto_real,
     proyeccion: p.proyeccion,
+    proyeccionPresto: p.proyeccionPresto,
     variacion_uf: p.variacion_uf,
     variacion_pct: p.variacion_pct,
     ytg: p.ytg,
@@ -82,6 +90,9 @@ export function useDashboardData(): DashboardData {
   const viewPorProyecto = useInformesStore(s => s.viewPorProyecto)
   const informesPorProyecto = useInformesStore(s => s.porProyecto)
   const snapshots = useInformesStore(s => s.snapshots)
+  const eleccionesVivas = useEleccionesStore(s =>
+    activeProjectId ? (s.porProyecto[activeProjectId] ?? SIN_ELECCIONES) : SIN_ELECCIONES,
+  )
   const activeProject = projects.find(p => p.id === activeProjectId) ?? null
 
   const empty: DashboardData = {
@@ -99,6 +110,7 @@ export function useDashboardData(): DashboardData {
     partidasAnteriorMeta: {},
     esVistaAprobada: false,
     numeroInforme: null,
+    eleccionesProyeccion: [],
   }
 
   if (!activeProject) return empty
@@ -123,7 +135,11 @@ export function useDashboardData(): DashboardData {
 
   if (!hasAnyData) return { ...empty, projectName: activeProject.nombre, esVistaAprobada, numeroInforme }
 
-  const { partidas, sinPartida, familias, fechaCorte } = mergeProyecto(
+  const eleccionesProyeccion: EleccionProyeccionDTO[] = view?.tipo === 'aprobado'
+    ? (view.informe.snapshot.eleccionesProyeccion ?? SIN_ELECCIONES)
+    : eleccionesVivas
+
+  const { partidas: partidasPresto, sinPartida, familias, fechaCorte } = mergeProyecto(
     proyectoEnUso,
     plan,
     proyectoEnUso.cutoffMesReal ?? null
@@ -147,7 +163,11 @@ export function useDashboardData(): DashboardData {
     if (snapshots[informeAnteriorId]) {
       const snapAnterior = snapshots[informeAnteriorId].snapshot
       const proyectoAnterior = snapshotToProyecto(activeProject, snapAnterior)
-      const { partidas: partidasAnt } = mergeProyecto(proyectoAnterior, plan, proyectoAnterior.cutoffMesReal ?? null)
+      const { partidas: partidasAntCrudas } = mergeProyecto(proyectoAnterior, plan, proyectoAnterior.cutoffMesReal ?? null)
+      const partidasAnt = aplicarEleccionProyeccion(
+        partidasAntCrudas,
+        snapAnterior.eleccionesProyeccion ?? [],
+      )
       for (const p of partidasAnt) {
         proyeccionAnteriorPorCodigo[p.codigo] = p.proyeccion
         variacionAnteriorPorCodigo[p.codigo] = p.variacion_uf
@@ -159,6 +179,8 @@ export function useDashboardData(): DashboardData {
       useInformesStore.getState().fetchSnapshot(activeProjectId!, informeAnteriorId).catch(() => { /* ignore */ })
     }
   }
+
+  const partidas = aplicarEleccionProyeccion(partidasPresto, eleccionesProyeccion)
 
   return {
     partidas: partidas.map(toPartida),
@@ -175,5 +197,6 @@ export function useDashboardData(): DashboardData {
     partidasAnteriorMeta,
     esVistaAprobada,
     numeroInforme,
+    eleccionesProyeccion,
   }
 }

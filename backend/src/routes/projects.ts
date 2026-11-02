@@ -4,12 +4,14 @@ import { prisma } from '../db.js'
 import { requireRole, assertProjectAccess } from '../middleware/auth.js'
 import informesRouter from './informes.js'
 import comentariosRouter from './comentarios.js'
+import eleccionesProyeccionRouter from './eleccionesProyeccion.js'
 
 const router = Router()
 
 // Sub-routers — assertProjectAccess cierra el IDOR también para informes/comentarios.
 router.use('/:id/informes', assertProjectAccess, informesRouter)
 router.use('/:id/comentarios', assertProjectAccess, comentariosRouter)
+router.use('/:id/elecciones-proyeccion', assertProjectAccess, eleccionesProyeccionRouter)
 
 /**
  * Ficha de obra: entradas del predictor de curvas de costo. Todas opcionales —
