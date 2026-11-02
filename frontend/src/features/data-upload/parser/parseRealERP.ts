@@ -1,7 +1,9 @@
 import type { WorkBook } from 'xlsx'
 import * as XLSX from 'xlsx'
 import { esOficinaCentral } from '../../plan-cuentas/oficinaCentral'
-import { esRollupFamilia, CODIGOS_ROLLUP_FAMILIA } from '../../plan-cuentas/rollupFamilia'
+import { esRollupFamilia, esTraspasoCostoVenta, CODIGOS_ROLLUP_FAMILIA } from '../../plan-cuentas/rollupFamilia'
+import { construirConciliacion, type Conciliacion } from './conciliacionErp'
+import type { CargaERP } from '../../projects/types'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -51,6 +53,8 @@ export type GastoRealAgregado = {
   rango_fechas: { desde: Date; hasta: Date }
   mesesDisponibles: string[]
   warnings: string[]
+  /** Conciliacion contra el total del Excel (solo para log; no se muestra en pantalla). */
+  conciliacion: Conciliacion
 }
 
 // ── Header mapping (case-insensitive, accent-insensitive) ────────────────────
@@ -243,6 +247,12 @@ export function parsearERP(workbook: WorkBook, unidadNegocioCodigo: number): Gas
   // Contrapartidas de rollup por familia (100..500): idem, duplican el detalle.
   let rollupTx = 0
   let rollupUF = 0
+  // Conciliacion contra el Excel: total de TODAS las filas de la unidad.
+  let filasArchivo = 0
+  let totalArchivoUF = 0
+  let traspasoTx = 0
+  let traspasoUF = 0
+  let filasSinCodigo = 0
 
   for (let i = 1; i < rows.length; i++) {
     const row = rows[i]
@@ -252,6 +262,9 @@ export function parsearERP(workbook: WorkBook, unidadNegocioCodigo: number): Gas
     if (codUnidad !== unidadNegocioCodigo) continue
 
     const concepto = safeInt(row[colIdx.concepto1_codigo])
+    const montoFila = safeFloat(row[colIdx.afecto_detalle_uf]) + safeFloat(row[colIdx.exento_detalle_uf])
+    filasArchivo++
+    totalArchivoUF += montoFila
 
     // Cuentas 900 (Gastos Oficina Central): gasto corporativo, no de obra.
     // Se descarta antes de contar la fila para que num_filas y total_uf sigan
@@ -264,13 +277,24 @@ export function parsearERP(workbook: WorkBook, unidadNegocioCodigo: number): Gas
 
     // Rollup por familia: contrapartida agrupada con signo contrario que duplica
     // el detalle ya desglosado. Sumarla descuadra el gasto real de la obra.
-    if (esRollupFamilia(concepto)) {
+    // Excepcion: el traspaso mensual a costo de venta ("COSTO DE VENTA <OBRA>
+    // <MES>") es parte del reporte contable y el Excel lo suma; se carga.
+    const esTraspaso = esRollupFamilia(concepto) && esTraspasoCostoVenta(
+      colIdx.glosa_detalle !== undefined ? safeString(row[colIdx.glosa_detalle]) : '',
+      colIdx.glosa_encabezado !== undefined ? safeString(row[colIdx.glosa_encabezado]) : '',
+    )
+    if (esRollupFamilia(concepto) && !esTraspaso) {
       rollupTx++
-      rollupUF += safeFloat(row[colIdx.afecto_detalle_uf]) + safeFloat(row[colIdx.exento_detalle_uf])
+      rollupUF += montoFila
       continue
+    }
+    if (esTraspaso) {
+      traspasoTx++
+      traspasoUF += montoFila
     }
 
     filasUnidad++
+    if (concepto === 0) filasSinCodigo++
 
     // Capture descripcion from first matching row
     if (!unidadDescripcion && colIdx.desc_unidad !== undefined) {
@@ -416,6 +440,18 @@ export function parsearERP(workbook: WorkBook, unidadNegocioCodigo: number): Gas
     }
   }
 
+  const conciliacion = construirConciliacion({
+    unidadNegocioCodigo,
+    filasArchivo,
+    totalArchivoUF,
+    filasCargadas: filasUnidad,
+    totalCargadoUF: total_uf,
+    oficinaCentral: { filas: ofCentralTx, uf: ofCentralUF },
+    rollupFamilia: { filas: rollupTx, uf: rollupUF },
+    traspasoCostoVenta: { filas: traspasoTx, uf: traspasoUF },
+    filasSinCodigo,
+  })
+
   return {
     unidadNegocio: {
       codigo: unidadNegocioCodigo,
@@ -431,6 +467,38 @@ export function parsearERP(workbook: WorkBook, unidadNegocioCodigo: number): Gas
     },
     mesesDisponibles: Array.from(mesesSet).sort(),
     warnings,
+    conciliacion,
+  }
+}
+
+/**
+ * Arma el registro que se guarda de una carga ERP (sin el workbook). Es lo mismo que
+ * hace el panel de carga; vive aca para que las pruebas usen exactamente este codigo.
+ */
+export function construirCargaERP(preview: GastoRealAgregado, nombreArchivo: string): CargaERP {
+  const agregadoPorCcosto: CargaERP['agregadoPorCcosto'] = {}
+  const agregadoPorCcostoPorMes: CargaERP['agregadoPorCcostoPorMes'] = {}
+  const transaccionesPorCcosto: CargaERP['transaccionesPorCcosto'] = {}
+  for (const [cc, data] of Object.entries(preview.porCentroCosto)) {
+    agregadoPorCcosto[Number(cc)] = { monto_uf: data.monto_uf, num_tx: data.num_transacciones }
+    agregadoPorCcostoPorMes[Number(cc)] = data.porMes
+    transaccionesPorCcosto[Number(cc)] = data.transacciones
+  }
+  return {
+    fechaCarga: new Date().toISOString(),
+    nombreArchivo,
+    unidadNegocioCodigo: preview.unidadNegocio.codigo,
+    unidadNegocioDescripcion: preview.unidadNegocio.descripcion,
+    totalUF: preview.total_uf,
+    numTransacciones: preview.unidadNegocio.num_filas,
+    rangoFechas: {
+      desde: preview.rango_fechas.desde.toISOString(),
+      hasta: preview.rango_fechas.hasta.toISOString(),
+    },
+    agregadoPorCcosto,
+    agregadoPorCcostoPorMes,
+    mesesDisponibles: preview.mesesDisponibles,
+    transaccionesPorCcosto,
   }
 }
 

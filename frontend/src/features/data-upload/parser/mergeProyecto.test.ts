@@ -112,6 +112,22 @@ describe('mergeProyecto — exclusión de cuentas 900 (Gastos Oficina Central)',
   })
 })
 
+describe('mergeProyecto — traspaso a costo de venta (codigos de familia 100..500)', () => {
+  it('suma el traspaso al gasto real como fila propia en su familia, sin mandarlo a sinPartida', () => {
+    const { partidas, sinPartida } = mergeProyecto(proyecto({
+      presupuesto_original: archivo([partida('M10100001', 101, 1000)]),
+      gasto_real_erp: erp({ 101: 400, 100: -150 }),
+    }))
+
+    const total = partidas.reduce((s, p) => s + p.gasto_real, 0)
+    expect(total).toBeCloseTo(250, 2)
+    expect(sinPartida).toEqual([])
+    const fila = partidas.find(p => p.codigo2 === '100')!
+    expect(fila.gasto_real).toBe(-150)
+    expect(fila.familia).toBe('MATERIALES')
+  })
+})
+
 describe('estadoAgregado', () => {
   const base = { ppto_original: 0, redistribuido: 0, ppto_vigente: 0, gasto_real: 0, proyeccion: 0 }
 

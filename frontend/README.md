@@ -1,3 +1,5 @@
+> **Carga del ERP:** reglas de lo que se carga/descarta y la conciliacion contra el Excel en [`../docs/reglas-carga-erp.md`](../docs/reglas-carga-erp.md).
+
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
