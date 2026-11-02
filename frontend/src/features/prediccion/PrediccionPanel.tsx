@@ -265,7 +265,7 @@ export default function PrediccionPanel() {
   }
 
   // KPIs: se definen una vez y los usan la pantalla y la descarga a Excel.
-  const kpis = [
+  const kpis = !proy ? [] : [
     {
       label: rotulo ? `Cierre ${rotulo} — modelo` : 'Cierre proyectado — modelo',
       valor: `UF ${uf0(cierreModelo)}`,
@@ -299,12 +299,12 @@ export default function PrediccionPanel() {
   ]
 
   // Texto de la cabecera del gráfico (también va en el Excel).
-  const subtituloCurva =
+  const subtituloCurva = !proy ? '' :
     `${proy.obra.nombre} · ${serieReal.length} meses observados de ${proy.NT} · proyectando ${ambito}` +
     `${famActual && !cuentaActual ? ` (cuentas ${famActual.codigo}–${famActual.codigo + 99})` : ''}` +
     `${cuentaActual ? ` · ${cuentaActual.nObras} de 8 obras históricas la tienen` : ''}`
 
-  const descargarExcel = () => descargarCurva({
+  const descargarExcel = () => proy && descargarCurva({
     obra: proy.obra.nombre,
     ambito: cuentaActual
       ? `Cuenta ${cuentaActual.codigo} — ${nombreCuenta(cuentaActual.codigo)}`
