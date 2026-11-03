@@ -12,6 +12,8 @@ export interface ObraBase {
   tipo: string
   m2: number
   contrato: number
+  /** Costo real ejecutado (cuentas 101–516 sin 421), en UF. */
+  total: number
   anio_fin: number
   /** Costo real ejecutado / monto de contrato. Lo usa la mezcla por similitud. */
   ejec: number
@@ -185,6 +187,8 @@ export interface Comparable {
   tipo: string
   m2: number
   contrato: number
+  /** Costo real ejecutado de la obra histórica (cuentas 101–516 sin 421), en UF. */
+  total: number
   anio_fin: number
 }
 

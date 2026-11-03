@@ -20,11 +20,17 @@ export interface ParametrosObra {
   advertencias: string[]
   /**
    * Factor de ejecución que se desprende de la propia proyección de la obra:
-   * Σ proyectado / monto de contrato. Es el 101% de La Quebrada contra el
-   * 90,3% del modelo — la discrepancia que sigue abierta con EMM. Se ofrece
-   * como override para que la pantalla muestre las dos lecturas, no una.
+   * Σ proyectado / Costo Construcción, que es el ancla de la curva
+   * característica. Si la obra no tiene Costo Construcción, sobre el monto de
+   * contrato. Se ofrece como override para que la pantalla muestre las dos
+   * lecturas, no una.
    */
   ejecSegunObra: number | null
+  /**
+   * El mismo factor sobre el monto de contrato. Lo usa la mezcla por similitud
+   * (familia y cuenta), cuyo total es contrato × factor.
+   */
+  ejecSegunObraContrato: number | null
 }
 
 const ETIQUETAS: Record<string, string> = {
@@ -87,10 +93,14 @@ export function parametrosObra(
       }
     : null
 
-  const ejecSegunObra =
+  const ejecSegunObraContrato =
     totalProyectadoUF && totalProyectadoUF > 0 && proyecto.montoContratoUF
       ? totalProyectadoUF / proyecto.montoContratoUF
       : null
+  const ejecSegunObra =
+    totalProyectadoUF && totalProyectadoUF > 0 && costoConstruccion && costoConstruccion > 0
+      ? totalProyectadoUF / costoConstruccion
+      : ejecSegunObraContrato
 
   return {
     obra,
@@ -102,5 +112,6 @@ export function parametrosObra(
     excluido: real.excluido,
     advertencias,
     ejecSegunObra,
+    ejecSegunObraContrato,
   }
 }

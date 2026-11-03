@@ -232,7 +232,7 @@ function proyectarSimilitud(obra: ObraInput, opciones: OpcionesProyeccion = {}):
   const comparables: Comparable[] = OB
     .map((o, i) => ({
       nombre: o.nombre, peso: w[i], tipo: o.tipo,
-      m2: o.m2, contrato: o.contrato, anio_fin: o.anio_fin,
+      m2: o.m2, contrato: o.contrato, total: o.total, anio_fin: o.anio_fin,
     }))
     .filter(c => c.peso > 0)
     .sort((a, b) => b.peso - a.peso)

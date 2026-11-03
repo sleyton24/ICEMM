@@ -156,6 +156,7 @@ export function proyectarCaracteristica(obra: ObraInput, opciones: OpcionesProye
       tipo: o.tipo,
       m2: o.m2,
       contrato: o.contrato,
+      total: o.total,
       anio_fin: o.anio_fin,
     })),
     masaSimilitud: curvasBase.obras.length,

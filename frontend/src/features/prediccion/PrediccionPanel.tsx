@@ -120,7 +120,10 @@ export default function PrediccionPanel() {
       return { proy: null, repro: null, error: null, motivo: 'sin-obras' as const }
     }
     try {
-      const ejec = usarEjecObra && params.ejecSegunObra ? params.ejecSegunObra : undefined
+      // La curva característica (toda la obra) ancla en Costo Construcción; la
+      // mezcla por similitud (familia o cuenta) ancla en el contrato.
+      const ejecObra = familia ? params.ejecSegunObraContrato : params.ejecSegunObra
+      const ejec = usarEjecObra && ejecObra ? ejecObra : undefined
       const usarCuenta = Boolean(metaCuenta?.tieneCurva)
       const p = proyectar(params.obra, {
         lead, skew, ejec,
@@ -218,12 +221,13 @@ export default function PrediccionPanel() {
   const rotulo = cuenta
     ? `Cuenta ${cuenta}${metaCuenta && !metaCuenta.tieneCurva && metaCuenta.respaldoFamilia ? ' · respaldo de familia' : ''}`
     : famActual ? famActual.etiqueta : null
-  // En modo familia o cuenta el contrato no es el divisor correcto: lo que
-  // corresponde es la parte que le toca según el mix histórico.
+  // La base es el gasto total proyectado (ancla × factor de ejecución). En
+  // modo familia o cuenta, la parte que le toca según el mix histórico.
   const claveParcial = usarCuentaPropia ? cuenta : familia
-  const baseContrato = proy
-    ? (claveParcial ? proy.obra.contrato * (proy.mix[claveParcial] ?? 0) : proy.obra.contrato)
-    : 0
+  const mixParcial = proy && claveParcial ? (proy.mix[claveParcial] ?? 0) : 1
+  const baseGastoTotal = proy ? proy.ancla * proy.ejec * mixParcial : 0
+  // Factor de ejecución de la obra sobre el ancla del modo: CC en toda la obra, contrato en familia o cuenta.
+  const ejecObraVista = familia ? params.ejecSegunObraContrato : params.ejecSegunObra
 
   const toggleObra = (nombre: string) => {
     if (!projectId || !cuenta) return
@@ -270,7 +274,7 @@ export default function PrediccionPanel() {
       label: rotulo ? `Cierre ${rotulo} — modelo` : 'Cierre proyectado — modelo',
       valor: `UF ${uf0(cierreModelo)}`,
       sub: claveParcial
-        ? `${pct1(proy.mix[claveParcial])} del contrato × ${proy.ejec.toFixed(3)}`
+        ? `${pct1(proy.mix[claveParcial])} del gasto total × ${proy.ejec.toFixed(3)}`
         : proy.modoModelo === 'caracteristica'
           ? `${proy.anclaOrigen === 'costo_construccion' ? 'costo construcción' : 'contrato (sin col. Q)'} × ${proy.ejec.toFixed(3)}`
           : `contrato × ${proy.ejec.toFixed(3)}`,
@@ -279,14 +283,14 @@ export default function PrediccionPanel() {
     {
       label: rotulo ? `Cierre ${rotulo} — obra` : 'Cierre proyectado — obra',
       valor: proyObra > 0 ? `UF ${uf0(proyObra)}` : '—',
-      sub: proyObra > 0 ? `× ${(proyObra / baseContrato).toFixed(3)} sobre esa base` : 'sin slot proyectado',
+      sub: proyObra > 0 ? `× ${(proyObra / baseGastoTotal).toFixed(3)} sobre esa base` : 'sin slot proyectado',
       acento: '#809494',
     },
     {
       label: 'Brecha entre ambos',
       valor: brechaObra !== null ? `UF ${uf0(Math.abs(brechaObra))}` : '—',
       sub: brechaObra !== null ? (brechaObra < 0 ? 'el modelo proyecta menos' : 'el modelo proyecta más') : '',
-      acento: brechaObra !== null && Math.abs(brechaObra) > proy.sdE * baseContrato * 1.2816 ? '#E00544' : '#253136',
+      acento: brechaObra !== null && Math.abs(brechaObra) > proy.sdE * proy.ancla * mixParcial * 1.2816 ? '#E00544' : '#253136',
     },
     {
       label: 'Duración estimada',
@@ -616,13 +620,13 @@ export default function PrediccionPanel() {
           <p className="text-[10px] text-gray-400 mt-1">{ESCENARIOS.find(e => e.id === escenario)!.detalle}</p>
         </div>
 
-        {params.ejecSegunObra && (
+        {ejecObraVista != null && (
           <label className="flex items-start gap-2 text-xs text-gray-600 bg-surface border border-gray-200 rounded-lg px-3 py-2">
             <input type="checkbox" checked={usarEjecObra} onChange={e => setUsarEjecObra(e.target.checked)}
                    className="mt-0.5 accent-tinta" />
             <span>
               Usar el factor de ejecución que proyecta la obra
-              (<strong className="tabular-nums">{proy.obra.contrato ? pct1(params.ejecSegunObra) : '—'}</strong>)
+              (<strong className="tabular-nums">{pct1(ejecObraVista)}</strong>)
               en vez del ponderado histórico (<strong className="tabular-nums">{pct1(proy.ejecAuto)}</strong>).
               <span className="block text-[10px] text-gray-400 mt-0.5">
                 La diferencia entre ambos es la discusión abierta con EMM sobre el nivel de cierre. El modelo no la resuelve.
@@ -651,7 +655,7 @@ export default function PrediccionPanel() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                {['Obra', 'Peso', 'Tipo', 'm²', 'Contrato (UF)', 'Año'].map((h, i) => (
+                {['Obra', 'Peso', 'Tipo', 'm²', 'Costo de construcción', 'Año'].map((h, i) => (
                   <th key={h} className={`px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase tracking-wider ${i > 1 ? 'text-right' : 'text-left'}`}>{h}</th>
                 ))}
               </tr>
@@ -670,7 +674,7 @@ export default function PrediccionPanel() {
                   </td>
                   <td className="px-3 py-2 text-right text-xs text-gray-500">{c.tipo}</td>
                   <td className="px-3 py-2 tabular-nums text-right text-gray-600">{uf0(c.m2)}</td>
-                  <td className="px-3 py-2 tabular-nums text-right text-gray-600">{uf0(c.contrato)}</td>
+                  <td className="px-3 py-2 tabular-nums text-right text-gray-600">{uf0(c.total)}</td>
                   <td className="px-3 py-2 tabular-nums text-right text-gray-500">{c.anio_fin}</td>
                 </tr>
               ))}
@@ -728,7 +732,7 @@ function SelectorObras({ seleccion, pesosPorNombre, tieneCuenta, personalizada, 
         <table className="w-full text-sm">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
-              {['', 'Obra', 'Peso', 'Tipo', 'm²', 'Contrato (UF)', 'Año'].map((h, i) => (
+              {['', 'Obra', 'Peso', 'Tipo', 'm²', 'Costo de construcción', 'Año'].map((h, i) => (
                 <th key={h || 'marca'} className={`px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase tracking-wider ${i > 2 ? 'text-right' : 'text-left'}`}>{h}</th>
               ))}
             </tr>
@@ -765,7 +769,7 @@ function SelectorObras({ seleccion, pesosPorNombre, tieneCuenta, personalizada, 
                   </td>
                   <td className="px-3 py-2 text-right text-xs text-gray-500">{o.tipo}</td>
                   <td className="px-3 py-2 tabular-nums text-right text-gray-600">{uf0(o.m2)}</td>
-                  <td className="px-3 py-2 tabular-nums text-right text-gray-600">{uf0(o.contrato)}</td>
+                  <td className="px-3 py-2 tabular-nums text-right text-gray-600">{uf0(o.total)}</td>
                   <td className="px-3 py-2 tabular-nums text-right text-gray-500">{o.anio_fin}</td>
                 </tr>
               )
